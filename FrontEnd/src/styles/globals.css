@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@theme {
+  --color-whatsapp-green: #25d366;
+  --color-whatsapp-light-green: #dcf8c6;
+  --color-whatsapp-dark-green: #075e54;
+  --color-whatsapp-teal: #128c7e;
+  --color-whatsapp-gray: #f0f2f5;
+  
+  --background-image-whatsapp-gradient: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Custom Utility Classes using @apply */
+.bg-whatsapp-gradient {
+  @apply bg-[image:var(--background-image-whatsapp-gradient)];
+}
+
+.chat-bubble-admin {
+  @apply bg-green-100 text-gray-800 rounded-lg p-3 shadow-sm relative max-w-[80%] self-end;
+}
+
+.chat-bubble-user {
+  @apply bg-white text-gray-800 rounded-lg p-3 shadow-sm relative max-w-[80%] self-start border border-gray-100;
+}
+
+.sidebar-item-active {
+  @apply bg-green-50 border-r-4 border-green-500;
+}
+
+/* Custom transitions */
+.transition-all-custom {
+  @apply transition-all duration-300 ease-in-out;
+}
