@@ -34,7 +34,7 @@ const MainAuth = ({ initialMode, onLoginSuccess }: MainAuthProps) => {
 
     const fetchCaptcha = async () => {
         try {
-            const res = await fetch('http://localhost:8080/api/captcha');
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/captcha`);
             const data = await res.json();
             if (res.ok) {
                 setCaptcha(data);
@@ -52,7 +52,7 @@ const MainAuth = ({ initialMode, onLoginSuccess }: MainAuthProps) => {
     const handleLogin = async (payload: any) => {
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:8080/api/login', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
@@ -80,7 +80,7 @@ const MainAuth = ({ initialMode, onLoginSuccess }: MainAuthProps) => {
     const handleSignUp = async (payload: any) => {
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:8080/api/signup', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),

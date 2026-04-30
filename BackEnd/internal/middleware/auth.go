@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"os"
 	"strings"
 
 	"helpdesk-backend/internal/models"
@@ -10,7 +11,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var JwtKey = []byte("helpdesk_secret_key")
+var JwtKey []byte
+
+func init() {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		secret = "helpdesk_secret_key"
+	}
+	JwtKey = []byte(secret)
+}
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {

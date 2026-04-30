@@ -28,7 +28,7 @@ const MobileSignUp = ({ onNavigate, onSignUp, loading }: SignUpProps) => {
       <div className="flex-1 flex flex-col justify-center relative z-10">
         <div className="flex flex-col items-center mb-12">
           <Logo />
-          <h2 className="text-2xl font-black text-slate-800 mt-10 tracking-tight">Daftar HelpDesk</h2>
+          <h2 className="text-2xl font-black text-slate-800 mt-10 tracking-tight">Daftar Admin Admisi UNJ</h2>
           <p className="text-xs font-bold text-slate-400 mt-2 text-center uppercase tracking-widest">Buat akun baru</p>
         </div>
 

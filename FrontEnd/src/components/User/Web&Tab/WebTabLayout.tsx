@@ -10,15 +10,36 @@ import {
   MessageSquare,
   HelpCircle,
   Clock,
-  Trash2,
-  MoreVertical,
   Search as SearchIcon,
-  LogOut
+  MoreVertical,
+  LogOut,
+  FileText,
+  Download,
+  Eye,
+  X,
+  LayoutGrid,
+  Trash2
 } from 'lucide-react';
-import { dummyChats, Message } from '@/constants/dummyData';
+import { Message, CannedResponse } from '@/constants/chatTypes';
+import { dummyChats } from '@/constants/chatData';
+import { cannedResponses } from '@/constants/cannedResponses';
 import Avatar from '@/components/Shared/Avatar';
+import FormattedText from '@/components/Shared/FormattedText';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+
+const toLocalTime = (dateStr: string) => {
+    if (!dateStr) return '--:--';
+    try {
+        const timePart = dateStr.includes('T') ? dateStr.split('T')[1] : dateStr.split(' ')[1];
+        if (timePart) {
+            return timePart.substring(0, 5); // Ambil HH:mm
+        }
+        return format(new Date(dateStr), 'HH:mm');
+    } catch (e) {
+        return '--:--';
+    }
+};
 
 const WebTabLayout = () => {
   const [userName, setUserName] = useState('User');
@@ -27,11 +48,85 @@ const WebTabLayout = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [manualNote, setManualNote] = useState('');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('userActiveChat') === 'true';
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem('userActiveChat', isChatOpen.toString());
+  }, [isChatOpen]);
+  const [selectedResponse, setSelectedResponse] = useState<CannedResponse | null>(null);
+  const [isTemplatePopupOpen, setIsTemplatePopupOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string>('Pendaftaran');
+
+  const downloadFile = (dataUrl: string, fileName: string) => {
+    try {
+      const parts = dataUrl.split(',');
+      if (parts.length < 2) throw new Error("Format base64 tidak valid");
+      const mime = parts[0].match(/:(.*?);/)?.[1] || 'application/octet-stream';
+      const bstr = atob(parts[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      const blob = new Blob([u8arr], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error("Gagal download:", e);
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = fileName;
+      link.click();
+    }
+  };
+
+  const viewFile = (dataUrl: string) => {
+    try {
+      const parts = dataUrl.split(',');
+      if (parts.length < 2) throw new Error("Format base64 tidak valid");
+      const mime = parts[0].match(/:(.*?);/)?.[1] || 'application/octet-stream';
+      const bstr = atob(parts[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      const blob = new Blob([u8arr], { type: mime });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } catch (e) {
+      console.error("Gagal melihat file:", e);
+      window.open(dataUrl, '_blank');
+    }
+  };
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const lastRoomIdRef = useRef<number | null>(null);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
+  };
+
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
+      setShouldAutoScroll(isAtBottom);
+    }
   };
 
   useEffect(() => {
@@ -52,7 +147,7 @@ const WebTabLayout = () => {
   const initChat = async (gmail: string, token: string) => {
     try {
       // 1. Get or Create Room
-      const roomRes = await fetch(`http://localhost:8080/api/chat/user-room?gmail=${gmail}`, {
+      const roomRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/user-room?gmail=${gmail}`, {
         headers: { 'Authorization': token }
       });
       const roomData = await roomRes.json();
@@ -72,7 +167,7 @@ const WebTabLayout = () => {
 
   const fetchMessages = async (id: number, token: string, currentGmail: string) => {
     try {
-      const res = await fetch(`http://localhost:8080/api/chat/messages/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/messages/${id}`, {
         headers: { 'Authorization': token }
       });
       const data = await res.json();
@@ -81,7 +176,7 @@ const WebTabLayout = () => {
           id: m.id.toString(),
           sender: m.sender_gmail.toLowerCase() === currentGmail.toLowerCase() ? 'user' : 'admin',
           text: m.message,
-          timestamp: format(new Date(m.created_at), 'HH:mm'),
+          timestamp: toLocalTime(m.created_at),
           type: m.message_type
         })));
 
@@ -97,9 +192,22 @@ const WebTabLayout = () => {
     }
   };
 
+  // Efek pintar buat scroll
+  useEffect(() => {
+    if (roomId && messages.length > 0) {
+      if (lastRoomIdRef.current !== roomId) {
+        scrollToBottom('auto');
+        lastRoomIdRef.current = roomId;
+        setShouldAutoScroll(true);
+      } else if (shouldAutoScroll) {
+        scrollToBottom('smooth');
+      }
+    }
+  }, [messages, roomId, shouldAutoScroll]);
+
   const markAsRead = async (id: number, token: string) => {
     try {
-      await fetch(`http://localhost:8080/api/admin/chat/mark-read/${id}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chat/mark-read/${id}`, {
         method: 'POST',
         headers: { 'Authorization': token }
       });
@@ -117,7 +225,7 @@ const WebTabLayout = () => {
     const { token, gmail } = JSON.parse(storedUser);
 
     try {
-      const res = await fetch('http://localhost:8080/api/chat/send', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -133,6 +241,8 @@ const WebTabLayout = () => {
 
       if (res.ok) {
         setManualNote('');
+        const el = document.getElementById('user-web-message-input');
+        if (el) el.style.height = 'auto';
         fetchMessages(roomId, token, gmail);
       }
     } catch (err) {
@@ -144,23 +254,51 @@ const WebTabLayout = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !roomId) return;
 
-    const fileType = file.type.startsWith('image/') ? 'image' : 
-                     file.type.startsWith('video/') ? 'video' : 'file';
+    if (file.size > 1024 * 1024) {
+      alert(`Waduh bro! Ukuran file lu (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB biar server tetep ngebut!`);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      sender: 'user',
-      text: `📎 Mengirim file: ${file.name}`,
-      timestamp: format(new Date(), 'HH:mm'),
-      type: fileType as any
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) return;
+    const { token, gmail } = JSON.parse(storedUser);
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64Data = reader.result as string;
+      const fileType = file.type.startsWith('image/') ? 'image' : 'file';
+      const combinedData = `${file.name}|${base64Data}`;
+
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': token
+          },
+          body: JSON.stringify({
+            room_id: roomId,
+            sender_gmail: gmail,
+            message: combinedData,
+            message_type: fileType
+          })
+        });
+
+        if (res.ok) {
+          fetchMessages(roomId, token, gmail);
+          scrollToBottom();
+        }
+      } catch (err) {
+        console.error("Gagal kirim file:", err);
+      }
     };
+    reader.readAsDataURL(file);
 
-    setMessages([...messages, newMessage]);
-    scrollToBottom();
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -180,17 +318,20 @@ const WebTabLayout = () => {
                     {/* Header Row */}
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-11 h-11 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30 shadow-inner">
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                            >
                                 <Image
                                     src="/unj.png"
                                     alt="Logo UNJ"
-                                    width={32}
-                                    height={32}
-                                    className="object-contain"
+                                    width={50}
+                                    height={50}
+                                    className="object-contain drop-shadow-2xl"
                                 />
-                            </div>
+                            </motion.div>
                             <div className="flex flex-col">
-                                <h3 className="text-lg font-black tracking-tighter leading-none">HELP DESK ADMISI</h3>
+                                <h3 className="text-lg font-black tracking-tighter leading-none">Admin Admisi UNJ</h3>
                                 <div className="flex items-center gap-1 mt-1">
                                     <span className="px-1.5 py-0.5 bg-emerald-500 text-[7px] font-black text-white rounded-md uppercase tracking-wider border border-emerald-400 shadow-sm">
                                         Admisi System
@@ -199,24 +340,19 @@ const WebTabLayout = () => {
                             </div>
                         </div>
 
-                        <button 
-                            onClick={() => { localStorage.removeItem('user'); window.location.reload(); }}
-                            className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-rose-200 hover:bg-rose-500/20 hover:text-white transition-all active:scale-90"
-                            title="Logout"
-                        >
-                            <LogOut size={20} />
-                        </button>
                     </div>
 
                     {/* Welcome Message */}
-                    <div>
+                    <div 
+                        onClick={() => setIsChatOpen(true)}
+                        className="cursor-pointer group/card"
+                    >
                         <h4 className="text-xl font-bold leading-tight tracking-tight">Selamat Datang, {userName}!</h4>
-                        <p className="text-[10px] font-medium text-emerald-100/70 uppercase tracking-widest mt-1">Pusat Bantuan Mahasiswa</p>
                         <div className={cn(
                             "mt-4 flex items-center gap-2 w-fit px-3 py-1.5 rounded-full border backdrop-blur-sm transition-all duration-500",
                             unreadCount > 0 
                                 ? "bg-rose-500/20 border-rose-500/30 animate-pulse" 
-                                : "bg-white/10 border-white/10"
+                                : "bg-white/10 border-white/10 group-hover/card:bg-white/20"
                         )}>
                             <span className={cn(
                                 "w-1.5 h-1.5 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.8)]",
@@ -261,33 +397,47 @@ const WebTabLayout = () => {
             </div>
         </div>
         
-        <div className="p-6 mt-auto">
-            <div className="p-4 bg-slate-900 rounded-2xl text-white flex items-center justify-between shadow-xl shadow-slate-200">
-                <div className="flex items-center gap-3">
-                    <Avatar size="sm" alt="Student" className="ring-2 ring-slate-800" />
-                    <div>
-                        <p className="text-[10px] font-bold">{userName}</p>
-                        <p className="text-[8px] text-slate-400 uppercase tracking-widest font-black">Peserta 2026</p>
-                    </div>
-                </div>
-            </div>
+        <div className="p-4 mt-auto">
+            <button 
+                onClick={async () => { 
+                    const storedUser = localStorage.getItem('user');
+                    if (storedUser) {
+                        const { token } = JSON.parse(storedUser);
+                        try {
+                            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
+                                method: 'POST',
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                        } catch (err) {
+                            console.error("Logout API failed:", err);
+                        }
+                    }
+                    localStorage.removeItem('user'); 
+                    window.location.reload(); 
+                }}
+                className="w-full flex items-center justify-center gap-3 py-3.5 bg-white border border-rose-100 text-rose-600 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all duration-300 shadow-sm active:scale-[0.98]"
+            >
+                <LogOut size={18} />
+                Keluar Akun
+            </button>
         </div>
       </aside>
 
       {/* Main Chat Area */}
-      <main className="flex-1 flex flex-col bg-[#F8FAFB] relative overflow-hidden">
+      <main 
+        className="flex-1 flex flex-col bg-slate-50 relative overflow-hidden"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20c0-11.046 8.954-20 20-20v20H20zM0 20c11.046 0 20-8.954 20-20v20H0zM0 20c11.046 0 20 8.954 20 20H0V20zm20 20c0-11.046 8.954-20 20-20v20H20z' fill='%23059669' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E")`
+        }}
+      >
         {/* Header */}
-        <header className="px-8 py-5 bg-white border-b border-slate-100 flex items-center justify-between z-10 shadow-sm">
+        <header className="px-8 py-5 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between z-10 shadow-sm">
           <div className="flex items-center gap-4">
-            <Avatar src="https://i.pravatar.cc/150?u=admin" size="md" className="ring-2 ring-emerald-50" />
+            <Avatar src="/unj.png" size="md" />
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="font-black text-slate-800 tracking-tight">Admin HelpDesk</h2>
+                <h2 className="font-black text-slate-800 tracking-tight">Admin Admisi UNJ</h2>
                 <span className="px-1.5 py-0.5 bg-slate-900 text-white text-[8px] font-black rounded-md tracking-tighter uppercase">OFFICIAL</span>
-              </div>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                <p className="text-[10px] text-emerald-600 font-black uppercase tracking-widest">Aktif Sekarang</p>
               </div>
             </div>
           </div>
@@ -295,14 +445,23 @@ const WebTabLayout = () => {
             <button className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all">
               <SearchIcon size={20} />
             </button>
-            <button className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all">
-              <MoreVertical size={20} />
+            <button 
+              onClick={() => setIsChatOpen(false)}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-100"
+            >
+              <X size={20} />
             </button>
           </div>
         </header>
 
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 lg:p-10 flex flex-col gap-8 scrollbar-hide">
+        {isChatOpen ? (
+          <>
+            {/* Messages Area */}
+            <div 
+              ref={scrollContainerRef}
+              onScroll={handleScroll}
+              className="flex-1 overflow-y-auto p-4 lg:p-10 flex flex-col gap-8 scrollbar-hide"
+            >
           <div className="flex justify-center mb-2">
             <span className="bg-white border border-slate-100 shadow-sm text-[10px] font-black text-slate-400 px-4 py-1.5 rounded-full uppercase tracking-widest">
               Layanan Bantuan Resmi UNJ
@@ -328,7 +487,70 @@ const WebTabLayout = () => {
                       ? "bg-linear-to-br from-emerald-400 to-emerald-500 text-white rounded-tr-none border border-emerald-300 shadow-emerald-100"
                       : "bg-white text-slate-700 rounded-tl-none border border-slate-100 shadow-slate-100/50"
                   )}>
-                    {msg.text}
+                    {msg.type === 'image' ? (
+                      <div className="flex flex-col gap-2">
+                        {(() => {
+                          const parts = msg.text.split('|');
+                          const imgData = parts.length > 1 ? parts[1] : msg.text;
+                          const caption = parts.length > 2 ? parts[2] : null;
+                          return (
+                            <>
+                              <img 
+                                src={imgData} 
+                                alt="Sent image" 
+                                onClick={() => setSelectedImage(imgData)}
+                                className="rounded-2xl max-w-[240px] h-auto shadow-sm border border-slate-100 cursor-zoom-in hover:opacity-90 transition-all"
+                              />
+                               {caption && (
+                                 <FormattedText text={caption} className="text-sm font-medium leading-relaxed mt-1 px-1" />
+                               )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    ) : msg.type === 'file' ? (
+                      (() => {
+                        const parts = msg.text.split('|');
+                        const fileName = parts.length > 1 ? parts[0] : "Dokumen Pengumuman";
+                        const fileData = parts.length > 1 ? parts[1] : msg.text;
+                        const caption = parts.length > 2 ? parts[2] : null;
+                        return (
+                          <>
+                            <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100/50 min-w-[200px]">
+                              <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                                <FileText size={20} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-bold text-slate-700 truncate">{fileName}</p>
+                                <div className="flex items-center gap-3 mt-1">
+                                  <button 
+                                    onClick={() => viewFile(fileData)}
+                                    className="text-[10px] font-black text-emerald-600 hover:underline flex items-center gap-1"
+                                  >
+                                    <Eye size={10} />
+                                    Lihat
+                                  </button>
+                                  <button 
+                                    onClick={() => downloadFile(fileData, fileName)}
+                                    className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1"
+                                  >
+                                    <Download size={10} />
+                                    Download
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                             {caption && (
+                               <div className="mt-3 px-1 border-t border-slate-100 pt-3">
+                                 <FormattedText text={caption} className="text-sm font-medium leading-relaxed" />
+                               </div>
+                             )}
+                          </>
+                        );
+                      })()
+                     ) : (
+                       <FormattedText text={msg.text} />
+                     )}
                     <div className={cn(
                       "flex items-center gap-2 mt-2.5 justify-end",
                       isMe ? "text-emerald-50" : "text-slate-400"
@@ -347,9 +569,63 @@ const WebTabLayout = () => {
         {/* Input Area */}
         <div className="px-4 lg:px-8 pb-8 pt-2">
           <div className="bg-white border border-slate-100 rounded-[32px] shadow-2xl shadow-slate-200/50 overflow-hidden">
-            <div className="p-4">
-              <form onSubmit={handleSendMessage} className="flex flex-col gap-4">
-                <div className="flex items-center gap-3">
+            <div className="p-6 flex flex-col gap-4">
+              <div className="flex items-stretch gap-4">
+                <motion.button 
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="button"
+                  onClick={() => setIsTemplatePopupOpen(true)}
+                  className="shrink-0 px-6 bg-white border border-emerald-100 text-emerald-600 rounded-[28px] shadow-lg flex flex-col items-center justify-center hover:border-emerald-500 hover:text-emerald-700 hover:shadow-xl hover:shadow-emerald-100 transition-all group gap-1 min-w-[120px]"
+                >
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                    <LayoutGrid size={18} />
+                  </div>
+                  <span className="text-[9px] font-black uppercase tracking-widest">Template</span>
+                </motion.button>
+
+                <AnimatePresence mode="wait">
+                  {selectedResponse ? (
+                    <motion.div
+                      key="selected"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      className="flex-1 p-4 bg-emerald-50/50 border border-emerald-100 rounded-[28px] flex items-center justify-between gap-4"
+                    >
+                      <div className="flex-1 min-w-0 flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                          <Clock size={18} className="text-emerald-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] font-black text-emerald-800 uppercase tracking-widest mb-0.5">Selected Draft:</p>
+                          <p className="text-sm text-emerald-900/70 italic font-medium leading-relaxed truncate">"{selectedResponse.response}"</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedResponse(null)}
+                        className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all shrink-0"
+                      >
+                        <X size={20} />
+                      </button>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="none"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex-1 p-4 border-2 border-dashed border-slate-100 rounded-[28px] flex items-center justify-center bg-slate-50/30"
+                    >
+                       <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Silakan pilih template untuk mempercepat pertanyaan</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className="p-4">
+                <form onSubmit={handleSendMessage} className="flex flex-col gap-4">
+                <div className="flex items-end gap-3">
                   <input 
                     type="file" 
                     ref={fileInputRef} 
@@ -361,17 +637,22 @@ const WebTabLayout = () => {
                     type="button" 
                     whileTap={{ scale: 0.95 }}
                     onClick={handleFileClick}
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all"
+                    className="w-12 h-12 mb-1 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all shrink-0"
                   >
                     <Paperclip size={24} />
                   </motion.button>
                   
                   <div className="flex-1 relative">
                     <textarea
+                      id="user-web-message-input"
                       value={manualNote}
-                      onChange={(e) => setManualNote(e.target.value)}
+                      onChange={(e) => {
+                          setManualNote(e.target.value);
+                          e.target.style.height = 'auto';
+                          e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
+                      }}
                       placeholder="Tulis pertanyaanmu di sini..."
-                      className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[20px] text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none font-medium"
+                      className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[24px] text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none font-medium max-h-[150px] scrollbar-hide"
                       rows={1}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
@@ -384,7 +665,7 @@ const WebTabLayout = () => {
                   <button
                     type="submit"
                     disabled={!manualNote.trim()}
-                    className="w-14 h-14 bg-emerald-800 text-white rounded-[20px] flex items-center justify-center shadow-xl shadow-emerald-200/50 hover:bg-emerald-900 hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:shadow-none"
+                    className="w-14 h-14 bg-emerald-800 text-white rounded-[24px] flex items-center justify-center shadow-xl shadow-emerald-200/50 hover:bg-emerald-900 hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:shadow-none shrink-0"
                   >
                     <Send size={24} className="ml-1" />
                   </button>
@@ -393,7 +674,139 @@ const WebTabLayout = () => {
             </div>
           </div>
         </div>
+      </div>
+      </>
+    ) : (
+          <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-white">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-col items-center max-w-sm"
+              >
+                  <div className="w-24 h-24 bg-emerald-50 rounded-4xl flex items-center justify-center mb-8 shadow-2xl shadow-emerald-100 relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-emerald-500/10 scale-0 group-hover:scale-100 transition-transform duration-700 rounded-full"></div>
+                      <Image src="/unj.png" alt="Logo" width={60} height={60} className="relative z-10" />
+                  </div>
+                  <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-3">Admin Admisi UNJ</h2>
+                  <p className="text-sm font-medium text-slate-400 leading-relaxed mb-8">
+                    Klik tombol dibawah ini untuk  mulai berkonsultasi dengan petugas kami.
+                  </p>
+                  <button 
+                    onClick={() => setIsChatOpen(true)}
+                    className="px-8 py-3.5 bg-emerald-800 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-emerald-200 hover:bg-emerald-900 hover:scale-105 active:scale-95 transition-all"
+                  >
+                    BUKA CHAT SEKARANG
+                  </button>
+              </motion.div>
+          </div>
+        )}
       </main>
+
+      {/* Template Popup Modal */}
+      <AnimatePresence>
+        {isTemplatePopupOpen && (
+          <div className="fixed inset-0 z-9999 flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsTemplatePopupOpen(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-2xl bg-white rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+            >
+              {/* Modal Header */}
+              <div className="px-8 py-6 bg-emerald-800 text-white flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-black tracking-tight">Template Pertanyaan</h3>
+                  <p className="text-emerald-100/60 text-[10px] font-bold uppercase tracking-widest mt-1">Pilih kategori bantuan</p>
+                </div>
+                <button 
+                  onClick={() => setIsTemplatePopupOpen(false)}
+                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="flex flex-1 overflow-hidden">
+                {/* Categories Sidebar */}
+                <div className="w-48 bg-slate-50 border-r border-slate-100 p-4 flex flex-col gap-2 overflow-y-auto">
+                  {Array.from(new Set(cannedResponses.map(r => r.category))).map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setActiveCategory(cat)}
+                      className={cn(
+                        "px-4 py-3 rounded-xl text-left text-[11px] font-black uppercase tracking-wider transition-all",
+                        activeCategory === cat 
+                          ? "bg-emerald-600 text-white shadow-lg shadow-emerald-100" 
+                          : "text-slate-400 hover:bg-white hover:text-emerald-600"
+                      )}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Questions List */}
+                <div className="flex-1 p-6 overflow-y-auto scrollbar-hide">
+                  <div className="grid grid-cols-1 gap-4">
+                    {cannedResponses.filter(r => r.category === activeCategory).map(resp => (
+                      <motion.button
+                        key={resp.id}
+                        whileHover={{ x: 5 }}
+                        onClick={() => {
+                          setSelectedResponse(resp);
+                          setIsTemplatePopupOpen(false);
+                        }}
+                        className="p-5 bg-white border border-slate-100 rounded-3xl text-left hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-50 transition-all group"
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                           <span className="px-2 py-0.5 bg-emerald-50 text-[8px] font-black text-emerald-600 rounded uppercase tracking-widest">{resp.keyword}</span>
+                        </div>
+                        <p className="text-sm font-black text-slate-800 leading-snug group-hover:text-emerald-700 transition-colors">{resp.question}</p>
+                        <p className="text-[11px] text-slate-400 mt-2 line-clamp-2 leading-relaxed">{resp.response}</p>
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Image Lightbox Modal */}
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedImage(null)}
+            className="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-md cursor-zoom-out"
+          >
+            <motion.img 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              src={selectedImage}
+              alt="Enlarged"
+              className="max-w-full max-h-full rounded-2xl shadow-2xl object-contain"
+            />
+            <button 
+              className="absolute top-8 right-8 text-white/50 hover:text-white transition-colors text-xs font-black uppercase tracking-widest"
+              onClick={() => setSelectedImage(null)}
+            >
+              Tutup (Esc)
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

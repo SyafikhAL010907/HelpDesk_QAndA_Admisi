@@ -1,5 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
+import { UserCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AvatarProps {
   src?: string;
@@ -7,9 +9,10 @@ interface AvatarProps {
   size?: 'sm' | 'md' | 'lg';
   status?: 'online' | 'offline';
   className?: string;
+  icon?: React.ReactNode;
 }
 
-const Avatar: React.FC<AvatarProps> = ({ src, alt = 'User', size = 'md', status, className }) => {
+const Avatar: React.FC<AvatarProps> = ({ src, alt = 'User', size = 'md', status, className, icon }) => {
   const sizeClasses = {
     sm: 'w-8 h-8',
     md: 'w-10 h-10',
@@ -17,8 +20,12 @@ const Avatar: React.FC<AvatarProps> = ({ src, alt = 'User', size = 'md', status,
   };
 
   return (
-    <div className="relative inline-block">
-      <div className={`${sizeClasses[size]} rounded-full overflow-hidden bg-gray-200 border border-gray-100`}>
+    <div className={cn("relative inline-block", className)}>
+      <div className={cn(
+        sizeClasses[size], 
+        "rounded-full overflow-hidden flex items-center justify-center",
+        !src && "bg-slate-100 border border-slate-200"
+      )}>
         {src ? (
           <Image 
             src={src} 
@@ -28,8 +35,8 @@ const Avatar: React.FC<AvatarProps> = ({ src, alt = 'User', size = 'md', status,
             className="w-full h-full object-cover" 
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-green-100 text-green-600 font-bold">
-            {alt.charAt(0).toUpperCase()}
+          <div className="w-full h-full flex items-center justify-center text-slate-400">
+            {icon || <UserCircle className="w-full h-full p-1" strokeWidth={1.5} />}
           </div>
         )}
       </div>

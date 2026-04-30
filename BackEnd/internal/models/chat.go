@@ -8,7 +8,9 @@ type ChatRoom struct {
 	LastMessage string    `json:"last_message"`
 	UnreadCount int       `json:"unread_count"`
 	UpdatedAt   time.Time `json:"updated_at"`
-	UserName    string    `json:"user_name,omitempty"` // Buat nampilin nama user di sidebar admin
+	UserName       string    `json:"user_name,omitempty"` // Buat nampilin nama user di sidebar admin
+	IsOnline       bool      `json:"is_online"`           // Status online user
+	IsMarkedUnread bool      `json:"is_marked_unread"`    // Status ditandai belum dibaca oleh admin
 }
 
 type ChatMessage struct {

@@ -29,7 +29,7 @@ const WebSignUp = ({ onNavigate, onSignUp, loading }: SignUpProps) => {
         <div className="flex flex-col items-center mb-10">
           <Logo />
           <h2 className="text-xl font-black text-slate-800 mt-8 tracking-tight">Buat Akun Baru</h2>
-          <p className="text-xs font-bold text-slate-400 mt-1 text-center uppercase tracking-widest">Daftar sebagai Peserta HelpDesk</p>
+          <p className="text-xs font-bold text-slate-400 mt-1 text-center uppercase tracking-widest">Daftar sebagai Peserta Admin Admisi UNJ</p>
         </div>
 
         <form onSubmit={handleSignUp} className="space-y-6">
