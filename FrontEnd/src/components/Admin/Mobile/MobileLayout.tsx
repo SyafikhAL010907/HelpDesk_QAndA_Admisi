@@ -126,6 +126,12 @@ const MobileLayout = () => {
   const [activeCategory, setActiveCategory] = useState<string>('Pendaftaran');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isInfoActive, setIsInfoActive] = useState(false);
+  // ── AI Auto-Response State ────────────────────────────────────────────────
+  // ⚠️  DISABLE: Comment baris ini untuk balik ke toggle lokal saja
+  const [isAILoading, setIsAILoading] = useState(false); // Loading state saat toggle
+  const [showAIConfirm, setShowAIConfirm] = useState(false); // Konfirmasi sebelum toggle AI
+  const [pendingAIState, setPendingAIState] = useState(false); // State AI yang akan diaktifkan
+  // ─────────────────────────────────────────────────────────────────────────
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [isRoomMenuOpen, setIsRoomMenuOpen] = useState(false);
   const [selectedRooms, setSelectedRooms] = useState<number[]>([]);
@@ -237,13 +243,18 @@ const MobileLayout = () => {
         headers: { 'Authorization': token }
       });
       const data = await res.json();
-      if (res.ok) setRooms(data.map((r: any) => ({
-        ...r,
-        is_online: r.is_online,
-        is_marked_unread: r.is_marked_unread
-      })));
+      if (res.ok && Array.isArray(data)) {
+        setRooms(data.map((r: any) => ({
+          ...r,
+          is_online: r.is_online,
+          is_marked_unread: r.is_marked_unread
+        })));
+      } else if (res.ok) {
+        setRooms([]);
+      }
     } catch (err) {
       console.error("Gagal ambil room:", err);
+      setRooms([]);
     }
   };
 
@@ -295,6 +306,8 @@ const MobileLayout = () => {
       fetchRooms(parsed.token);
       fetchStats(parsed.token);
       fetchAllUsers(parsed.token);
+      // ⚠️  DISABLE: Comment baris fetchAIStatus di bawah jika tidak pakai AI
+      fetchAIStatus(parsed.token); // Ambil status AI saat pertama load
       const interval = setInterval(() => {
         fetchRooms(parsed.token);
         fetchStats(parsed.token);
@@ -317,13 +330,13 @@ const MobileLayout = () => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
-    if (storedUser && selectedChat && view === 'ROOM') {
+    if (storedUser && selectedChat && view === 'ROOM' && adminGmail) {
       const { token } = JSON.parse(storedUser);
       fetchMessages(selectedChat.id, token);
       const interval = setInterval(() => fetchMessages(selectedChat.id, token), 3000);
       return () => clearInterval(interval);
     }
-  }, [selectedChat?.id, view]);
+  }, [selectedChat?.id, view, adminGmail]);
 
   // Efek pintar buat scroll
   useEffect(() => {
@@ -372,6 +385,59 @@ const MobileLayout = () => {
       console.error("Gagal mark read:", err);
     }
   };
+
+  // ── AI Auto-Response Functions ───────────────────────────────────────────
+  // ⚠️  DISABLE: Comment seluruh blok fetchAIStatus + handleToggleAI di bawah ini
+
+  const fetchAIStatus = async (token: string) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/ai/status`, {
+        headers: { 'Authorization': token }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setIsInfoActive(data.enabled === true);
+      }
+    } catch (err) {
+      console.warn('[AI] Tidak bisa ambil status AI (ML service mungkin belum jalan):', err);
+    }
+  };
+
+  const handleToggleAI = async (newState: boolean) => {
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) return;
+    const { token } = JSON.parse(storedUser);
+
+    setIsInfoActive(newState);
+    setIsAILoading(true);
+    setShowAIConfirm(false);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/ai/toggle`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({ enabled: newState })
+      });
+      if (!res.ok) {
+        setIsInfoActive(!newState);
+        console.error('[AI] Gagal toggle AI');
+      }
+    } catch (err) {
+      setIsInfoActive(!newState);
+      console.warn('[AI] Koneksi ke backend gagal:', err);
+    } finally {
+      setIsAILoading(false);
+    }
+  };
+
+  const handleAIToggleRequest = (newState: boolean) => {
+    setPendingAIState(newState);
+    setShowAIConfirm(true);
+  };
+  // ─────────────────────────────────────────────────────────────────────────
 
   const handleBlessChat = async () => {
     if (!blessMessage.trim() && !blessFile) return;
@@ -679,10 +745,14 @@ const MobileLayout = () => {
 
                        {/* Elegant Large Toggle */}
                        <div 
-                         onClick={() => setIsInfoActive(!isInfoActive)}
+                         onClick={() => {
+                          // ⚠️  DISABLE: Ganti handleAIToggleRequest → setIsInfoActive(!isInfoActive)
+                          if (!isAILoading) handleAIToggleRequest(!isInfoActive);
+                        }}
                          className={cn(
                            "relative w-16 h-9 rounded-full p-1 transition-all duration-500 cursor-pointer",
-                           isInfoActive ? "bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]" : "bg-slate-100 shadow-inner"
+                           isInfoActive ? "bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]" : "bg-slate-100 shadow-inner",
+                           isAILoading && "opacity-60 cursor-wait"
                          )}
                        >
                          <motion.div 
@@ -690,10 +760,14 @@ const MobileLayout = () => {
                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
                            className="w-7 h-7 bg-white rounded-full shadow-lg flex items-center justify-center overflow-hidden"
                          >
-                           <div className={cn(
-                             "w-1.5 h-1.5 rounded-full transition-all duration-300",
-                             isInfoActive ? "bg-emerald-500 scale-150" : "bg-slate-300"
-                           )} />
+                           {isAILoading ? (
+                             <div className="w-3 h-3 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                           ) : (
+                             <div className={cn(
+                               "w-1.5 h-1.5 rounded-full transition-all duration-300",
+                               isInfoActive ? "bg-emerald-500 scale-150" : "bg-slate-300"
+                             )} />
+                           )}
                          </motion.div>
                        </div>
                      </div>
@@ -1250,13 +1324,13 @@ const MobileLayout = () => {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            className="px-4 py-3 bg-emerald-50 border-b border-emerald-100 flex items-center justify-between gap-3"
+                            className="px-4 py-3 bg-emerald-50 border-b border-emerald-100 flex items-start justify-between gap-3"
                         >
                             <div className="flex-1 min-w-0 flex gap-2">
                                 <Clock size={14} className="text-emerald-600 shrink-0" />
                                 <div className="min-w-0 flex-1">
                                     <p className="text-[9px] font-black text-emerald-800 uppercase tracking-widest">Draft:</p>
-                                    <p className="text-[11px] text-emerald-900/70 italic font-medium leading-relaxed truncate">"{selectedResponse.response}"</p>
+                                    <p className="text-[11px] text-emerald-900/70 italic font-medium leading-relaxed whitespace-pre-wrap">"{selectedResponse.response}"</p>
                                 </div>
                             </div>
                             <button 
@@ -1654,6 +1728,106 @@ const MobileLayout = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── AI CONFIRMATION MODAL ─────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showAIConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-200 flex items-end justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setShowAIConfirm(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 80, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 80, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm bg-white rounded-[32px] overflow-hidden shadow-2xl"
+            >
+              {/* Header Gradient */}
+              <div className={`p-6 ${pendingAIState ? 'bg-linear-to-br from-emerald-500 to-emerald-700' : 'bg-linear-to-br from-slate-600 to-slate-800'} relative overflow-hidden`}>
+                <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+                <div className="relative z-10 flex items-center gap-4">
+                  <div className="w-14 h-14 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20 shadow-lg">
+                    <span className="text-2xl">{pendingAIState ? '🤖' : '🔕'}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[10px] font-black text-white/70 uppercase tracking-widest mb-0.5">Konfirmasi</p>
+                    <h3 className="text-lg font-black text-white leading-tight">
+                      {pendingAIState ? 'Aktifkan AI?' : 'Matikan AI?'}
+                    </h3>
+                  </div>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 flex flex-col gap-4">
+                {pendingAIState ? (
+                  <div className="flex flex-col gap-3">
+                    <p className="text-sm font-bold text-slate-700 leading-relaxed">
+                      Fitur <span className="text-emerald-600">Auto-Response AI</span> akan diaktifkan untuk semua chat yang masuk.
+                    </p>
+                    <div className="bg-emerald-50 rounded-2xl p-4 flex flex-col gap-2 border border-emerald-100">
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-sm mt-0.5">✅</span>
+                        <p className="text-xs font-semibold text-slate-600">AI akan otomatis menjawab pertanyaan user berdasarkan template yang sudah dilatih</p>
+                      </div>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-sm mt-0.5">✅</span>
+                        <p className="text-xs font-semibold text-slate-600">Respons akan muncul dalam hitungan detik</p>
+                      </div>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-sm mt-0.5">⚠️</span>
+                        <p className="text-xs font-semibold text-slate-500">Pastikan ML Service sudah berjalan sebelum mengaktifkan</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    <p className="text-sm font-bold text-slate-700 leading-relaxed">
+                      Fitur <span className="text-slate-600">Auto-Response AI</span> akan dinonaktifkan.
+                    </p>
+                    <div className="bg-slate-50 rounded-2xl p-4 flex flex-col gap-2 border border-slate-100">
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-sm mt-0.5">ℹ️</span>
+                        <p className="text-xs font-semibold text-slate-600">Semua chat selanjutnya harus dijawab secara manual oleh admin</p>
+                      </div>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-sm mt-0.5">ℹ️</span>
+                        <p className="text-xs font-semibold text-slate-600">Chat yang sedang berjalan tidak terpengaruh</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 mt-1">
+                  <button
+                    onClick={() => setShowAIConfirm(false)}
+                    className="flex-1 py-3.5 rounded-2xl text-xs font-black text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all active:scale-95"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={() => handleToggleAI(pendingAIState)}
+                    className={`flex-1 py-3.5 rounded-2xl text-xs font-black text-white shadow-lg transition-all active:scale-95 ${
+                      pendingAIState
+                        ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-200'
+                        : 'bg-slate-700 hover:bg-slate-800 shadow-slate-200'
+                    }`}
+                  >
+                    {pendingAIState ? '🚀 Ya, Aktifkan!' : '🔕 Ya, Matikan'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* ──────────────────────────────────────────────────────────────────── */}
     </div>
   );
 };

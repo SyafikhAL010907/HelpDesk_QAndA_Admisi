@@ -195,6 +195,17 @@ const MobileLayout = () => {
     }
   };
 
+  useEffect(() => {
+    if (roomId && userGmail) {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            const { token } = JSON.parse(storedUser);
+            const interval = setInterval(() => fetchMessages(roomId, token, userGmail), 3000);
+            return () => clearInterval(interval);
+        }
+    }
+  }, [roomId, userGmail]);
+
   const fetchMessages = async (id: number, token: string, currentGmail: string) => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/messages/${id}`, {
@@ -248,7 +259,12 @@ const MobileLayout = () => {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !roomId) return;
+    
+    const combinedText = selectedResponse
+      ? `${selectedResponse.response}\n\nCatatan Tambahan:\n${newMessage}`
+      : newMessage;
+
+    if (!combinedText.trim() || !roomId) return;
 
     const storedUser = localStorage.getItem('user');
     if (!storedUser) return;
@@ -264,13 +280,14 @@ const MobileLayout = () => {
         body: JSON.stringify({
           room_id: roomId,
           sender_gmail: gmail,
-          message: newMessage,
+          message: combinedText,
           message_type: 'text'
         })
       });
 
       if (res.ok) {
         setNewMessage('');
+        setSelectedResponse(null);
         const el = document.getElementById('user-message-input');
         if (el) el.style.height = 'auto';
         fetchMessages(roomId, token, gmail);
@@ -571,15 +588,15 @@ const MobileLayout = () => {
                                  <motion.div
                                    initial={{ opacity: 0, height: 0 }}
                                    animate={{ opacity: 1, height: 'auto' }}
-                                   className="p-3 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-between gap-3 mx-2"
+                                   className="p-3 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-start justify-between gap-3 mx-2"
                                  >
-                                   <div className="flex-1 min-w-0 flex gap-2">
+                                   <div className="flex-1 min-w-0 flex items-start gap-2">
                                      <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                                        <Clock size={12} className="text-emerald-600" />
                                      </div>
                                      <div className="min-w-0 flex-1">
                                        <p className="text-[8px] font-black text-emerald-800 uppercase tracking-widest mb-0.5">Draf:</p>
-                                       <p className="text-[10px] text-emerald-900/70 italic font-medium leading-relaxed truncate">"{selectedResponse.response}"</p>
+                                       <p className="text-[10px] text-emerald-900/70 italic font-medium leading-relaxed whitespace-pre-wrap">"{selectedResponse.response}"</p>
                                      </div>
                                    </div>
                                    <button

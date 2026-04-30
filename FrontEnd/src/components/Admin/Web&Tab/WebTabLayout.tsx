@@ -87,7 +87,13 @@ const WebTabLayout = () => {
   };
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [selectedRooms, setSelectedRooms] = useState<number[]>([]);
+  // ── AI Auto-Response State ────────────────────────────────────────────────
+  // ⚠️  DISABLE: Comment blok ini (baris 90-91) untuk balik ke toggle lokal saja
   const [isInfoActive, setIsInfoActive] = useState(false);
+  const [isAILoading, setIsAILoading] = useState(false); // Loading state saat toggle
+  const [showAIConfirm, setShowAIConfirm] = useState(false); // Konfirmasi sebelum toggle AI
+  const [pendingAIState, setPendingAIState] = useState(false); // State AI yang akan diaktifkan
+  // ─────────────────────────────────────────────────────────────────────────
 
   const downloadFile = (dataUrl: string, fileName: string) => {
     try {
@@ -278,7 +284,9 @@ const WebTabLayout = () => {
       fetchRooms(parsed.token);
       fetchStats(parsed.token);
       fetchAllUsers(parsed.token);
-      
+      // ⚠️  DISABLE: Comment baris fetchAIStatus di bawah jika tidak pakai AI
+      fetchAIStatus(parsed.token); // Ambil status AI saat pertama load
+
       const interval = setInterval(() => {
         fetchRooms(parsed.token);
         fetchStats(parsed.token);
@@ -289,14 +297,14 @@ const WebTabLayout = () => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
-    if (storedUser && selectedChat) {
+    if (storedUser && selectedChat && adminGmail) {
       const { token } = JSON.parse(storedUser);
       fetchMessages(selectedChat.id, token);
       
       const interval = setInterval(() => fetchMessages(selectedChat.id, token), 3000);
       return () => clearInterval(interval);
     }
-  }, [selectedChat?.id]);
+  }, [selectedChat?.id, adminGmail]);
 
   // Efek pintar buat scroll
   useEffect(() => {
@@ -384,6 +392,64 @@ const WebTabLayout = () => {
       console.error("Gagal mark read:", err);
     }
   };
+
+  // ── AI Auto-Response Functions ───────────────────────────────────────────
+  // ⚠️  DISABLE: Comment seluruh blok fetchAIStatus + handleToggleAI (baris di bawah ini)
+  // Kalau di-comment, toggle akan balik ke mode lokal-only (tidak nyambung ke backend)
+
+  const fetchAIStatus = async (token: string) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/ai/status`, {
+        headers: { 'Authorization': token }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setIsInfoActive(data.enabled === true);
+      }
+    } catch (err) {
+      // ML service mungkin belum jalan — toggle tetap lokal, tidak crash
+      console.warn('[AI] Tidak bisa ambil status AI (ML service mungkin belum jalan):', err);
+    }
+  };
+
+  const handleToggleAI = async (newState: boolean) => {
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) return;
+    const { token } = JSON.parse(storedUser);
+
+    // Langsung update UI dulu biar responsif (optimistic update)
+    setIsInfoActive(newState);
+    setIsAILoading(true);
+    setShowAIConfirm(false);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/ai/toggle`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({ enabled: newState })
+      });
+      if (!res.ok) {
+        // Kalau gagal, rollback ke state sebelumnya
+        setIsInfoActive(!newState);
+        console.error('[AI] Gagal toggle AI');
+      }
+    } catch (err) {
+      // Backend/ML tidak nyambung — toggle balik ke sebelumnya
+      setIsInfoActive(!newState);
+      console.warn('[AI] Koneksi ke backend gagal:', err);
+    } finally {
+      setIsAILoading(false);
+    }
+  };
+
+  const handleAIToggleRequest = (newState: boolean) => {
+    setPendingAIState(newState);
+    setShowAIConfirm(true);
+  };
+  // ─────────────────────────────────────────────────────────────────────────
 
   const handleBlessChat = async () => {
     if (!blessMessage.trim() && !blessFile) return;
@@ -592,11 +658,13 @@ const WebTabLayout = () => {
                             <div 
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    setIsInfoActive(!isInfoActive);
+                                    // ⚠️  DISABLE: Ganti handleAIToggleRequest → setIsInfoActive(!isInfoActive)
+                                    if (!isAILoading) handleAIToggleRequest(!isInfoActive);
                                 }}
                                 className={cn(
                                     "relative w-8 h-4 rounded-full p-0.5 transition-all duration-500 cursor-pointer",
-                                    isInfoActive ? "bg-emerald-400" : "bg-white/20"
+                                    isInfoActive ? "bg-emerald-400" : "bg-white/20",
+                                    isAILoading && "opacity-60 cursor-wait"
                                 )}
                             >
                                 <motion.div 
@@ -604,10 +672,14 @@ const WebTabLayout = () => {
                                     transition={{ type: "spring", stiffness: 400, damping: 25 }}
                                     className="w-3 h-3 bg-white rounded-full shadow-md flex items-center justify-center"
                                 >
-                                    <div className={cn(
-                                        "w-1 h-1 rounded-full",
-                                        isInfoActive ? "bg-emerald-500" : "bg-slate-300"
-                                    )} />
+                                    {isAILoading ? (
+                                        <div className="w-2 h-2 border border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                        <div className={cn(
+                                            "w-1 h-1 rounded-full",
+                                            isInfoActive ? "bg-emerald-500" : "bg-slate-300"
+                                        )} />
+                                    )}
                                 </motion.div>
                             </div>
                          </div>
@@ -1269,15 +1341,15 @@ const WebTabLayout = () => {
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -20 }}
-                          className="flex-1 p-4 bg-emerald-50/50 border border-emerald-100 rounded-[28px] flex items-center justify-between gap-4"
+                          className="flex-1 p-4 bg-emerald-50/50 border border-emerald-100 rounded-[28px] flex items-start justify-between gap-4"
                         >
-                          <div className="flex-1 min-w-0 flex items-center gap-4">
+                          <div className="flex-1 min-w-0 flex items-start gap-4">
                             <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                               <Clock size={18} className="text-emerald-600" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-[9px] font-black text-emerald-800 uppercase tracking-widest mb-0.5">Selected Draft:</p>
-                              <p className="text-sm text-emerald-900/70 italic font-medium leading-relaxed truncate">"{selectedResponse.response}"</p>
+                              <p className="text-sm text-emerald-900/70 italic font-medium leading-relaxed whitespace-pre-wrap">"{selectedResponse.response}"</p>
                             </div>
                           </div>
                           <button
@@ -1618,6 +1690,106 @@ const WebTabLayout = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── AI CONFIRMATION MODAL ─────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showAIConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-200 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setShowAIConfirm(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm bg-white rounded-[32px] overflow-hidden shadow-2xl"
+            >
+              {/* Header Gradient */}
+              <div className={`p-6 ${pendingAIState ? 'bg-linear-to-br from-emerald-500 to-emerald-700' : 'bg-linear-to-br from-slate-600 to-slate-800'} relative overflow-hidden`}>
+                <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+                <div className="relative z-10 flex items-center gap-4">
+                  <div className="w-14 h-14 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20 shadow-lg">
+                    <span className="text-2xl">{pendingAIState ? '🤖' : '🔕'}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[10px] font-black text-white/70 uppercase tracking-widest mb-0.5">Konfirmasi</p>
+                    <h3 className="text-lg font-black text-white leading-tight">
+                      {pendingAIState ? 'Aktifkan AI?' : 'Matikan AI?'}
+                    </h3>
+                  </div>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 flex flex-col gap-4">
+                {pendingAIState ? (
+                  <div className="flex flex-col gap-3">
+                    <p className="text-sm font-bold text-slate-700 leading-relaxed">
+                      Fitur <span className="text-emerald-600">Auto-Response AI</span> akan diaktifkan untuk semua chat yang masuk.
+                    </p>
+                    <div className="bg-emerald-50 rounded-2xl p-4 flex flex-col gap-2 border border-emerald-100">
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-sm mt-0.5">✅</span>
+                        <p className="text-xs font-semibold text-slate-600">AI akan otomatis menjawab pertanyaan user berdasarkan template yang sudah dilatih</p>
+                      </div>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-sm mt-0.5">✅</span>
+                        <p className="text-xs font-semibold text-slate-600">Respons akan muncul dalam hitungan detik</p>
+                      </div>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-sm mt-0.5">⚠️</span>
+                        <p className="text-xs font-semibold text-slate-500">Pastikan ML Service sudah berjalan sebelum mengaktifkan</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    <p className="text-sm font-bold text-slate-700 leading-relaxed">
+                      Fitur <span className="text-slate-600">Auto-Response AI</span> akan dinonaktifkan.
+                    </p>
+                    <div className="bg-slate-50 rounded-2xl p-4 flex flex-col gap-2 border border-slate-100">
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-sm mt-0.5">ℹ️</span>
+                        <p className="text-xs font-semibold text-slate-600">Semua chat selanjutnya harus dijawab secara manual oleh admin</p>
+                      </div>
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-sm mt-0.5">ℹ️</span>
+                        <p className="text-xs font-semibold text-slate-600">Chat yang sedang berjalan tidak terpengaruh</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 mt-1">
+                  <button
+                    onClick={() => setShowAIConfirm(false)}
+                    className="flex-1 py-3.5 rounded-2xl text-xs font-black text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all active:scale-95"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={() => handleToggleAI(pendingAIState)}
+                    className={`flex-1 py-3.5 rounded-2xl text-xs font-black text-white shadow-lg transition-all active:scale-95 ${
+                      pendingAIState
+                        ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-200'
+                        : 'bg-slate-700 hover:bg-slate-800 shadow-slate-200'
+                    }`}
+                  >
+                    {pendingAIState ? '🚀 Ya, Aktifkan!' : '🔕 Ya, Matikan'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* ──────────────────────────────────────────────────────────────────── */}
     </div>
   );
 };

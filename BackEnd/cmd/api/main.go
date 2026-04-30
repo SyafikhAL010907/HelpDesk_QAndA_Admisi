@@ -1,5 +1,15 @@
 package main
 
+// =============================================================================
+// FILE: BackEnd/cmd/api/main.go
+// ⚠️  CARA DISABLE FITUR AI:
+//   1. Comment baris: handlers.StartAIWorker(os.Getenv("ML_SERVICE_URL"))
+//   2. Comment baris: admin.POST("/ai/toggle", handlers.ToggleAI)
+//   3. Comment baris: admin.GET("/ai/status", handlers.GetAIStatus)
+//   Semua fitur lain (chat, auth, dll) TIDAK akan terpengaruh.
+//   Detail lengkap: MachineLearning/DISABLE_GUIDE.md
+// =============================================================================
+
 import (
 	"fmt"
 	"log"
@@ -68,8 +78,25 @@ func main() {
 			admin.POST("/chat/mark-unread/:room_id", handlers.MarkAsUnread)
 			admin.POST("/chat/broadcast", handlers.BroadcastMessage)
 			admin.POST("/chat/delete-bulk", handlers.BulkDeleteRooms)
+
+			// ── AI Auto-Response Routes ──────────────────────────────────────
+			// ⚠️  DISABLE: Comment 2 baris di bawah ini untuk matikan endpoint AI
+			admin.POST("/ai/toggle", handlers.ToggleAI)   // Toggle AI ON/OFF
+			admin.GET("/ai/status", handlers.GetAIStatus) // Cek status AI
+			// ─────────────────────────────────────────────────────────────────
 		}
 	}
+
+	// ── AI Background Worker ─────────────────────────────────────────────────
+	// ⚠️  DISABLE: Comment baris StartAIWorker di bawah ini untuk matikan AI worker
+	// Fitur chat biasa TIDAK terpengaruh jika di-comment
+	mlServiceURL := os.Getenv("ML_SERVICE_URL")
+	if mlServiceURL == "" {
+		mlServiceURL = "http://localhost:8000" // default ML service URL
+	}
+	handlers.StartAIWorker(mlServiceURL) // ⚠️  Comment baris ini untuk disable AI worker
+	log.Printf("[AI] Worker dimulai, ML Service: %s", mlServiceURL)
+	// ─────────────────────────────────────────────────────────────────────────
 
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {
