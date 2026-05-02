@@ -24,15 +24,17 @@ import {
   LayoutGrid,
   MessageSquare,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   LogOut,
   X
 } from 'lucide-react';
 import { Message, CannedResponse, BlastTemplate } from '@/constants/chatTypes';
-import { dummyChats } from '@/constants/chatData';
 import { cannedResponses } from '@/constants/cannedResponses';
 import { blastTemplates } from '@/constants/blastTemplates';
 import Avatar from '@/components/Shared/Avatar';
 import FormattedText from '@/components/Shared/FormattedText';
+import CustomAlert from '@/components/Shared/CustomAlert';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Image from 'next/image';
@@ -137,6 +139,54 @@ const MobileLayout = () => {
   const [selectedRooms, setSelectedRooms] = useState<number[]>([]);
   const [networkLatency, setNetworkLatency] = useState<number>(24);
   const [totalUsersCount, setTotalUsersCount] = useState<number>(12540);
+  const [alertConfig, setAlertConfig] = useState<{show: boolean, type: 'alert' | 'confirm', message: string, title?: string, onConfirm?: () => void}>({show: false, type: 'alert', message: ''});
+  const [roomSearchQuery, setRoomSearchQuery] = useState('');
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const [isLocalSearchOpen, setIsLocalSearchOpen] = useState(false);
+  const [searchMatchIndex, setSearchMatchIndex] = useState<number>(0);
+
+  const searchMatches = messages
+    ? messages.filter(m => localSearchQuery.trim() && m.text.toLowerCase().includes(localSearchQuery.toLowerCase()))
+    : [];
+
+  useEffect(() => {
+    if (localSearchQuery.trim()) {
+      setSearchMatchIndex(searchMatches.length > 0 ? 1 : 0);
+    } else {
+      setSearchMatchIndex(0);
+    }
+  }, [localSearchQuery, messages]);
+
+  const scrollToMatch = (index: number) => {
+    if (index > 0 && searchMatches[index - 1]) {
+      const matchMsg = searchMatches[index - 1];
+      const el = document.getElementById(`msg-${matchMsg.id || matchMsg.timestamp}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  };
+
+  const renderHighlightedText = (text: string, query: string) => {
+    if (!query.trim()) return <FormattedText text={text} />;
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const parts = text.split(regex);
+    return (
+      <span className="whitespace-pre-wrap leading-relaxed">
+        {parts.map((part, i) => 
+          part.toLowerCase() === query.toLowerCase() ? (
+            <span key={i} className="bg-amber-300 text-slate-900 font-extrabold px-1 rounded-sm shadow-sm border border-amber-400 mx-0.5 select-all">
+              {part}
+            </span>
+          ) : (
+            <FormattedText key={i} text={part} />
+          )
+        )}
+      </span>
+    );
+  };
+
+  const showAlert = (message: string, title?: string) => setAlertConfig({show: true, type: 'alert', message, title});
 
   const formatNumber = (num: number) => {
     return num.toLocaleString('id-ID');
@@ -354,6 +404,12 @@ const MobileLayout = () => {
 
 
   const filteredRooms = rooms.filter(room => {
+    const matchesSearch = roomSearchQuery.trim()
+      ? (room.user_name || '').toLowerCase().includes(roomSearchQuery.toLowerCase()) || (room.user_gmail || '').toLowerCase().includes(roomSearchQuery.toLowerCase())
+      : true;
+
+    if (!matchesSearch) return false;
+
     if (activeFilter === 'unreading') return room.unread_count > 0 || room.is_marked_unread;
     if (activeFilter === 'reading') return room.unread_count === 0 && !room.is_marked_unread;
     return true;
@@ -442,7 +498,7 @@ const MobileLayout = () => {
   const handleBlessChat = async () => {
     if (!blessMessage.trim() && !blessFile) return;
     if (blessTargetMode === 'specific_users' && selectedBlessUsers.length === 0) {
-      alert('Pilih minimal satu user tujuan!');
+      showAlert('Pilih minimal satu user tujuan!', 'Pilih User');
       return;
     }
     
@@ -471,7 +527,7 @@ const MobileLayout = () => {
       });
 
       if (res.ok) {
-        alert('Berhasil mengirim pesan Bless Chat!');
+        showAlert('Berhasil mengirim pesan Bless Chat!', 'Sukses');
         setBlessMessage('');
         setBlessFile(null);
         setSelectedBlessUsers([]);
@@ -488,35 +544,41 @@ const MobileLayout = () => {
   const handleBulkDelete = async () => {
     if (selectedRooms.length === 0) return;
     
-    if (!confirm(`Lu yakin mau hapus ${selectedRooms.length} room chat ini secara permanen? Data gak bakal bisa balik lagi lho bro!`)) return;
+    setAlertConfig({
+      show: true,
+      type: 'confirm',
+      message: `Lu yakin mau hapus ${selectedRooms.length} room chat ini secara permanen? Data gak bakal bisa balik lagi lho bro!`,
+      title: 'Hapus Room Chat',
+      onConfirm: async () => {
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) return;
+        const { token } = JSON.parse(storedUser);
 
-    const storedUser = localStorage.getItem('user');
-    if (!storedUser) return;
-    const { token } = JSON.parse(storedUser);
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chat/delete-bulk`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({ room_ids: selectedRooms })
+          });
 
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chat/delete-bulk`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-        body: JSON.stringify({ room_ids: selectedRooms })
-      });
-
-      if (res.ok) {
-        alert('Mantap! Room chat pilihan lu udah bersih dari database.');
-        setSelectedRooms([]);
-        setIsDeleteMode(false);
-        fetchRooms(token);
-      } else {
-        const data = await res.json();
-        alert('Gagal hapus: ' + data.error);
+          if (res.ok) {
+            showAlert('Mantap! Room chat pilihan lu udah bersih dari database.', 'Sukses');
+            setSelectedRooms([]);
+            setIsDeleteMode(false);
+            fetchRooms(token);
+          } else {
+            const data = await res.json();
+            showAlert('Gagal hapus: ' + data.error, 'Gagal');
+          }
+        } catch (err) {
+          console.error("Gagal bulk delete:", err);
+          showAlert('Ada kendala koneksi pas mau hapus data bro.', 'Error Koneksi');
+        }
       }
-    } catch (err) {
-      console.error("Gagal bulk delete:", err);
-      alert('Ada kendala koneksi pas mau hapus data bro.');
-    }
+    });
   };
 
   const toggleSelectRoom = (id: number) => {
@@ -594,7 +656,7 @@ const MobileLayout = () => {
     if (!file || !selectedChat) return;
 
     if (file.size > 1024 * 1024) {
-      alert(`Waduh bro! Ukuran file lu (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB biar server tetep ngebut!`);
+      showAlert(`Waduh bro! Ukuran file lu (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB biar server tetep ngebut!`, 'Ukuran File Kegedean');
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
@@ -778,14 +840,24 @@ const MobileLayout = () => {
                        animate={{ opacity: 1 }}
                        className="flex flex-col gap-3"
                     >
-                       <div className="bg-white rounded-[32px] p-2 shadow-lg shadow-emerald-900/5 border border-slate-50">
-                           <div className="flex items-center gap-3 px-4 py-3 bg-slate-50/50 rounded-[24px]">
-                               <Search size={18} className="text-slate-400" />
+                       <div className="bg-white rounded-full shadow-lg shadow-emerald-900/5 border-2 border-emerald-50 p-1.5 focus-within:border-emerald-400 focus-within:ring-4 focus-within:ring-emerald-50 transition-all duration-300">
+                           <div className="flex items-center gap-3 px-4 h-11 bg-white rounded-full">
+                               <Search size={18} className="text-emerald-500 shrink-0" />
                                <input 
                                    type="text" 
+                                   value={roomSearchQuery}
+                                   onChange={(e) => setRoomSearchQuery(e.target.value)}
                                    placeholder="Cari user atau pesan..." 
-                                   className="bg-transparent border-none focus:ring-0 text-sm font-medium w-full text-slate-600 placeholder:text-slate-400"
+                                   className="bg-transparent border-none focus:ring-0 text-sm font-bold w-full text-slate-700 placeholder:text-slate-400 focus:outline-none outline-none p-0"
                                />
+                               {roomSearchQuery.trim() && (
+                                 <button 
+                                   onClick={() => setRoomSearchQuery('')}
+                                   className="text-slate-400 hover:text-rose-500 transition-colors mr-1"
+                                 >
+                                   <X size={16} />
+                                 </button>
+                               )}
                            </div>
                        </div>
                         <div className="bg-white/80 backdrop-blur-sm p-1.5 rounded-2xl border border-slate-50 min-h-[46px] items-center justify-center relative overflow-hidden shadow-xs">
@@ -1161,28 +1233,90 @@ const MobileLayout = () => {
                 <ArrowLeft size={24} />
               </button>
               
-              <div className="flex items-center gap-3 flex-1">
-                <div className="relative">
-                    <Avatar size="sm" />
-                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full shadow-sm"></span>
+              {!isLocalSearchOpen && (
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="relative">
+                      <Avatar size="sm" />
+                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full shadow-sm"></span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="font-black text-slate-800 text-sm tracking-tight truncate">
+                        {selectedChat?.user_name || selectedChat?.user_gmail}
+                    </h2>
+                      <p className={cn(
+                        "text-[9px] font-black uppercase tracking-widest",
+                        selectedChat?.is_online ? "text-emerald-600" : "text-slate-400"
+                      )}>
+                        {selectedChat?.is_online ? "Online" : "Offline"}
+                      </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="font-black text-slate-800 text-sm tracking-tight truncate">
-                      {selectedChat?.user_name || selectedChat?.user_gmail}
-                  </h2>
-                    <p className={cn(
-                      "text-[9px] font-black uppercase tracking-widest",
-                      selectedChat?.is_online ? "text-emerald-600" : "text-slate-400"
-                    )}>
-                      {selectedChat?.is_online ? "Online" : "Offline"}
-                    </p>
-                </div>
-              </div>
+              )}
 
-              <div className="flex gap-1 relative">
-                <button className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 active:bg-slate-100">
+              <div className={cn("flex gap-1 relative items-center", isLocalSearchOpen ? "flex-1 ml-2" : "")}>
+                {isLocalSearchOpen ? (
+                  <motion.div 
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "100%" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="flex items-center bg-slate-50 border border-slate-200 rounded-[18px] px-3 py-1 h-9 ring-4 ring-emerald-500/5 focus-within:border-emerald-200 focus-within:bg-white focus-within:ring-emerald-500/10 transition-all duration-300 gap-1.5 flex-1"
+                  >
+                    <Search size={14} className="text-emerald-500 shrink-0" />
+                    <input 
+                      type="text" 
+                      autoFocus
+                      value={localSearchQuery}
+                      onChange={(e) => setLocalSearchQuery(e.target.value)}
+                      placeholder="Cari..."
+                      className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none focus-visible:outline-none text-xs font-semibold text-slate-700 placeholder:text-slate-400 h-full p-0 min-w-[60px]"
+                    />
+                    {localSearchQuery.trim() && (
+                      <div className="flex items-center gap-1 shrink-0 bg-slate-100/80 px-1.5 py-0.5 rounded-lg">
+                        <span className="text-[9px] font-black text-slate-500 select-none">
+                          {searchMatchIndex}/{searchMatches.length}
+                        </span>
+                        <button 
+                          onClick={() => {
+                            if (searchMatches.length === 0) return;
+                            const nextIdx = searchMatchIndex <= 1 ? searchMatches.length : searchMatchIndex - 1;
+                            setSearchMatchIndex(nextIdx);
+                            scrollToMatch(nextIdx);
+                          }}
+                          className="text-slate-400 hover:text-emerald-600 transition-colors"
+                        >
+                          <ChevronUp size={12} />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if (searchMatches.length === 0) return;
+                            const nextIdx = searchMatchIndex >= searchMatches.length ? 1 : searchMatchIndex + 1;
+                            setSearchMatchIndex(nextIdx);
+                            scrollToMatch(nextIdx);
+                          }}
+                          className="text-slate-400 hover:text-emerald-600 transition-colors"
+                        >
+                          <ChevronDown size={12} />
+                        </button>
+                      </div>
+                    )}
+                    <button 
+                      onClick={() => {
+                        setLocalSearchQuery('');
+                        setIsLocalSearchOpen(false);
+                      }}
+                      className="text-slate-300 hover:text-rose-500 shrink-0 ml-1 transition-colors duration-300"
+                    >
+                      <X size={12} />
+                    </button>
+                  </motion.div>
+                ) : (
+                  <button 
+                    onClick={() => setIsLocalSearchOpen(true)}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 active:bg-slate-100"
+                  >
                     <Search size={18} />
-                </button>
+                  </button>
+                )}
                 <div className="relative">
                   <button 
                     onClick={() => setIsRoomMenuOpen(!isRoomMenuOpen)}
@@ -1220,7 +1354,15 @@ const MobileLayout = () => {
               onScroll={handleScroll}
               className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 scrollbar-hide"
             >
-              {messages.map((msg, idx) => (
+              {(() => {
+
+                const filteredMessages = localSearchQuery.trim()
+
+                  ? messages.filter(m => m.text.toLowerCase().includes(localSearchQuery.toLowerCase()))
+
+                  : messages;
+
+                return filteredMessages.map((msg, idx) => (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -1296,7 +1438,7 @@ const MobileLayout = () => {
                       );
                     })()
                   ) : (
-                    <FormattedText text={msg.text} className="leading-relaxed" />
+                    renderHighlightedText(msg.text, localSearchQuery)
                   )}
                   <div className="flex items-center justify-end gap-1.5 mt-2">
                     <span className={cn(
@@ -1310,7 +1452,8 @@ const MobileLayout = () => {
                     )}
                   </div>
                 </motion.div>
-              ))}
+              ));
+              })()}
               <div ref={messagesEndRef} />
             </main>
 
@@ -1827,9 +1970,12 @@ const MobileLayout = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      <CustomAlert config={alertConfig} onClose={() => setAlertConfig({...alertConfig, show: false})} />
       {/* ──────────────────────────────────────────────────────────────────── */}
     </div>
   );
 };
 
 export default MobileLayout;
+
+

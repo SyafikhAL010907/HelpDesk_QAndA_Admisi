@@ -11,6 +11,8 @@ import {
   HelpCircle,
   Clock,
   Search as SearchIcon,
+  ChevronUp,
+  ChevronDown,
   MoreVertical,
   LogOut,
   FileText,
@@ -21,10 +23,11 @@ import {
   Trash2
 } from 'lucide-react';
 import { Message, CannedResponse } from '@/constants/chatTypes';
-import { dummyChats } from '@/constants/chatData';
-import { cannedResponses } from '@/constants/cannedResponses';
+import { cannedQuestions as cannedResponses } from '@/constants/cannedQuestions';
+import BukuPedomanViewer from '@/components/Shared/BukuPedomanViewer';
 import Avatar from '@/components/Shared/Avatar';
 import FormattedText from '@/components/Shared/FormattedText';
+import CustomAlert from '@/components/Shared/CustomAlert';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
@@ -49,6 +52,50 @@ const WebTabLayout = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [manualNote, setManualNote] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const [isLocalSearchOpen, setIsLocalSearchOpen] = useState(false);
+  const [searchMatchIndex, setSearchMatchIndex] = useState<number>(0);
+
+  const searchMatches = messages
+    ? messages.filter(m => localSearchQuery.trim() && m.text.toLowerCase().includes(localSearchQuery.toLowerCase()))
+    : [];
+
+  useEffect(() => {
+    if (localSearchQuery.trim()) {
+      setSearchMatchIndex(searchMatches.length > 0 ? 1 : 0);
+    } else {
+      setSearchMatchIndex(0);
+    }
+  }, [localSearchQuery, messages]);
+
+  const scrollToMatch = (index: number) => {
+    if (index > 0 && searchMatches[index - 1]) {
+      const matchMsg = searchMatches[index - 1];
+      const el = document.getElementById(`msg-${matchMsg.id || matchMsg.timestamp}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  };
+
+  const renderHighlightedText = (text: string, query: string) => {
+    if (!query.trim()) return <FormattedText text={text} />;
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const parts = text.split(regex);
+    return (
+      <span className="whitespace-pre-wrap leading-relaxed">
+        {parts.map((part, i) => 
+          part.toLowerCase() === query.toLowerCase() ? (
+            <span key={i} className="bg-amber-300 text-slate-900 font-extrabold px-1 rounded-sm shadow-sm border border-amber-400 mx-0.5 select-all">
+              {part}
+            </span>
+          ) : (
+            <FormattedText key={i} text={part} />
+          )
+        )}
+      </span>
+    );
+  };
   const [isChatOpen, setIsChatOpen] = useState(() => {
     if (typeof window !== 'undefined') {
       return sessionStorage.getItem('userActiveChat') === 'true';
@@ -58,10 +105,23 @@ const WebTabLayout = () => {
 
   useEffect(() => {
     sessionStorage.setItem('userActiveChat', isChatOpen.toString());
-  }, [isChatOpen]);
+    if (isChatOpen) {
+      setUnreadCount(0);
+      const storedUser = localStorage.getItem('user');
+      if (storedUser && roomId) {
+        try {
+          const { token } = JSON.parse(storedUser);
+          markAsRead(roomId, token);
+        } catch (e) {}
+      }
+    }
+  }, [isChatOpen, roomId]);
   const [selectedResponse, setSelectedResponse] = useState<CannedResponse | null>(null);
   const [isTemplatePopupOpen, setIsTemplatePopupOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<string>('Pendaftaran');
+  const [activeCategory, setActiveCategory] = useState<string>('Informasi Umum');
+  const [alertConfig, setAlertConfig] = useState<{show: boolean, type: 'alert' | 'confirm', message: string, title?: string, onConfirm?: () => void}>({show: false, type: 'alert', message: ''});
+
+  const showAlert = (message: string, title?: string) => setAlertConfig({show: true, type: 'alert', message, title});
 
   const downloadFile = (dataUrl: string, fileName: string) => {
     try {
@@ -191,11 +251,12 @@ const WebTabLayout = () => {
           type: m.message_type
         })));
 
-        // Jika ada pesan dari admin, tandai sudah dibaca
-        const hasAdminMessage = data.some((m: any) => m.sender_gmail.toLowerCase() !== currentGmail.toLowerCase() && m.is_read === 0);
-        if (hasAdminMessage) {
+        if (isChatOpen) {
           markAsRead(id, token);
           setUnreadCount(0);
+        } else {
+          const unreadAdminCount = data.filter((m: any) => m.sender_gmail.toLowerCase() !== currentGmail.toLowerCase() && m.is_read === 0).length;
+          setUnreadCount(unreadAdminCount);
         }
       }
     } catch (err) {
@@ -218,7 +279,7 @@ const WebTabLayout = () => {
 
   const markAsRead = async (id: number, token: string) => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chat/mark-read/${id}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/mark-read/${id}`, {
         method: 'POST',
         headers: { 'Authorization': token }
       });
@@ -276,7 +337,7 @@ const WebTabLayout = () => {
     if (!file || !roomId) return;
 
     if (file.size > 1024 * 1024) {
-      alert(`Waduh bro! Ukuran file lu (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB biar server tetep ngebut!`);
+      showAlert(`Waduh bro! Ukuran file lu (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB biar server tetep ngebut!`, 'Ukuran File Kegedean');
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
@@ -348,10 +409,10 @@ const WebTabLayout = () => {
                                 />
                             </motion.div>
                             <div className="flex flex-col">
-                                <h3 className="text-lg font-black tracking-tighter leading-none">Admin Admisi UNJ</h3>
+                                <h3 className="text-lg font-black tracking-tighter leading-none">Q & A ADMISI UNJ</h3>
                                 <div className="flex items-center gap-1 mt-1">
                                     <span className="px-1.5 py-0.5 bg-emerald-500 text-[7px] font-black text-white rounded-md uppercase tracking-wider border border-emerald-400 shadow-sm">
-                                        Admisi System
+                                        HelpDesk Admisi
                                     </span>
                                 </div>
                             </div>
@@ -387,13 +448,19 @@ const WebTabLayout = () => {
         <div className="flex-1 px-6 flex flex-col gap-6 pt-2 overflow-y-auto scrollbar-hide">
             <div className="flex flex-col gap-4">
                 <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Panduan Cepat</h4>
-                <div className="grid grid-cols-1 gap-2">
-                    {['Cara Daftar', 'Biaya UKT', 'Jadwal Ujian'].map((item) => (
-                        <div key={item} className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group cursor-pointer hover:bg-emerald-50 hover:border-emerald-100 transition-all">
-                            <span className="text-xs font-bold text-slate-600 group-hover:text-emerald-700">{item}</span>
-                            <HelpCircle size={14} className="text-slate-300 group-hover:text-emerald-500" />
+                <div className="flex flex-col gap-2">
+                    <button 
+                        onClick={() => setIsTemplatePopupOpen(true)}
+                        className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group cursor-pointer hover:bg-emerald-50 hover:border-emerald-100 transition-all select-none w-full"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                                <LayoutGrid size={16} className="text-emerald-600 group-hover:text-white transition-all" />
+                            </div>
+                            <span className="text-xs font-black text-slate-700 group-hover:text-emerald-700 tracking-tight leading-tight">Template Pertanyaan</span>
                         </div>
-                    ))}
+                        <HelpCircle size={14} className="text-slate-300 group-hover:text-emerald-500" />
+                    </button>
                 </div>
             </div>
 
@@ -407,7 +474,7 @@ const WebTabLayout = () => {
                         </div>
                         <div className="flex flex-col">
                             <span className="text-[10px] font-bold text-slate-400 uppercase">Senin - Jumat</span>
-                            <span className="text-xs font-black text-slate-700 leading-none mt-1">08:00 - 16:00 WIB</span>
+                            <span className="text-xs font-black text-slate-700 leading-none mt-1">09:00 - 16:00 WIB</span>
                         </div>
                     </div>
                 </div>
@@ -447,32 +514,91 @@ const WebTabLayout = () => {
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20c0-11.046 8.954-20 20-20v20H20zM0 20c11.046 0 20-8.954 20-20v20H0zM0 20c11.046 0 20 8.954 20 20H0V20zm20 20c0-11.046 8.954-20 20-20v20H20z' fill='%23059669' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E")`
         }}
       >
-        {/* Header */}
-        <header className="px-8 py-5 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between z-10 shadow-sm">
-          <div className="flex items-center gap-4">
-            <Avatar src="/unj.png" size="md" />
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-black text-slate-800 tracking-tight">Admin Admisi UNJ</h2>
-                <span className="px-1.5 py-0.5 bg-slate-900 text-white text-[8px] font-black rounded-md tracking-tighter uppercase">OFFICIAL</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all">
-              <SearchIcon size={20} />
-            </button>
-            <button 
-              onClick={() => setIsChatOpen(false)}
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-100"
-            >
-              <X size={20} />
-            </button>
-          </div>
-        </header>
-
         {isChatOpen ? (
           <>
+            {/* Header */}
+            <header className="px-8 py-5 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between z-10 shadow-sm">
+              <div className="flex items-center gap-4">
+                <Avatar src="/unj.png" size="md" />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-black text-slate-800 tracking-tight">Admin Admisi UNJ</h2>
+                    <span className="px-1.5 py-0.5 bg-slate-900 text-white text-[8px] font-black rounded-md tracking-tighter uppercase">OFFICIAL</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 relative">
+                {isLocalSearchOpen ? (
+                  <motion.div 
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 340 }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="flex items-center bg-slate-50 border border-slate-200 rounded-[24px] px-4 py-1.5 h-10 ring-4 ring-emerald-500/5 focus-within:border-emerald-200 focus-within:bg-white focus-within:ring-emerald-500/10 transition-all duration-300 gap-2"
+                  >
+                    <SearchIcon size={16} className="text-emerald-500 shrink-0" />
+                    <input 
+                      type="text" 
+                      autoFocus
+                      value={localSearchQuery}
+                      onChange={(e) => setLocalSearchQuery(e.target.value)}
+                      placeholder="Cari pesan..."
+                      className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none focus-visible:outline-none text-xs font-semibold text-slate-700 placeholder:text-slate-400 h-full p-0 min-w-[100px]"
+                    />
+                    {localSearchQuery.trim() && (
+                      <div className="flex items-center gap-1 shrink-0 bg-slate-100/80 px-2 py-1 rounded-xl">
+                        <span className="text-[10px] font-black text-slate-500 min-w-[30px] text-center select-none">
+                          {searchMatchIndex}/{searchMatches.length}
+                        </span>
+                        <button 
+                          onClick={() => {
+                            if (searchMatches.length === 0) return;
+                            const nextIdx = searchMatchIndex <= 1 ? searchMatches.length : searchMatchIndex - 1;
+                            setSearchMatchIndex(nextIdx);
+                            scrollToMatch(nextIdx);
+                          }}
+                          className="text-slate-400 hover:text-emerald-600 transition-colors"
+                        >
+                          <ChevronUp size={14} />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if (searchMatches.length === 0) return;
+                            const nextIdx = searchMatchIndex >= searchMatches.length ? 1 : searchMatchIndex + 1;
+                            setSearchMatchIndex(nextIdx);
+                            scrollToMatch(nextIdx);
+                          }}
+                          className="text-slate-400 hover:text-emerald-600 transition-colors"
+                        >
+                          <ChevronDown size={14} />
+                        </button>
+                      </div>
+                    )}
+                    <button 
+                      onClick={() => {
+                        setLocalSearchQuery('');
+                        setIsLocalSearchOpen(false);
+                      }}
+                      className="text-slate-400 hover:text-rose-500 shrink-0 ml-1 transition-colors duration-300"
+                    >
+                      <X size={14} />
+                    </button>
+                  </motion.div>
+                ) : (
+                  <button 
+                    onClick={() => setIsLocalSearchOpen(true)}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all"
+                  >
+                    <SearchIcon size={20} />
+                  </button>
+                )}
+                <button 
+                  onClick={() => setIsChatOpen(false)}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-100"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </header>
             {/* Messages Area */}
             <div 
               ref={scrollContainerRef}
@@ -486,10 +612,15 @@ const WebTabLayout = () => {
           </div>
           
           <AnimatePresence>
-            {messages.map((msg: Message, idx: number) => {
-              const isMe = msg.sender === 'user';
-              return (
+            {(() => {
+              const filteredMessages = localSearchQuery.trim()
+                ? messages.filter((m: Message) => m.text.toLowerCase().includes(localSearchQuery.toLowerCase()))
+                : messages;
+              return filteredMessages.map((msg: Message, idx: number) => {
+                const isMe = msg.sender === 'user';
+                return (
                 <motion.div
+                  id={`msg-${msg.id || msg.timestamp}`}
                   key={msg.id || idx}
                   initial={{ opacity: 0, y: 10, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -566,7 +697,7 @@ const WebTabLayout = () => {
                         );
                       })()
                      ) : (
-                       <FormattedText text={msg.text} />
+                       renderHighlightedText(msg.text, localSearchQuery)
                      )}
                     <div className={cn(
                       "flex items-center gap-2 mt-2.5 justify-end",
@@ -578,7 +709,8 @@ const WebTabLayout = () => {
                   </div>
                 </motion.div>
               );
-            })}
+            });
+            })()}
           </AnimatePresence>
           <div ref={messagesEndRef} />
         </div>
@@ -587,22 +719,9 @@ const WebTabLayout = () => {
         <div className="px-4 lg:px-8 pb-8 pt-2">
           <div className="bg-white border border-slate-100 rounded-[32px] shadow-2xl shadow-slate-200/50 overflow-hidden">
             <div className="p-6 flex flex-col gap-4">
-              <div className="flex items-stretch gap-4">
-                <motion.button 
-                  whileHover={{ y: -2, scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  type="button"
-                  onClick={() => setIsTemplatePopupOpen(true)}
-                  className="shrink-0 px-6 bg-white border border-emerald-100 text-emerald-600 rounded-[28px] shadow-lg flex flex-col items-center justify-center hover:border-emerald-500 hover:text-emerald-700 hover:shadow-xl hover:shadow-emerald-100 transition-all group gap-1 min-w-[120px]"
-                >
-                  <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all">
-                    <LayoutGrid size={18} />
-                  </div>
-                  <span className="text-[9px] font-black uppercase tracking-widest">Template</span>
-                </motion.button>
-
-                <AnimatePresence mode="wait">
-                  {selectedResponse ? (
+              {selectedResponse && (
+                <div className="flex items-stretch gap-4 w-full">
+                  <AnimatePresence mode="wait">
                     <motion.div
                       key="selected"
                       initial={{ opacity: 0, x: 20 }}
@@ -627,18 +746,9 @@ const WebTabLayout = () => {
                         <X size={20} />
                       </button>
                     </motion.div>
-                  ) : (
-                    <motion.div
-                      key="none"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex-1 p-4 border-2 border-dashed border-slate-100 rounded-[28px] flex items-center justify-center bg-slate-50/30"
-                    >
-                       <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Silakan pilih template untuk mempercepat pertanyaan</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                  </AnimatePresence>
+                </div>
+              )}
 
               <div className="p-4">
                 <form onSubmit={handleSendMessage} className="flex flex-col gap-4">
@@ -681,7 +791,7 @@ const WebTabLayout = () => {
                   </div>
                   <button
                     type="submit"
-                    disabled={!manualNote.trim()}
+                    disabled={!manualNote.trim() && !selectedResponse}
                     className="w-14 h-14 bg-emerald-800 text-white rounded-[24px] flex items-center justify-center shadow-xl shadow-emerald-200/50 hover:bg-emerald-900 hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:shadow-none shrink-0"
                   >
                     <Send size={24} className="ml-1" />
@@ -694,11 +804,11 @@ const WebTabLayout = () => {
       </div>
       </>
     ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-white">
+          <div className="flex-1 flex flex-col items-center justify-start p-12 overflow-y-auto text-center bg-white">
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center max-w-sm"
+                className="flex flex-col items-center max-w-sm mb-12 shrink-0"
               >
                   <div className="w-24 h-24 bg-emerald-50 rounded-4xl flex items-center justify-center mb-8 shadow-2xl shadow-emerald-100 relative overflow-hidden group">
                       <div className="absolute inset-0 bg-emerald-500/10 scale-0 group-hover:scale-100 transition-transform duration-700 rounded-full"></div>
@@ -710,11 +820,20 @@ const WebTabLayout = () => {
                   </p>
                   <button 
                     onClick={() => setIsChatOpen(true)}
-                    className="px-8 py-3.5 bg-emerald-800 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-emerald-200 hover:bg-emerald-900 hover:scale-105 active:scale-95 transition-all"
+                    className="px-8 py-3.5 bg-emerald-800 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-emerald-200 hover:bg-emerald-900 hover:scale-105 active:scale-95 transition-all relative"
                   >
                     BUKA CHAT SEKARANG
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-400 text-white text-[10px] font-black flex items-center justify-center rounded-full shadow-lg border-2 border-white animate-bounce">
+                        {unreadCount}
+                      </span>
+                    )}
                   </button>
               </motion.div>
+
+              <div className="w-full max-w-2xl mt-4 border-t border-slate-100/80 pt-4">
+                <BukuPedomanViewer />
+              </div>
           </div>
         )}
       </main>
@@ -779,6 +898,7 @@ const WebTabLayout = () => {
                         onClick={() => {
                           setSelectedResponse(resp);
                           setIsTemplatePopupOpen(false);
+                          setIsChatOpen(true);
                         }}
                         className="p-5 bg-white border border-slate-100 rounded-3xl text-left hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-50 transition-all group"
                       >
@@ -824,8 +944,12 @@ const WebTabLayout = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      <CustomAlert config={alertConfig} onClose={() => setAlertConfig({...alertConfig, show: false})} />
     </div>
   );
 };
 
 export default WebTabLayout;
+
+
+

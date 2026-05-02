@@ -67,7 +67,7 @@ Bisa didaftarkan oleh peserta yang tidak diterima di PTN manapun pada UTBK SNBT 
     category: "Jalur Nasional",
     keyword: "3 PENMABA DISABILITAS PENMABA",
     question: "Pertanyaan terkait 3 penmaba disabilitas penmaba?",
-    response: `3. Penmaba Disabilitas (penmaba.unj.ac.id/penmaba-jalur-disabilitas)
+    response: `Penmaba Disabilitas (penmaba.unj.ac.id/penmaba-jalur-disabilitas)
 Bisa didaftarkan oleh lulusan SMA/Sederajat atau Lulusan Paket C tahun 2024, 2025, dan 2026. Kemudian tidak diterima di PTN manapun pada UTBK SNBT 2026 maupun SNBP 2026 (https://penmaba.unj.ac.id/mandiri-ujian-tulis/)`
   },
   {
@@ -75,7 +75,7 @@ Bisa didaftarkan oleh lulusan SMA/Sederajat atau Lulusan Paket C tahun 2024, 202
     category: "Jalur Mandiri",
     keyword: "4 PENMABA UJIAN TULIS",
     question: "Pertanyaan terkait 4 penmaba ujian tulis?",
-    response: `4. Penmaba Ujian Tulis di Kampus (https://penmaba.unj.ac.id/mandiri-ujian-tulis/)
+    response: `Penmaba Ujian Tulis di Kampus (https://penmaba.unj.ac.id/mandiri-ujian-tulis/)
 Merupakan mandiri ujian tulis yang dilaksanakan di Kampus A UNJ berbasis cbt, dengan 4 mata ujian: Tes Pengukuran Kognitif, Penalaran Matematika, Literasi Bahasa Indonesia, Literasi Bahasa Inggris.`
   },
   {
@@ -83,7 +83,7 @@ Merupakan mandiri ujian tulis yang dilaksanakan di Kampus A UNJ berbasis cbt, de
     category: "Jalur Mandiri",
     keyword: "5 PENMABA UJIAN TULIS",
     question: "Pertanyaan terkait 5 penmaba ujian tulis?",
-    response: `5. Penmaba Ujian Tulis di Kediaman (https://penmaba.unj.ac.id/penmaba-dikediaman/)
+    response: ` Penmaba Ujian Tulis di Kediaman (https://penmaba.unj.ac.id/penmaba-dikediaman/)
 Teknisnya sama dengan Penmaba Ujian Tulis di Kampus, yang membedakan adalah ujian ini bisa dilaksanakan di kediaman masing-masing, namun peserta WAJIB memiliki dua perangkat elektronik yang digunakan untuk ujian (Komputer dan HP) terhubung dengan internet menggunakan jaringan nirkabel (Wi-Fi) dan tidak diperbolehkan menggunakan jaringan dengan kabel LAN. Peserta WAJIB mengunduh dan memasang aplikasi ujian pada perangkat laptop masing-masing. Kamera WAJIB dinyalakan selama ujian berlangsung, dan lingkungan ujian peserta harus tenang, bebas gangguan, dan hanya terdapat satu peserta di ruangan.`
   },
   {

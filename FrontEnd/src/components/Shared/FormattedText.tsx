@@ -26,7 +26,7 @@ const FormattedText: React.FC<FormattedTextProps> = ({ text, className }) => {
     if (line.startsWith('* ') || line.startsWith('- ')) {
       return (
         <div className="flex gap-2 ml-2 my-0.5">
-          <span className="text-emerald-500 text-lg leading-none">•</span>
+          <span className="text-current opacity-80 text-lg leading-none">•</span>
           <span className="flex-1">{parseInline(line.substring(2))}</span>
         </div>
       );
@@ -37,7 +37,7 @@ const FormattedText: React.FC<FormattedTextProps> = ({ text, className }) => {
     if (numListMatch) {
       return (
         <div className="flex gap-2 ml-2 my-0.5">
-          <span className="text-emerald-500 font-bold min-w-[1.2em]">{numListMatch[1]}.</span>
+          <span className="text-current opacity-90 font-bold min-w-[1.2em]">{numListMatch[1]}.</span>
           <span className="flex-1">{parseInline(numListMatch[2])}</span>
         </div>
       );

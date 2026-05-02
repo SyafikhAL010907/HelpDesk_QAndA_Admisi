@@ -66,6 +66,15 @@ SLANG_MAP = {
     "pagi": "pagi", "siang": "siang", "sore": "sore", "malam": "malam",
 }
 
+# =============================================================================
+# DAFTAR KATA SAPAAN UNTUK BYPASS RULE
+# =============================================================================
+GREETING_WORDS = {
+    "halo", "hai", "hei", "helo", "hello", "hallo", "haloo", 
+    "salam", "assalamualaikum", "assalam", "samlekom", "asalamualaikum", 
+    "p", "ping", "test", "tes", "oy", "oi", "punten", "permisi", "misi",
+    "kakak", "admin", "selamat", "pagi", "siang", "sore", "malam"
+}
 
 # =============================================================================
 # KELAS UTAMA MODEL AI
@@ -142,6 +151,21 @@ class HelpDeskAIModel:
         Output: dict berisi template_id, confidence, reply_text, human_note
         """
         cleaned = self._preprocess(message)
+        words = cleaned.split()
+
+        # --- GREETING BYPASS RULE ---
+        # Jika semua kata di dalam pesan (setelah diproses) adalah kata sapaan
+        # (Kita longgarkan panjangnya karena backend Golang menduplikasi pesan terakhir jadi 3x lipat)
+        if 0 < len(words) <= 15 and all(w in GREETING_WORDS for w in words):
+            best_tmpl = next((t for t in self.templates if t["id"] == "c0"), self.templates[0])
+            human_note = self._generate_human_note(message, best_tmpl, 1.0)
+            return {
+                "template_id": best_tmpl["id"],
+                "confidence" : 1.0,
+                "reply_text" : best_tmpl["response"],
+                "human_note" : human_note,
+                "category"   : best_tmpl["category"],
+            }
 
         # --- Hitung similarity terhadap ketiga slot ---
         v_kw = self.vec_keyword.transform([cleaned])

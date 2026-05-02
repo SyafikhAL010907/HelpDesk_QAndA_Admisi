@@ -65,6 +65,7 @@ func main() {
 		protected.GET("/chat/user-room", handlers.GetOrCreateRoom)
 		protected.GET("/chat/messages/:room_id", handlers.GetMessages)
 		protected.POST("/chat/send", handlers.SendMessage)
+		protected.POST("/chat/mark-read/:room_id", handlers.MarkAsRead)
 
 		// Admin Routes
 		admin := protected.Group("/admin")

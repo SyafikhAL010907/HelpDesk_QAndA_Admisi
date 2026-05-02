@@ -12,6 +12,8 @@ import {
   Search as SearchIcon,
   MessageSquare,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   Trash2,
   Plus,
   FileText,
@@ -25,11 +27,11 @@ import {
   LayoutGrid
 } from 'lucide-react';
 import { ChatSession, CannedResponse, Message } from '@/constants/chatTypes';
-import { dummyChats } from '@/constants/chatData';
 import { cannedResponses } from '@/constants/cannedResponses';
 import { blastTemplates } from '@/constants/blastTemplates';
 import Avatar from '@/components/Shared/Avatar';
 import FormattedText from '@/components/Shared/FormattedText';
+import CustomAlert from '@/components/Shared/CustomAlert';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
@@ -93,6 +95,9 @@ const WebTabLayout = () => {
   const [isAILoading, setIsAILoading] = useState(false); // Loading state saat toggle
   const [showAIConfirm, setShowAIConfirm] = useState(false); // Konfirmasi sebelum toggle AI
   const [pendingAIState, setPendingAIState] = useState(false); // State AI yang akan diaktifkan
+  const [alertConfig, setAlertConfig] = useState<{show: boolean, type: 'alert' | 'confirm', message: string, title?: string, onConfirm?: () => void}>({show: false, type: 'alert', message: ''});
+
+  const showAlert = (message: string, title?: string) => setAlertConfig({show: true, type: 'alert', message, title});
   // ─────────────────────────────────────────────────────────────────────────
 
   const downloadFile = (dataUrl: string, fileName: string) => {
@@ -148,6 +153,51 @@ const WebTabLayout = () => {
   const [isTemplatePopupOpen, setIsTemplatePopupOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('Pendaftaran');
   const [isRoomMenuOpen, setIsRoomMenuOpen] = useState(false);
+  const [roomSearchQuery, setRoomSearchQuery] = useState('');
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const [isLocalSearchOpen, setIsLocalSearchOpen] = useState(false);
+  const [searchMatchIndex, setSearchMatchIndex] = useState<number>(0);
+
+  const searchMatches = messages
+    ? messages.filter(m => localSearchQuery.trim() && m.text.toLowerCase().includes(localSearchQuery.toLowerCase()))
+    : [];
+
+  useEffect(() => {
+    if (localSearchQuery.trim()) {
+      setSearchMatchIndex(searchMatches.length > 0 ? 1 : 0);
+    } else {
+      setSearchMatchIndex(0);
+    }
+  }, [localSearchQuery, messages]);
+
+  const scrollToMatch = (index: number) => {
+    if (index > 0 && searchMatches[index - 1]) {
+      const matchMsg = searchMatches[index - 1];
+      const el = document.getElementById(`msg-${matchMsg.id || matchMsg.timestamp}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  };
+
+  const renderHighlightedText = (text: string, query: string) => {
+    if (!query.trim()) return <FormattedText text={text} />;
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const parts = text.split(regex);
+    return (
+      <span className="whitespace-pre-wrap leading-relaxed">
+        {parts.map((part, i) => 
+          part.toLowerCase() === query.toLowerCase() ? (
+            <span key={i} className="bg-amber-300 text-slate-900 font-extrabold px-1 rounded-sm shadow-sm border border-amber-400 mx-0.5 select-all">
+              {part}
+            </span>
+          ) : (
+            <FormattedText key={i} text={part} />
+          )
+        )}
+      </span>
+    );
+  };
 
   // REAL-TIME NETWORK LATENCY DETECTION
   useEffect(() => {
@@ -371,6 +421,12 @@ const WebTabLayout = () => {
   };
 
   const filteredRooms = rooms.filter(room => {
+    const matchesSearch = roomSearchQuery.trim()
+      ? (room.user_name || '').toLowerCase().includes(roomSearchQuery.toLowerCase()) || (room.user_gmail || '').toLowerCase().includes(roomSearchQuery.toLowerCase())
+      : true;
+
+    if (!matchesSearch) return false;
+
     if (activeFilter === 'unreading') return room.unread > 0 || room.is_marked_unread;
     if (activeFilter === 'reading') return room.unread === 0 && !room.is_marked_unread;
     return true;
@@ -454,7 +510,7 @@ const WebTabLayout = () => {
   const handleBlessChat = async () => {
     if (!blessMessage.trim() && !blessFile) return;
     if (blessTargetMode === 'specific_users' && selectedBlessUsers.length === 0) {
-      alert('Pilih minimal satu user tujuan!');
+      showAlert('Pilih minimal satu user tujuan!', 'Pilih User');
       return;
     }
     
@@ -483,7 +539,7 @@ const WebTabLayout = () => {
       });
 
       if (res.ok) {
-        alert('Berhasil mengirim pesan Bless Chat!');
+        showAlert('Berhasil mengirim pesan Bless Chat!', 'Sukses');
         setBlessMessage('');
         setBlessFile(null);
         setSelectedBlessUsers([]);
@@ -500,39 +556,45 @@ const WebTabLayout = () => {
   const handleBulkDelete = async () => {
     if (selectedRooms.length === 0) return;
     
-    if (!confirm(`Lu yakin mau hapus ${selectedRooms.length} room chat ini secara permanen? Data gak bakal bisa balik lagi lho bro!`)) return;
+    setAlertConfig({
+      show: true,
+      type: 'confirm',
+      message: `Lu yakin mau hapus ${selectedRooms.length} room chat ini secara permanen? Data gak bakal bisa balik lagi lho bro!`,
+      title: 'Hapus Room Chat',
+      onConfirm: async () => {
+        const storedUser = localStorage.getItem('user');
+        if (!storedUser) return;
+        const { token } = JSON.parse(storedUser);
 
-    const storedUser = localStorage.getItem('user');
-    if (!storedUser) return;
-    const { token } = JSON.parse(storedUser);
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chat/delete-bulk`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({ room_ids: selectedRooms })
+          });
 
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chat/delete-bulk`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-        body: JSON.stringify({ room_ids: selectedRooms })
-      });
-
-      if (res.ok) {
-        alert('Mantap! Room chat pilihan lu udah bersih dari database.');
-        setSelectedRooms([]);
-        setIsDeleteMode(false);
-        if (selectedChat && selectedRooms.includes(selectedChat.id)) {
-            setSelectedChat(null);
-            setMessages([]);
+          if (res.ok) {
+            showAlert('Mantap! Room chat pilihan lu udah bersih dari database.', 'Sukses');
+            setSelectedRooms([]);
+            setIsDeleteMode(false);
+            if (selectedChat && selectedRooms.includes(selectedChat.id)) {
+                setSelectedChat(null);
+                setMessages([]);
+            }
+            fetchRooms(token);
+          } else {
+            const data = await res.json();
+            showAlert('Gagal hapus: ' + data.error, 'Gagal');
+          }
+        } catch (err) {
+          console.error("Gagal bulk delete:", err);
+          showAlert('Ada kendala koneksi pas mau hapus data bro.', 'Error Koneksi');
         }
-        fetchRooms(token);
-      } else {
-        const data = await res.json();
-        alert('Gagal hapus: ' + data.error);
       }
-    } catch (err) {
-      console.error("Gagal bulk delete:", err);
-      alert('Ada kendala koneksi pas mau hapus data bro.');
-    }
+    });
   };
 
   const toggleSelectRoom = (id: number) => {
@@ -559,7 +621,7 @@ const WebTabLayout = () => {
 
     // Cek ukuran file (Max 1MB)
     if (file.size > 1024 * 1024) {
-      alert(`Waduh bro! Ukuran file lu (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB biar server tetep ngebut!`);
+      showAlert(`Waduh bro! Ukuran file lu (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB biar server tetep ngebut!`, 'Ukuran File Kegedean');
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
@@ -695,6 +757,8 @@ const WebTabLayout = () => {
             </div>
             <input
               type="text"
+              value={roomSearchQuery}
+              onChange={(e) => setRoomSearchQuery(e.target.value)}
               placeholder="Cari user atau pesan..."
               className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-transparent rounded-[20px] text-xs font-semibold text-slate-700 placeholder:text-slate-400 focus:bg-white focus:border-emerald-100 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-300"
             />
@@ -937,7 +1001,7 @@ const WebTabLayout = () => {
                             const file = e.target.files?.[0];
                             if (file) {
                               if (file.size > 1024 * 1024) {
-                                alert(`Waduh bro! Ukuran file lu (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB biar server tetep ngebut!`);
+                                showAlert(`Waduh bro! Ukuran file lu (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB biar server tetep ngebut!`, 'Ukuran File Kegedean');
                                 e.target.value = '';
                                 return;
                               }
@@ -1165,10 +1229,70 @@ const WebTabLayout = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex gap-2 relative">
-                <button className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all">
-                  <SearchIcon size={20} />
-                </button>
+              <div className="flex items-center gap-2 relative">
+                {isLocalSearchOpen ? (
+                  <motion.div 
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 340 }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="flex items-center bg-slate-50 border border-slate-200 rounded-[24px] px-4 py-1.5 h-10 ring-4 ring-emerald-500/5 focus-within:border-emerald-200 focus-within:bg-white focus-within:ring-emerald-500/10 transition-all duration-300 gap-2"
+                  >
+                    <SearchIcon size={16} className="text-emerald-500 shrink-0" />
+                    <input 
+                      type="text" 
+                      autoFocus
+                      value={localSearchQuery}
+                      onChange={(e) => setLocalSearchQuery(e.target.value)}
+                      placeholder="Cari pesan..."
+                      className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none focus-visible:outline-none text-xs font-semibold text-slate-700 placeholder:text-slate-400 h-full p-0 min-w-[100px]"
+                    />
+                    {localSearchQuery.trim() && (
+                      <div className="flex items-center gap-1 shrink-0 bg-slate-100/80 px-2 py-1 rounded-xl">
+                        <span className="text-[10px] font-black text-slate-500 min-w-[30px] text-center select-none">
+                          {searchMatchIndex}/{searchMatches.length}
+                        </span>
+                        <button 
+                          onClick={() => {
+                            if (searchMatches.length === 0) return;
+                            const nextIdx = searchMatchIndex <= 1 ? searchMatches.length : searchMatchIndex - 1;
+                            setSearchMatchIndex(nextIdx);
+                            scrollToMatch(nextIdx);
+                          }}
+                          className="text-slate-400 hover:text-emerald-600 transition-colors"
+                        >
+                          <ChevronUp size={14} />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            if (searchMatches.length === 0) return;
+                            const nextIdx = searchMatchIndex >= searchMatches.length ? 1 : searchMatchIndex + 1;
+                            setSearchMatchIndex(nextIdx);
+                            scrollToMatch(nextIdx);
+                          }}
+                          className="text-slate-400 hover:text-emerald-600 transition-colors"
+                        >
+                          <ChevronDown size={14} />
+                        </button>
+                      </div>
+                    )}
+                    <button 
+                      onClick={() => {
+                        setLocalSearchQuery('');
+                        setIsLocalSearchOpen(false);
+                      }}
+                      className="text-slate-400 hover:text-rose-500 shrink-0 ml-1 transition-colors duration-300"
+                    >
+                      <X size={14} />
+                    </button>
+                  </motion.div>
+                ) : (
+                  <button 
+                    onClick={() => setIsLocalSearchOpen(true)}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all"
+                  >
+                    <SearchIcon size={20} />
+                  </button>
+                )}
                 <div className="relative">
                   <button 
                     onClick={() => setIsRoomMenuOpen(!isRoomMenuOpen)}
@@ -1218,10 +1342,15 @@ const WebTabLayout = () => {
               </div>
               
               <AnimatePresence>
-                {messages.map((msg: Message, idx: number) => {
-                  const isMe = msg.sender === 'admin';
+                {(() => {
+                  const filteredMessages = localSearchQuery.trim()
+                    ? messages.filter((m: Message) => m.text.toLowerCase().includes(localSearchQuery.toLowerCase()))
+                    : messages;
+                  return filteredMessages.map((msg: Message, idx: number) => {
+                    const isMe = msg.sender === 'admin';
                   return (
                     <motion.div
+                      id={`msg-${msg.id || msg.timestamp}`}
                       key={msg.id || idx}
                       initial={{ opacity: 0, y: 10, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -1300,7 +1429,7 @@ const WebTabLayout = () => {
                             );
                           })()
                         ) : (
-                          <FormattedText text={msg.text} />
+                          renderHighlightedText(msg.text, localSearchQuery)
                         )}
                         <div className={cn(
                           "flex items-center gap-2 mt-2.5 justify-end",
@@ -1312,7 +1441,8 @@ const WebTabLayout = () => {
                       </div>
                     </motion.div>
                   );
-                })}
+                });
+                })()}
               </AnimatePresence>
               <div ref={messagesEndRef} />
             </div>
@@ -1789,9 +1919,13 @@ const WebTabLayout = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      <CustomAlert config={alertConfig} onClose={() => setAlertConfig({...alertConfig, show: false})} />
       {/* ──────────────────────────────────────────────────────────────────── */}
     </div>
   );
 };
 
 export default WebTabLayout;
+
+
+

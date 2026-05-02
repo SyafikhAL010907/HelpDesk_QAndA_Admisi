@@ -19,5 +19,6 @@ type ChatMessage struct {
 	SenderGmail string    `json:"sender_gmail"`
 	Message     string    `json:"message"`
 	MessageType string    `json:"message_type"` // text, file, image
+	IsRead      int       `json:"is_read"`
 	CreatedAt   time.Time `json:"created_at"`
 }

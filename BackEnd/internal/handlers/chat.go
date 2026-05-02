@@ -57,7 +57,7 @@ func GetOrCreateRoom(c *gin.Context) {
 	var room models.ChatRoom
 	err := database.DB.QueryRow(`
 		SELECT id, user_gmail, COALESCE(last_message, ''), updated_at,
-		(SELECT COUNT(*) FROM chat_messages WHERE room_id = chat_rooms.id AND sender_gmail = user_gmail AND is_read = 0) as unread_count,
+		(SELECT COUNT(*) FROM chat_messages WHERE room_id = chat_rooms.id AND sender_gmail != chat_rooms.user_gmail AND is_read = 0) as unread_count,
 		is_marked_unread
 		FROM chat_rooms WHERE user_gmail = ?`, userGmail).
 		Scan(&room.ID, &room.UserGmail, &room.LastMessage, &room.UpdatedAt, &room.UnreadCount, &room.IsMarkedUnread)
@@ -86,7 +86,7 @@ func GetOrCreateRoom(c *gin.Context) {
 // GetMessages - Fetch messages for a specific room
 func GetMessages(c *gin.Context) {
 	roomID := c.Param("room_id")
-	rows, err := database.DB.Query("SELECT id, room_id, sender_gmail, message, message_type, created_at FROM chat_messages WHERE room_id = ? ORDER BY created_at ASC", roomID)
+	rows, err := database.DB.Query("SELECT id, room_id, sender_gmail, message, message_type, is_read, created_at FROM chat_messages WHERE room_id = ? ORDER BY created_at ASC", roomID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal mengambil history chat"})
 		return
@@ -96,7 +96,7 @@ func GetMessages(c *gin.Context) {
 	messages := []models.ChatMessage{}
 	for rows.Next() {
 		var msg models.ChatMessage
-		if err := rows.Scan(&msg.ID, &msg.RoomID, &msg.SenderGmail, &msg.Message, &msg.MessageType, &msg.CreatedAt); err != nil {
+		if err := rows.Scan(&msg.ID, &msg.RoomID, &msg.SenderGmail, &msg.Message, &msg.MessageType, &msg.IsRead, &msg.CreatedAt); err != nil {
 			continue
 		}
 		messages = append(messages, msg)
@@ -153,7 +153,14 @@ func MarkAsRead(c *gin.Context) {
 		return
 	}
 
-	_, err := database.DB.Exec("UPDATE chat_messages SET is_read = 1 WHERE room_id = ?", roomID)
+	gmailRaw, exists := c.Get("gmail")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	gmail := fmt.Sprintf("%v", gmailRaw)
+
+	_, err := database.DB.Exec("UPDATE chat_messages SET is_read = 1 WHERE room_id = ? AND sender_gmail != ?", roomID, gmail)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal update status baca: " + err.Error()})
 		return

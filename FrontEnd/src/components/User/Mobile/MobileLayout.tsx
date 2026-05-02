@@ -8,6 +8,9 @@ import {
   User,
   Plus,
   ArrowLeft,
+  ChevronUp,
+  ChevronDown,
+  ChevronRight,
   Send,
   Paperclip,
   CheckCheck,
@@ -21,14 +24,17 @@ import {
   LayoutGrid,
   X,
   Trash2,
-  MessageSquare
+  MessageSquare,
+  Calendar
 } from 'lucide-react';
 import { Message, CannedResponse } from '@/constants/chatTypes';
-import { dummyChats } from '@/constants/chatData';
-import { cannedResponses } from '@/constants/cannedResponses';
+import { cannedQuestions as cannedResponses } from '@/constants/cannedQuestions';
+import { jadwalPenmaba } from '@/constants/jadwalPenmaba';
+import BukuPedomanViewer from '@/components/Shared/BukuPedomanViewer';
 import Image from 'next/image';
 import Avatar from '@/components/Shared/Avatar';
 import FormattedText from '@/components/Shared/FormattedText';
+import CustomAlert from '@/components/Shared/CustomAlert';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
@@ -88,16 +94,74 @@ const MobileLayout = () => {
   });
 
   useEffect(() => {
-    sessionStorage.setItem('userActiveChat', (chatView === 'ROOM').toString());
-  }, [chatView]);
+    sessionStorage.setItem('userActiveChat', (chatView === 'ROOM' && activeTab === 'chats').toString());
+    if (chatView === 'ROOM' && activeTab === 'chats') {
+      setUnreadCount(0);
+      const storedUser = localStorage.getItem('user');
+      if (storedUser && roomId) {
+        try {
+          const { token } = JSON.parse(storedUser);
+          markAsRead(roomId, token);
+        } catch (e) {}
+      }
+    }
+  }, [chatView, activeTab, roomId]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isChatStarted, setIsChatStarted] = useState(false);
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const [isLocalSearchOpen, setIsLocalSearchOpen] = useState(false);
+  const [isJadwalModalOpen, setIsJadwalModalOpen] = useState(false);
+  const [searchMatchIndex, setSearchMatchIndex] = useState<number>(0);
+
+  const searchMatches = messages
+    ? messages.filter(m => localSearchQuery.trim() && m.text.toLowerCase().includes(localSearchQuery.toLowerCase()))
+    : [];
+
+  useEffect(() => {
+    if (localSearchQuery.trim()) {
+      setSearchMatchIndex(searchMatches.length > 0 ? 1 : 0);
+    } else {
+      setSearchMatchIndex(0);
+    }
+  }, [localSearchQuery, messages]);
+
+  const scrollToMatch = (index: number) => {
+    if (index > 0 && searchMatches[index - 1]) {
+      const matchMsg = searchMatches[index - 1];
+      const el = document.getElementById(`msg-${matchMsg.id || matchMsg.timestamp}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  };
+
+  const renderHighlightedText = (text: string, query: string) => {
+    if (!query.trim()) return <FormattedText text={text} />;
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const parts = text.split(regex);
+    return (
+      <span className="whitespace-pre-wrap leading-relaxed">
+        {parts.map((part, i) => 
+          part.toLowerCase() === query.toLowerCase() ? (
+            <span key={i} className="bg-amber-300 text-slate-900 font-extrabold px-1 rounded-sm shadow-sm border border-amber-400 mx-0.5 select-all">
+              {part}
+            </span>
+          ) : (
+            <FormattedText key={i} text={part} />
+          )
+        )}
+      </span>
+    );
+  };
   const [selectedResponse, setSelectedResponse] = useState<CannedResponse | null>(null);
   const [isTemplatePopupOpen, setIsTemplatePopupOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<string>('Pendaftaran');
+  const [activeCategory, setActiveCategory] = useState<string>('Informasi Umum');
+  const [alertConfig, setAlertConfig] = useState<{show: boolean, type: 'alert' | 'confirm', message: string, title?: string, onConfirm?: () => void}>({show: false, type: 'alert', message: ''});
+
+  const showAlert = (message: string, title?: string) => setAlertConfig({show: true, type: 'alert', message, title});
 
   const downloadFile = (dataUrl: string, fileName: string) => {
     try {
@@ -221,11 +285,12 @@ const MobileLayout = () => {
           type: m.message_type
         })));
 
-        // Jika ada pesan dari admin, tandai sudah dibaca
-        const hasAdminMessage = data.some((m: any) => m.sender_gmail.toLowerCase() !== currentGmail.toLowerCase() && m.is_read === 0);
-        if (hasAdminMessage) {
+        if (activeTab === 'chats' && chatView === 'ROOM') {
           markAsRead(id, token);
           setUnreadCount(0);
+        } else {
+          const unreadAdminCount = data.filter((m: any) => m.sender_gmail.toLowerCase() !== currentGmail.toLowerCase() && m.is_read === 0).length;
+          setUnreadCount(unreadAdminCount);
         }
       }
     } catch (err) {
@@ -248,7 +313,7 @@ const MobileLayout = () => {
 
   const markAsRead = async (id: number, token: string) => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chat/mark-read/${id}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/mark-read/${id}`, {
         method: 'POST',
         headers: { 'Authorization': token }
       });
@@ -306,7 +371,7 @@ const MobileLayout = () => {
     if (!file || !roomId) return;
 
     if (file.size > 1024 * 1024) {
-      alert(`Waduh bro! Ukuran file lu (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB biar server tetep ngebut!`);
+      showAlert(`Waduh bro! Ukuran file lu (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB biar server tetep ngebut!`, 'Ukuran File Kegedean');
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
@@ -384,24 +449,30 @@ const MobileLayout = () => {
                     </header>
                   </div>
 
-                  {/* Search Bar Area */}
+                  {/* Jadwal Penmaba Card (Replaces Search Bar) */}
                   <div className="px-6 -mt-8 relative z-20 mb-4">
-                      <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-2 border border-slate-100">
-                          <div className="flex items-center gap-3 px-4 py-3 bg-slate-50/50 rounded-[24px]">
-                              <Search size={18} className="text-slate-400" />
-                              <input 
-                                  type="text" 
-                                  placeholder="Cari pesan atau info..." 
-                                  className="bg-transparent text-xs font-bold text-slate-700 w-full focus:outline-none"
-                              />
+                      <motion.button 
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setIsJadwalModalOpen(true)}
+                          className="w-full bg-white rounded-full shadow-xl shadow-slate-200/40 p-1.5 border-2 border-emerald-50 hover:border-emerald-400 focus:outline-none transition-all duration-300 flex items-center justify-between"
+                      >
+                          <div className="flex items-center gap-3 px-4 h-11">
+                              <Calendar size={18} className="text-emerald-600 shrink-0" />
+                              <div className="flex flex-col text-left">
+                                  <span className="text-[11px] font-black text-slate-800 leading-tight">Cek Jadwal Penting Penmaba 2026</span>
+                                  <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Info pendaftaran & ujian</span>
+                              </div>
                           </div>
-                      </div>
+                          <div className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mr-1">
+                              <ChevronRight size={16} />
+                          </div>
+                      </motion.button>
                   </div>
 
                   {/* Admin Room Item - Refined & Clean */}
                   <main className="flex-1 px-6 overflow-y-auto scrollbar-hide pb-32">
                     <div className="flex flex-col gap-4 mt-2">
-                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] ml-2">Pilih Petugas</h4>
+                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] ml-2">Admin Helpdesk Admisi</h4>
                       <motion.button
                         whileTap={{ scale: 0.96 }}
                         onClick={() => setChatView('ROOM')}
@@ -411,17 +482,17 @@ const MobileLayout = () => {
                           <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 ring-4 ring-slate-50">
                             <Image src="/unj.png" alt="UNJ" width={40} height={40} className="drop-shadow-md" />
                           </div>
-                          {/* Single Status Dot */}
-                          <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-4 border-white rounded-full"></span>
                         </div>
                         <div className="flex-1 text-left">
                           <div className="flex justify-between items-center">
-                            <h4 className="text-base font-black text-slate-800 tracking-tight">Admin Admisi UNJ</h4>
+                            <h4 className="text-base font-black text-slate-800 tracking-tight flex items-center gap-1">
+                              <span>Admin Admisi</span>
+                              <ChevronRight size={16} className="text-slate-400" />
+                            </h4>
                           </div>
-                          <p className="text-[12px] font-medium text-slate-400 mt-0.5 leading-tight">Petugas standby membantu Anda.</p>
                         </div>
                         <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all">
-                           <MessageCircle size={18} />
+                           <MessageCircle size={18}     />
                         </div>
                       </motion.button>
 
@@ -454,25 +525,87 @@ const MobileLayout = () => {
                       <ArrowLeft size={20} />
                     </button>
                     
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="relative">
-                          <Avatar src="/unj.png" size="sm" />
-                          <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h2 className="font-black text-slate-800 text-sm tracking-tight truncate">
-                            Admin Admisi UNJ
-                        </h2>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600">Online</p>
+                    {!isLocalSearchOpen && (
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="relative">
+                            <Avatar src="/unj.png" size="sm" />
+                            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h2 className="font-black text-slate-800 text-sm tracking-tight truncate">
+                              Admin Admisi UNJ
+                          </h2>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600">Online</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
 
-                    <div className="flex gap-1">
-                      <button className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 active:bg-slate-100">
+                    <div className={cn("flex gap-1 relative items-center", isLocalSearchOpen ? "flex-1 ml-2" : "")}>
+                      {isLocalSearchOpen ? (
+                        <motion.div 
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: "100%" }}
+                          exit={{ opacity: 0, width: 0 }}
+                          className="flex items-center bg-slate-50 border border-slate-200 rounded-[18px] px-3 py-1 h-9 ring-4 ring-emerald-500/5 focus-within:border-emerald-200 focus-within:bg-white focus-within:ring-emerald-500/10 transition-all duration-300 gap-1.5 flex-1"
+                        >
+                          <Search size={14} className="text-emerald-500 shrink-0" />
+                          <input 
+                            type="text" 
+                            autoFocus
+                            value={localSearchQuery}
+                            onChange={(e) => setLocalSearchQuery(e.target.value)}
+                            placeholder="Cari..."
+                            className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none focus-visible:outline-none text-xs font-semibold text-slate-700 placeholder:text-slate-400 h-full p-0 min-w-[60px]"
+                          />
+                          {localSearchQuery.trim() && (
+                            <div className="flex items-center gap-1 shrink-0 bg-slate-100/80 px-1.5 py-0.5 rounded-lg">
+                              <span className="text-[9px] font-black text-slate-500 select-none">
+                                {searchMatchIndex}/{searchMatches.length}
+                              </span>
+                              <button 
+                                onClick={() => {
+                                  if (searchMatches.length === 0) return;
+                                  const nextIdx = searchMatchIndex <= 1 ? searchMatches.length : searchMatchIndex - 1;
+                                  setSearchMatchIndex(nextIdx);
+                                  scrollToMatch(nextIdx);
+                                }}
+                                className="text-slate-400 hover:text-emerald-600 transition-colors"
+                              >
+                                <ChevronUp size={12} />
+                              </button>
+                              <button 
+                                onClick={() => {
+                                  if (searchMatches.length === 0) return;
+                                  const nextIdx = searchMatchIndex >= searchMatches.length ? 1 : searchMatchIndex + 1;
+                                  setSearchMatchIndex(nextIdx);
+                                  scrollToMatch(nextIdx);
+                                }}
+                                className="text-slate-400 hover:text-emerald-600 transition-colors"
+                              >
+                                <ChevronDown size={12} />
+                              </button>
+                            </div>
+                          )}
+                          <button 
+                            onClick={() => {
+                              setLocalSearchQuery('');
+                              setIsLocalSearchOpen(false);
+                            }}
+                            className="text-slate-300 hover:text-rose-500 shrink-0 ml-1 transition-colors duration-300"
+                          >
+                            <X size={12} />
+                          </button>
+                        </motion.div>
+                      ) : (
+                        <button 
+                          onClick={() => setIsLocalSearchOpen(true)}
+                          className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 active:bg-slate-100"
+                        >
                           <Search size={18} />
-                      </button>
+                        </button>
+                      )}
                     </div>
                   </header>
 
@@ -487,7 +620,15 @@ const MobileLayout = () => {
                       </span>
                     </div>
 
-                    {messages.map((msg, idx) => {
+                    {(() => {
+
+                      const filteredMessages = localSearchQuery.trim()
+
+                        ? messages.filter(m => m.text.toLowerCase().includes(localSearchQuery.toLowerCase()))
+
+                        : messages;
+
+                      return filteredMessages.map((msg, idx) => {
                       const isMe = msg.sender === 'user';
                       return (
                         <motion.div
@@ -563,7 +704,7 @@ const MobileLayout = () => {
                               );
                             })()
                           ) : (
-                            <FormattedText text={msg.text} className="leading-relaxed" />
+                            renderHighlightedText(msg.text, localSearchQuery)
                           )}
                           <div className="flex items-center justify-end gap-1.5 mt-2">
                             <span className={cn(
@@ -576,7 +717,8 @@ const MobileLayout = () => {
                           </div>
                         </motion.div>
                       );
-                    })}
+                    });
+                    })()}
                     <div ref={messagesEndRef} />
                   </main>
 
@@ -632,7 +774,7 @@ const MobileLayout = () => {
                                  />
                                  <button 
                                      type="submit"
-                                     disabled={!newMessage.trim()}
+                                     disabled={!newMessage.trim() && !selectedResponse}
                                      className="w-10 h-10 mb-0.5 mr-0.5 bg-emerald-800 text-white rounded-full flex items-center justify-center shadow-lg disabled:opacity-30 hover:scale-105 active:scale-95 transition-all shrink-0"
                                  >
                                      <Send size={18} className="ml-0.5" />
@@ -719,9 +861,14 @@ const MobileLayout = () => {
                                 setActiveTab('chats');
                                 setChatView('LIST');
                               }}
-                              className="px-8 py-3.5 bg-emerald-800 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-emerald-200 hover:bg-emerald-900 hover:scale-105 active:scale-95 transition-all w-full"
+                              className="px-8 py-3.5 bg-emerald-800 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-emerald-200 hover:bg-emerald-900 hover:scale-105 active:scale-95 transition-all w-full relative"
                             >
                               BUKA CHAT SEKARANG
+                              {unreadCount > 0 && (
+                                <span className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-400 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white animate-bounce">
+                                  {unreadCount}
+                                </span>
+                              )}
                             </button>
                         </motion.div>
                     </div>
@@ -736,9 +883,13 @@ const MobileLayout = () => {
                             </div>
                             <div className="flex flex-col gap-1">
                                 <span className="text-[11px] font-black text-slate-400 uppercase tracking-tighter">Senin - Jumat</span>
-                                <span className="text-lg font-black text-slate-800 leading-none">08:00 - 16:00 <span className="text-[10px] text-emerald-600 font-black">WIB</span></span>
+                                <span className="text-lg font-black text-slate-800 leading-none">09:00 - 16:00 <span className="text-[10px] text-emerald-600 font-black">WIB</span></span>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="w-full mt-2 bg-white border border-slate-100/80 rounded-[36px] p-4 shadow-xl shadow-slate-200/20 mb-16 select-none">
+                      <BukuPedomanViewer />
                     </div>
                 </div>
             </div>
@@ -837,7 +988,7 @@ const MobileLayout = () => {
                       >
                           <MessageCircle size={28} />
                           {unreadCount > 0 && (
-                            <span className="absolute -top-1 -right-1 w-6 h-6 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-4 border-white">
+                            <span className="absolute -top-1 -right-1 w-6 h-6 bg-emerald-400 text-white text-[10px] font-black rounded-full flex items-center justify-center border-4 border-white">
                               {unreadCount}
                             </span>
                           )}
@@ -982,8 +1133,80 @@ const MobileLayout = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Jadwal Modal Popup */}
+      <AnimatePresence>
+        {isJadwalModalOpen && (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex flex-col justify-end">
+            <motion.div 
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="bg-white rounded-t-[40px] w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl relative border-t border-slate-100"
+            >
+              {/* Modal Header */}
+              <div className="bg-emerald-800 p-6 flex justify-between items-center relative shrink-0">
+                <div className="absolute top-[-30px] right-[-30px] w-36 h-36 bg-white/10 rounded-full blur-2xl"></div>
+                <div className="relative z-10 text-white">
+                  <h3 className="text-lg font-black tracking-tight flex items-center gap-2">
+                    <Calendar size={22} className="text-emerald-300" />
+                    Kalender & Jadwal
+                  </h3>
+                  <p className="text-emerald-100/60 text-[9px] font-bold uppercase tracking-widest mt-1">
+                    Jadwal Penting PENMABA UNJ 2026
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setIsJadwalModalOpen(false)}
+                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center active:bg-white/20 transition-all text-white relative z-10"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Schedules List */}
+              <div className="flex-1 p-6 overflow-y-auto scrollbar-hide bg-slate-50">
+                <div className="flex flex-col gap-4">
+                  {jadwalPenmaba.map((event) => (
+                    <motion.div
+                      key={event.id}
+                      whileTap={{ scale: 0.98 }}
+                      className="p-5 bg-white border border-slate-100 rounded-[28px] text-left active:border-emerald-200 active:bg-emerald-50/30 transition-all shadow-sm flex flex-col justify-between"
+                    >
+                      <div className="flex items-center gap-2 mb-2 justify-between">
+                         <span className={cn(
+                           "px-2.5 py-1 text-[8px] font-black rounded uppercase tracking-widest",
+                           event.category === 'PENDAFTARAN' && "bg-blue-50 text-blue-600",
+                           event.category === 'UJIAN' && "bg-amber-50 text-amber-600",
+                           event.category === 'PENGUMUMAN' && "bg-emerald-50 text-emerald-600"
+                         )}>
+                           {event.category}
+                         </span>
+                      </div>
+                      <p className="text-sm font-black text-slate-800 leading-tight mb-2">
+                        {event.title}
+                      </p>
+                      <p className="text-[12px] font-bold text-slate-500 leading-relaxed">
+                        {event.dateRange}
+                      </p>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-center shrink-0">
+                 <div className="w-12 h-1.5 bg-slate-200 rounded-full"></div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <CustomAlert config={alertConfig} onClose={() => setAlertConfig({...alertConfig, show: false})} />
     </div>
   );
 };
 
 export default MobileLayout;
+
