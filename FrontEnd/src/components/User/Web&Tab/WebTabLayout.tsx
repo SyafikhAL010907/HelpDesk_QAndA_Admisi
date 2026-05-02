@@ -20,10 +20,13 @@ import {
   Eye,
   X,
   LayoutGrid,
-  Trash2
+  Trash2,
+  Calendar,
+  ChevronRight
 } from 'lucide-react';
 import { Message, CannedResponse } from '@/constants/chatTypes';
 import { cannedQuestions as cannedResponses } from '@/constants/cannedQuestions';
+import { jadwalPenmaba } from '@/constants/jadwalPenmaba';
 import BukuPedomanViewer from '@/components/Shared/BukuPedomanViewer';
 import Avatar from '@/components/Shared/Avatar';
 import FormattedText from '@/components/Shared/FormattedText';
@@ -118,6 +121,7 @@ const WebTabLayout = () => {
   }, [isChatOpen, roomId]);
   const [selectedResponse, setSelectedResponse] = useState<CannedResponse | null>(null);
   const [isTemplatePopupOpen, setIsTemplatePopupOpen] = useState(false);
+  const [isJadwalModalOpen, setIsJadwalModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('Informasi Umum');
   const [alertConfig, setAlertConfig] = useState<{show: boolean, type: 'alert' | 'confirm', message: string, title?: string, onConfirm?: () => void}>({show: false, type: 'alert', message: ''});
 
@@ -820,7 +824,7 @@ const WebTabLayout = () => {
                   </p>
                   <button 
                     onClick={() => setIsChatOpen(true)}
-                    className="px-8 py-3.5 bg-emerald-800 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-emerald-200 hover:bg-emerald-900 hover:scale-105 active:scale-95 transition-all relative"
+                    className="px-8 py-3.5 bg-emerald-800 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-emerald-200 hover:bg-emerald-900 hover:scale-105 active:scale-95 transition-all relative w-full mb-4"
                   >
                     BUKA CHAT SEKARANG
                     {unreadCount > 0 && (
@@ -829,6 +833,24 @@ const WebTabLayout = () => {
                       </span>
                     )}
                   </button>
+
+                  {/* Jadwal Penmaba Card (Replaces Search Bar) */}
+                  <motion.button 
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setIsJadwalModalOpen(true)}
+                      className="w-full bg-white rounded-full shadow-xl shadow-slate-200/40 p-1 border-2 border-emerald-50 hover:border-emerald-400 focus:outline-none transition-all duration-300 flex items-center justify-between mt-2"
+                  >
+                      <div className="flex items-center gap-3 px-3 h-11">
+                          <Calendar size={18} className="text-emerald-600 shrink-0" />
+                          <div className="flex flex-col text-left">
+                              <span className="text-[11px] font-black text-slate-800 leading-tight">Cek Jadwal Penting Penmaba 2026</span>
+                              <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider leading-tight mt-0.5">Info pendaftaran & ujian</span>
+                          </div>
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mr-1 shrink-0">
+                          <ChevronRight size={14} />
+                      </div>
+                  </motion.button>
               </motion.div>
 
               <div className="w-full max-w-2xl mt-4 border-t border-slate-100/80 pt-4">
@@ -944,6 +966,82 @@ const WebTabLayout = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Jadwal Modal Popup */}
+      <AnimatePresence>
+        {isJadwalModalOpen && (
+          <div className="fixed inset-0 z-9999 flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsJadwalModalOpen(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-2xl bg-white rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+            >
+              {/* Modal Header */}
+              <div className="px-8 py-6 bg-emerald-800 text-white flex items-center justify-between relative shrink-0">
+                <div className="absolute top-[-30px] right-[-30px] w-36 h-36 bg-white/10 rounded-full blur-2xl"></div>
+                <div className="relative z-10 text-white">
+                  <h3 className="text-xl font-black tracking-tight flex items-center gap-2">
+                    <Calendar size={24} className="text-emerald-300" />
+                    Kalender & Jadwal
+                  </h3>
+                  <p className="text-emerald-100/60 text-[10px] font-bold uppercase tracking-widest mt-1">
+                    Jadwal Penting PENMABA UNJ 2026
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setIsJadwalModalOpen(false)}
+                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center active:bg-white/20 transition-all text-white relative z-10"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Schedules List */}
+              <div className="flex-1 p-8 overflow-y-auto scrollbar-hide bg-slate-50">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {jadwalPenmaba.map((event) => (
+                    <motion.div
+                      key={event.id}
+                      whileTap={{ scale: 0.98 }}
+                      className="p-6 bg-white border border-slate-100 rounded-3xl text-left hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-50 transition-all shadow-sm flex flex-col justify-between"
+                    >
+                      <div className="flex items-center gap-2 mb-2 justify-between">
+                         <span className={cn(
+                           "px-2.5 py-1 text-[8px] font-black rounded uppercase tracking-widest",
+                           event.category === 'PENDAFTARAN' && "bg-blue-50 text-blue-600",
+                           event.category === 'UJIAN' && "bg-amber-50 text-amber-600",
+                           event.category === 'PENGUMUMAN' && "bg-emerald-50 text-emerald-600"
+                         )}>
+                           {event.category}
+                         </span>
+                      </div>
+                      <p className="text-sm font-black text-slate-800 leading-snug mb-2">
+                        {event.title}
+                      </p>
+                      <p className="text-[12px] font-bold text-slate-500 leading-relaxed">
+                        {event.dateRange}
+                      </p>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-center shrink-0">
+                 <div className="w-12 h-1.5 bg-slate-200 rounded-full"></div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <CustomAlert config={alertConfig} onClose={() => setAlertConfig({...alertConfig, show: false})} />
     </div>
   );
