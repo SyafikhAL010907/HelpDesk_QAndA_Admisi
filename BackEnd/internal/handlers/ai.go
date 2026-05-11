@@ -164,7 +164,26 @@ func StartAIWorker(mlServiceURL string) {
 // PROCESS ALL ROOMS — Cek semua room, cari yang perlu auto-reply
 // =============================================================================
 func processAllRooms(mlServiceURL string) {
-	rows, err := database.DB.Query("SELECT id FROM chat_rooms")
+	// ── Hybrid Mode: Cek Jam Kerja WIB (UTC+7) ───────────────────────────────
+	loc := time.FixedZone("WIB", 7*3600)
+	now := time.Now().In(loc)
+
+	// Jam Kerja: Senin (1) - Jumat (5), pukul 09:00 sampai 15:59 WIB
+	isWorkDay := now.Weekday() >= time.Monday && now.Weekday() <= time.Friday
+	isWorkHour := now.Hour() >= 9 && now.Hour() < 16
+
+	query := "SELECT id FROM chat_rooms" // Mode Patroli (Luar Jam Kerja)
+
+	if isWorkDay && isWorkHour {
+		// Mode Efisien (Jam Kerja): Cuma ambil yang aktif 1 menit terakhir
+		// Supaya server UNJ tetep enteng pas pendaftar lagi rame-ramenya
+		query = "SELECT id FROM chat_rooms WHERE updated_at > NOW() - INTERVAL 1 MINUTE"
+		log.Printf("[AI Worker] Jam Kerja WIB: Menggunakan Mode Efisien (Filter 1 Menit)")
+	} else {
+		log.Printf("[AI Worker] Luar Jam Kerja: Menggunakan Mode Patroli (Cek Semua)")
+	}
+
+	rows, err := database.DB.Query(query)
 	if err != nil {
 		log.Printf("[AI Worker] Gagal ambil daftar room: %v", err)
 		return
