@@ -8,25 +8,25 @@
 import React, { useState } from 'react';
 
 // 🔥 Vasya AI Note: Kita IMPORT Data, SVG, & Modal Premium dari WebTabLayout!
-import { 
-  FloorPlanSvg, 
-  FloorPlanLegend, 
-  RoomPopup, 
-  DaftarRuangan, 
-  ROOMS, 
-  type RoomCode 
+import {
+  FloorPlanSvg,
+  FloorPlanLegend,
+  RoomPopup,
+  DaftarRuangan,
+  ROOMS,
+  type RoomCode
 } from '../Web&Tab/Web&TabLayout';
 
 export default function MobileLayout() {
   const [selectedCode, setSelectedCode] = useState<RoomCode | null>(null);
   const [zoom, setZoom] = useState(1.6);
-  
+
   const selectedRoom = selectedCode ? ROOMS[selectedCode] : null;
   const ubahZoom = (d: number) => setZoom((z) => Math.min(3, Math.max(1, Math.round((z + d) * 10) / 10)));
 
   return (
-    <div className="space-y-4 p-4 bg-slate-50 min-h-screen pb-10">
-      
+    <div className="w-full min-h-screen flex flex-col space-y-4 p-4 bg-slate-50 pb-10">
+
       {/* Header Premium */}
       <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
         <h2 className="text-xl font-black text-slate-900 tracking-tight">Gedung LE · Lt. 3</h2>
@@ -42,14 +42,14 @@ export default function MobileLayout() {
             <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 active:bg-slate-100 font-bold" onClick={() => ubahZoom(0.4)} disabled={zoom >= 3}>+</button>
           </div>
         </div>
-        
+
         {/* SVG Container dgn Zoom */}
         <div className="overflow-auto rounded-xl bg-slate-50/50 border border-slate-100">
           <div style={{ width: `${zoom * 100}%` }}>
-            <FloorPlanSvg 
-              selectedCode={selectedCode} 
-              onSelectRoom={(c) => setSelectedCode(c as RoomCode)} 
-              className="block h-auto w-full" 
+            <FloorPlanSvg
+              selectedCode={selectedCode}
+              onSelectRoom={(c) => setSelectedCode(c as RoomCode)}
+              className="block h-auto w-full"
             />
           </div>
         </div>
@@ -63,10 +63,10 @@ export default function MobileLayout() {
 
       {/* Trigger Modal Premium (Sekarang tampil Fullscreen di Mobile dgn Animasi) */}
       {selectedRoom && (
-        <RoomPopup 
-          key={selectedRoom.kode} 
-          ruangan={selectedRoom} 
-          onClose={() => setSelectedCode(null)} 
+        <RoomPopup
+          key={selectedRoom.kode}
+          ruangan={selectedRoom}
+          onClose={() => setSelectedCode(null)}
         />
       )}
     </div>

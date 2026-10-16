@@ -1,0 +1,437 @@
+'use client';
+
+import React, { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { Plus_Jakarta_Sans, Fasthand } from 'next/font/google';
+import { FLOOR_MAPS_REGISTRY, DotIndicator } from '../Web&Tab/WebTabLayout';
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+});
+const fasthand = Fasthand({ subsets: ['latin'], weight: '400' });
+
+/* ------------------------------------------------------------------ */
+/*  DATA                                                               */
+/* ------------------------------------------------------------------ */
+
+const LOGIN_HREF = '/login';
+
+const gedungList = [
+  { key: 'sfd', label: 'Gedung SFD', base: '/denah-sfd', floors: [3, 8] },
+  { key: 'ls', label: 'Gedung L Sipil', base: '/denah-ls', floors: [1, 2, 3, 4] },
+  { key: 'le', label: 'Gedung L Elektro', base: '/denah-le', floors: [1, 2, 3, 4] },
+];
+
+const QUOTE =
+  '“Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.”';
+
+const testimonials = [1, 2, 3, 4, 5].map((n) => ({
+  src: `/SolusiMasalah/${n}.png`,
+  quote: QUOTE,
+}));
+
+/* ------------------------------------------------------------------ */
+/*  CAROUSEL CONFIG (canvas 358 x 340, diskalakan sesuai lebar layar) */
+/* ------------------------------------------------------------------ */
+
+const CANVAS_W = 358;
+const CANVAS_H = 340;
+
+type Slot = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  radius: number;
+  img: { left: number; top: number; width: number; height: number; radius: number };
+};
+
+const SLOTS: Slot[] = [
+  {
+    left: 0, top: 110, width: 28, height: 120, radius: 14,
+    img: { left: 4, top: 5, width: 20, height: 110, radius: 10 },
+  },
+  {
+    left: 36, top: 80, width: 40, height: 180, radius: 20,
+    img: { left: 5, top: 6, width: 30, height: 168, radius: 15 },
+  },
+  {
+    left: 84, top: 0, width: 190, height: 340, radius: 28,
+    img: { left: 8, top: 8, width: 174, height: 170, radius: 22 },
+  },
+  {
+    left: 282, top: 80, width: 40, height: 180, radius: 20,
+    img: { left: 5, top: 6, width: 30, height: 168, radius: 15 },
+  },
+  {
+    left: 330, top: 110, width: 28, height: 120, radius: 14,
+    img: { left: 4, top: 5, width: 20, height: 110, radius: 10 },
+  },
+];
+
+function useFitScale(designWidth: number, max = 1.2) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setScale(Math.min(max, el.clientWidth / designWidth));
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [designWidth, max]);
+
+  return { ref, scale };
+}
+
+function TestimonialCarousel() {
+  const [active, setActive] = useState(0);
+  const [failedImages, setFailedImages] = useState<Record<number, boolean>>({});
+  const { ref, scale } = useFitScale(CANVAS_W);
+  const n = testimonials.length;
+  const half = Math.floor(n / 2);
+
+  return (
+    <div className="flex w-full flex-col items-center">
+      <div ref={ref} className="w-full" style={{ height: CANVAS_H * scale }}>
+        <div
+          className="relative mx-auto origin-top-left shrink-0"
+          style={{
+            width: CANVAS_W,
+            height: CANVAS_H,
+            transform: `scale(${scale})`,
+            marginLeft: scale >= 1.2 ? 'auto' : 0,
+          }}
+        >
+          {testimonials.map((item, i) => {
+            const offset = ((i - active + n + half) % n) - half;
+            const slot = SLOTS[offset + 2];
+            const isActive = offset === 0;
+
+            return (
+              <div
+                key={i}
+                role="button"
+                tabIndex={0}
+                aria-label={`Testimoni ${i + 1}`}
+                aria-current={isActive}
+                onClick={() => setActive(i)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') setActive(i);
+                }}
+                className="absolute overflow-hidden bg-white outline-none transition-all duration-700 ease-in-out"
+                style={{
+                  left: slot.left,
+                  top: slot.top,
+                  width: slot.width,
+                  height: slot.height,
+                  borderRadius: slot.radius,
+                  zIndex: 30 - Math.abs(offset) * 5,
+                }}
+              >
+                <div
+                  className="absolute overflow-hidden transition-all duration-700 ease-in-out bg-[#D9D9D9]"
+                  style={{
+                    left: slot.img.left,
+                    top: slot.img.top,
+                    width: slot.img.width,
+                    height: slot.img.height,
+                    borderRadius: slot.img.radius,
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.src}
+                    alt={isActive ? `Foto testimoni ${i + 1}` : ''}
+                    draggable={false}
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                    className="h-full w-full object-cover object-top"
+                  />
+                </div>
+
+                <p
+                  className={`absolute text-[12px] font-medium leading-[19px] text-black transition-opacity ease-in-out ${
+                    isActive
+                      ? 'opacity-100 duration-500 delay-500'
+                      : 'pointer-events-none opacity-0 duration-200'
+                  }`}
+                  style={{ left: 14, top: 192, width: 162 }}
+                >
+                  {item.quote}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <DotIndicator
+        total={n}
+        activeIndex={active}
+        onSelect={setActive}
+        variant="dark"
+        className="mt-6"
+      />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  PAGE                                                               */
+/* ------------------------------------------------------------------ */
+
+export default function MobileLayout() {
+  const [activeKey, setActiveKey] = useState<'sfd' | 'ls' | 'le'>('sfd');
+  const [slideIndex, setSlideIndex] = useState(0);
+
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
+
+  const activeGedung = gedungList.find((g) => g.key === activeKey) ?? gedungList[0];
+  const floorItems = FLOOR_MAPS_REGISTRY[activeKey] || [];
+
+  const handleSelectGedung = (key: 'sfd' | 'ls' | 'le') => {
+    setActiveKey(key);
+    setSlideIndex(0);
+    if (sliderRef.current) {
+      sliderRef.current.scrollLeft = 0;
+    }
+  };
+
+  const handleSelectSlide = (i: number) => {
+    setSlideIndex(i);
+    if (sliderRef.current) {
+      const pageWidth = sliderRef.current.clientWidth;
+      sliderRef.current.scrollTo({
+        left: i * pageWidth,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  const handleScroll = () => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      if (!sliderRef.current) return;
+      const { scrollLeft, clientWidth } = sliderRef.current;
+      if (clientWidth > 0) {
+        const newIndex = Math.min(
+          floorItems.length - 1,
+          Math.max(0, Math.round(scrollLeft / clientWidth))
+        );
+        setSlideIndex((prev) => (prev !== newIndex ? newIndex : prev));
+      }
+    });
+  };
+
+  return (
+    <div className={`${jakarta.className} w-full overflow-x-hidden bg-white text-black`}>
+      {/* ---------------- NAVBAR ---------------- */}
+      <header className="flex items-center justify-end px-4 pt-5">
+        <Link
+          href={LOGIN_HREF}
+          className="flex h-[44px] w-[120px] items-center justify-center rounded-[12px] bg-[#333333] text-[16px] font-semibold text-white active:opacity-80"
+        >
+          Masuk
+        </Link>
+      </header>
+
+      {/* ---------------- HERO ---------------- */}
+      <section className="mt-[72px] px-4">
+        <div
+          className="relative rounded-[28px] px-6 pb-8 pt-[230px]"
+          style={{ background: 'linear-gradient(90deg, #183449 0%, #588CBC 100%)' }}
+        >
+          <div className="absolute right-0 top-[-64px] aspect-[617/745] w-[62%]">
+            <Image
+              src="/Landing/GedungSFD.png"
+              alt="Gedung SFD"
+              width={617}
+              height={745}
+              priority
+              className="h-full w-full rounded-br-[28px] object-cover"
+            />
+          </div>
+
+          <div className="leading-[34px] text-[#FCFCFC]">
+            <span className="text-[28px] font-bold">LOREM IPSUM&nbsp; </span>
+            <span className={`${fasthand.className} text-[44px] font-normal`}>Dolor</span>
+          </div>
+
+          <p className="mt-4 text-[15px] leading-[24px] text-[#FCFCFC]">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+          </p>
+
+          <Link
+            href={LOGIN_HREF}
+            className="mt-6 flex h-[48px] w-[160px] items-center justify-center rounded-[12px] bg-white text-[16px] font-semibold text-[#333333] active:opacity-80"
+          >
+            Masuk
+          </Link>
+        </div>
+      </section>
+
+      {/* ---------------- DATA REAL-TIME ---------------- */}
+      <section className="mt-[64px] px-4">
+        <h2 className="text-center text-[30px] font-semibold leading-[40px]">Data Real-Time</h2>
+        <p className="mt-3 text-center text-[15px] leading-[24px]">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+          incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+        </p>
+
+        {/* tombol gedung (geser ke samping kalau layar sempit) */}
+        <div className="-mx-4 mt-6 flex gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {gedungList.map((g) => {
+            const isActive = g.key === activeKey;
+            return (
+              <button
+                key={g.key}
+                type="button"
+                onClick={() => handleSelectGedung(g.key as 'sfd' | 'ls' | 'le')}
+                aria-pressed={isActive}
+                className={`h-[48px] shrink-0 rounded-[12px] px-6 text-[15px] font-semibold transition-colors duration-300 ${
+                  isActive
+                    ? 'bg-[#333333] text-white'
+                    : 'border border-[#333333] bg-transparent text-black'
+                }`}
+              >
+                {g.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* slider kartu denah lantai: 1 kartu per slide di mobile, swipe horizontal */}
+        <motion.div
+          key={activeGedung.key}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+          className="mt-6 w-full"
+        >
+          <div
+            ref={sliderRef}
+            onScroll={handleScroll}
+            className="flex w-full overflow-x-auto snap-x snap-mandatory select-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {floorItems.map((item) => (
+              <div key={item.lantai} className="w-full shrink-0 snap-start px-0.5">
+                <figure className="flex flex-col items-center">
+                  <div className="w-full rounded-[20px] bg-[#D9D9D9] p-3 shadow-xs">
+                    <div
+                      className="flex w-full items-center justify-center overflow-hidden rounded-[12px] bg-white p-2"
+                      style={{ aspectRatio: item.ratio }}
+                    >
+                      <div className="h-full w-full pointer-events-none select-none" aria-hidden="true">
+                        <item.Map
+                          className="h-full w-full object-contain"
+                          selectedCode={null}
+                          onSelectRoom={() => {}}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <figcaption className="mt-4 flex flex-col items-center text-center">
+                    <span className="text-[18px] font-semibold text-[#333333]">
+                      Lantai {item.lantai}
+                    </span>
+                    <span className="my-1.5 h-[4px] w-[32px] rounded-full bg-[#C2AC72]" />
+                    <span className="text-[14px] font-medium text-[#B8B8B8]">
+                      {activeGedung.label}
+                    </span>
+                  </figcaption>
+                </figure>
+              </div>
+            ))}
+          </div>
+
+          {floorItems.length > 1 && (
+            <div className="mt-6">
+              <DotIndicator
+                total={floorItems.length}
+                activeIndex={slideIndex}
+                onSelect={handleSelectSlide}
+                variant="light"
+              />
+            </div>
+          )}
+        </motion.div>
+      </section>
+
+      {/* ---------------- RESPONSIVE WEBSITE ---------------- */}
+      <section className="mt-[64px] px-4">
+        <div className="relative z-0 mx-auto aspect-[474/558] w-full max-w-[300px] flex items-center justify-center bg-white">
+          <video
+            src="/Landing/Responsive.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            disablePictureInPicture
+            disableRemotePlayback
+            controlsList="nodownload noremoteplayback noplaybackrate"
+            aria-hidden="true"
+            style={{
+              filter: 'brightness(1.03) contrast(1.04)',
+            }}
+            className="pointer-events-none h-full w-full select-none object-contain scale-[1.14] [clip-path:inset(3px_3px_3px_3px)]"
+          />
+        </div>
+
+        <div className="relative z-10 mt-6">
+          <p className="text-[15px] font-semibold leading-[28px] text-[#B8B8B8]">
+            Lorem Ipsum dolor sit
+          </p>
+          <h2 className="mt-1 text-[30px] font-semibold leading-[40px]">Responsive Website</h2>
+          <p className="mt-3 text-[15px] leading-[24px]">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          </p>
+          <Link
+            href="#"
+            className="mt-6 flex h-[48px] w-[160px] items-center justify-center rounded-[12px] bg-[#333333] text-[16px] font-semibold text-white active:opacity-80"
+          >
+            Lorem ipsum
+          </Link>
+        </div>
+      </section>
+
+      {/* ---------------- MASALAH YANG DISELESAIKAN ---------------- */}
+      <section className="mt-[64px] bg-[#333333] px-4 pb-[64px] pt-[56px]">
+        <p className="text-center text-[14px] leading-[24px] text-[#E3E3E3]">
+          Lorem Ipsum dolor sit
+        </p>
+        <h2 className="mt-1 text-center text-[28px] font-semibold leading-[36px] text-white">
+          Masalah yang Diselesaikan
+        </h2>
+
+        <div className="mx-auto mt-8 max-w-[430px]">
+          <TestimonialCarousel />
+        </div>
+      </section>
+
+      {/* ---------------- HOW WE WORKS ---------------- */}
+      <section className="px-4 pb-[80px] pt-[72px]">
+        <div className="flex items-center gap-4">
+          <span className="h-[6px] w-[48px] rounded-[2px] bg-[#C2AC72]" />
+          <span className="text-[18px] font-medium">How We Works</span>
+        </div>
+
+        <h2 className="mt-4 text-[30px] font-bold leading-[40px]">
+          How We <span className="text-[#C2AC72]">Get It Done</span>
+        </h2>
+
+        <h2 className="mt-[64px] text-[30px] font-semibold">Fitur</h2>
+      </section>
+    </div>
+  );
+}

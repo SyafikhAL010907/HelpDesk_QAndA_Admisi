@@ -364,7 +364,7 @@ export default function WebTabLayoutSfd() {
   const ubahZoom = (d: number) => setZoom((z) => Math.min(2.5, Math.max(0.5, Math.round((z + d) * 10) / 10)));
 
   return (
-    <div className="mx-auto w-full max-w-7xl p-4 md:p-8 bg-slate-50/50 min-h-screen">
+    <div className="w-full min-h-screen bg-slate-50 p-4 md:p-8">
       <header className="mb-6">
         <h2 className="text-3xl font-black text-slate-900 tracking-tight">Denah Gedung SFD · Lantai 3</h2>
         <p className="text-sm text-slate-500 mt-1 font-medium">Klik pada ruangan interaktif untuk melihat jadwal, fasilitas, atau mengajukan booking.</p>

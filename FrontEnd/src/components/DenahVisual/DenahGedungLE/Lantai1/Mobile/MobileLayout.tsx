@@ -25,7 +25,7 @@ export default function MobileLayout() {
   const ubahZoom = (d: number) => setZoom((z) => Math.min(3, Math.max(1, Math.round((z + d) * 10) / 10)));
 
   return (
-    <div className="space-y-4 p-4 bg-slate-50 min-h-screen pb-10">
+    <div className="w-full min-h-screen flex flex-col space-y-4 p-4 bg-slate-50 pb-10">
 
       {/* Header Premium */}
       <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">

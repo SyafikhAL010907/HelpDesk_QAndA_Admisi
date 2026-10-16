@@ -1,211 +1,437 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { 
-  Building2, 
-  LogIn, 
-  MapPin, 
-  ArrowRight,
-  MessageSquare,
-  Sparkles,
-  ChevronRight,
-  HelpCircle,
-  Calendar
-} from 'lucide-react';
+import { Plus_Jakarta_Sans, Fasthand } from 'next/font/google';
+import { FLOOR_MAPS_REGISTRY, DotIndicator } from '../Web&Tab/WebTabLayout';
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+});
+const fasthand = Fasthand({ subsets: ['latin'], weight: '400' });
+
+/* ------------------------------------------------------------------ */
+/*  DATA                                                               */
+/* ------------------------------------------------------------------ */
+
+const LOGIN_HREF = '/login';
 
 const gedungList = [
+  { key: 'sfd', label: 'Gedung SFD', base: '/denah-sfd', floors: [3, 8] },
+  { key: 'ls', label: 'Gedung L Sipil', base: '/denah-ls', floors: [1, 2, 3, 4] },
+  { key: 'le', label: 'Gedung L Elektro', base: '/denah-le', floors: [1, 2, 3, 4] },
+];
+
+const QUOTE =
+  '“Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.”';
+
+const testimonials = [1, 2, 3, 4, 5].map((n) => ({
+  src: `/SolusiMasalah/${n}.png`,
+  quote: QUOTE,
+}));
+
+/* ------------------------------------------------------------------ */
+/*  CAROUSEL CONFIG (canvas 358 x 340, diskalakan sesuai lebar layar) */
+/* ------------------------------------------------------------------ */
+
+const CANVAS_W = 358;
+const CANVAS_H = 340;
+
+type Slot = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  radius: number;
+  img: { left: number; top: number; width: number; height: number; radius: number };
+};
+
+const SLOTS: Slot[] = [
   {
-    name: 'Gedung LE',
-    subtitle: 'Rumpun Elektro',
-    desc: 'Denah interaktif Lantai 1–4, Lab & Ruang Dosen',
-    href: '/denah-le',
-    bgLight: 'bg-blue-50',
-    iconColor: 'text-blue-600',
-    badge: 'bg-blue-100 text-blue-700',
-    badgeText: '4 Lantai',
+    left: 0, top: 110, width: 28, height: 120, radius: 14,
+    img: { left: 4, top: 5, width: 20, height: 110, radius: 10 },
   },
   {
-    name: 'Gedung LS',
-    subtitle: 'Rumpun Sipil',
-    desc: 'Denah interaktif Lantai 1–4, Kelas & Fasilitas',
-    href: '/denah-ls',
-    bgLight: 'bg-emerald-50',
-    iconColor: 'text-emerald-600',
-    badge: 'bg-emerald-100 text-emerald-700',
-    badgeText: '4 Lantai',
+    left: 36, top: 80, width: 40, height: 180, radius: 20,
+    img: { left: 5, top: 6, width: 30, height: 168, radius: 15 },
   },
   {
-    name: 'Gedung SFD',
-    subtitle: 'Tower Smart Floor',
-    desc: 'Denah interaktif Lantai 3 & Lantai 8 Tower A',
-    href: '/denah-sfd',
-    bgLight: 'bg-teal-50',
-    iconColor: 'text-teal-600',
-    badge: 'bg-teal-100 text-teal-700',
-    badgeText: 'Lt. 3 & 8',
+    left: 84, top: 0, width: 190, height: 340, radius: 28,
+    img: { left: 8, top: 8, width: 174, height: 170, radius: 22 },
+  },
+  {
+    left: 282, top: 80, width: 40, height: 180, radius: 20,
+    img: { left: 5, top: 6, width: 30, height: 168, radius: 15 },
+  },
+  {
+    left: 330, top: 110, width: 28, height: 120, radius: 14,
+    img: { left: 4, top: 5, width: 20, height: 110, radius: 10 },
   },
 ];
 
-export default function MobileLayout() {
+function useFitScale(designWidth: number, max = 1.2) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setScale(Math.min(max, el.clientWidth / designWidth));
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [designWidth, max]);
+
+  return { ref, scale };
+}
+
+function TestimonialCarousel() {
+  const [active, setActive] = useState(0);
+  const [failedImages, setFailedImages] = useState<Record<number, boolean>>({});
+  const { ref, scale } = useFitScale(CANVAS_W);
+  const n = testimonials.length;
+  const half = Math.floor(n / 2);
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900 pb-8">
-      
-      {/* Mobile Top Header (Emerald Theme matching User & Admin Mobile) */}
-      <div className="bg-emerald-800 rounded-b-[36px] px-6 pt-10 pb-12 shadow-xl shadow-emerald-900/10 relative overflow-hidden shrink-0">
-        <div className="absolute -top-5 -right-5 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-5 -left-5 w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl"></div>
+    <div className="flex w-full flex-col items-center">
+      <div ref={ref} className="w-full" style={{ height: CANVAS_H * scale }}>
+        <div
+          className="relative mx-auto origin-top-left shrink-0"
+          style={{
+            width: CANVAS_W,
+            height: CANVAS_H,
+            transform: `scale(${scale})`,
+            marginLeft: scale >= 1.2 ? 'auto' : 0,
+          }}
+        >
+          {testimonials.map((item, i) => {
+            const offset = ((i - active + n + half) % n) - half;
+            const slot = SLOTS[offset + 2];
+            const isActive = offset === 0;
 
-        <header className="relative z-10 flex flex-col gap-6">
-          <div className="flex justify-between items-center text-white">
-            <div className="flex items-center gap-3">
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
+            return (
+              <div
+                key={i}
+                role="button"
+                tabIndex={0}
+                aria-label={`Testimoni ${i + 1}`}
+                aria-current={isActive}
+                onClick={() => setActive(i)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') setActive(i);
+                }}
+                className="absolute overflow-hidden bg-white outline-none transition-all duration-700 ease-in-out"
+                style={{
+                  left: slot.left,
+                  top: slot.top,
+                  width: slot.width,
+                  height: slot.height,
+                  borderRadius: slot.radius,
+                  zIndex: 30 - Math.abs(offset) * 5,
+                }}
               >
-                <Image
-                  src="/unj.png"
-                  alt="Logo UNJ"
-                  width={42}
-                  height={42}
-                  className="drop-shadow-lg"
-                  priority
-                />
-              </motion.div>
-              <div>
-                <h1 className="text-lg font-black tracking-tight leading-none">Admin UNJ</h1>
-                <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-widest mt-1">HelpDesk Admisi</p>
+                <div
+                  className="absolute overflow-hidden transition-all duration-700 ease-in-out bg-[#D9D9D9]"
+                  style={{
+                    left: slot.img.left,
+                    top: slot.img.top,
+                    width: slot.img.width,
+                    height: slot.img.height,
+                    borderRadius: slot.img.radius,
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.src}
+                    alt={isActive ? `Foto testimoni ${i + 1}` : ''}
+                    draggable={false}
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                    className="h-full w-full object-cover object-top"
+                  />
+                </div>
+
+                <p
+                  className={`absolute text-[12px] font-medium leading-[19px] text-black transition-opacity ease-in-out ${
+                    isActive
+                      ? 'opacity-100 duration-500 delay-500'
+                      : 'pointer-events-none opacity-0 duration-200'
+                  }`}
+                  style={{ left: 14, top: 192, width: 162 }}
+                >
+                  {item.quote}
+                </p>
               </div>
-            </div>
-
-            <Link
-              href="/login"
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 rounded-xl text-white text-xs font-black transition-all active:scale-95"
-            >
-              <LogIn size={14} />
-              Masuk
-            </Link>
-          </div>
-
-          <div className="text-white mt-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full mb-3 text-[10px] font-bold text-emerald-200 backdrop-blur-xs">
-              <Sparkles size={12} className="text-emerald-300" />
-              <span>Pusat Layanan Mahasiswa Baru</span>
-            </div>
-            <h2 className="text-2xl font-black leading-tight">
-              Selamat Datang di HelpDesk UNJ
-            </h2>
-            <p className="text-xs text-emerald-100/70 font-medium mt-2 leading-relaxed">
-              Cari denah ruangan gedung kampus atau konsultasikan pertanyaan admisi Anda.
-            </p>
-          </div>
-        </header>
+            );
+          })}
+        </div>
       </div>
+      <DotIndicator
+        total={n}
+        activeIndex={active}
+        onSelect={setActive}
+        variant="dark"
+        className="mt-6"
+      />
+    </div>
+  );
+}
 
-      {/* Main Content Area */}
-      <main className="flex-1 px-4 -mt-6 relative z-20 flex flex-col gap-5">
-        
-        {/* Quick Action Primary Card */}
-        <div className="bg-white rounded-3xl p-4 shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col gap-3">
-          <Link
-            href="/login"
-            className="w-full flex items-center justify-between p-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white rounded-2xl transition-all shadow-lg shadow-emerald-200/50"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                <MessageSquare size={18} />
-              </div>
-              <div className="text-left">
-                <p className="text-xs font-black uppercase tracking-wide">Konsultasi Langsung</p>
-                <p className="text-[11px] text-emerald-100 font-medium">Chat dengan Tim HelpDesk</p>
-              </div>
-            </div>
-            <ChevronRight size={18} className="text-emerald-200" />
-          </Link>
+/* ------------------------------------------------------------------ */
+/*  PAGE                                                               */
+/* ------------------------------------------------------------------ */
 
-          <Link
-            href="/login"
-            className="w-full flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100 active:scale-[0.98] text-slate-700 rounded-2xl transition-all border border-slate-100"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
-                <Calendar size={18} />
-              </div>
-              <div className="text-left">
-                <p className="text-xs font-black text-slate-800">Jadwal PENMABA 2026</p>
-                <p className="text-[10px] text-slate-400 font-medium">Info pendaftaran & jadwal ujian</p>
-              </div>
-            </div>
-            <ChevronRight size={16} className="text-slate-400" />
-          </Link>
-        </div>
+export default function MobileLayout() {
+  const [activeKey, setActiveKey] = useState<'sfd' | 'ls' | 'le'>('sfd');
+  const [slideIndex, setSlideIndex] = useState(0);
 
-        {/* Section Header: Denah Gedung */}
-        <div className="flex items-center justify-between px-2 pt-1">
-          <div>
-            <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-              <MapPin size={16} className="text-emerald-600" />
-              Denah Visual Gedung
-            </h3>
-            <p className="text-[10px] text-slate-400 font-medium mt-0.5">Pilih gedung untuk melihat tata letak ruangan</p>
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
+
+  const activeGedung = gedungList.find((g) => g.key === activeKey) ?? gedungList[0];
+  const floorItems = FLOOR_MAPS_REGISTRY[activeKey] || [];
+
+  const handleSelectGedung = (key: 'sfd' | 'ls' | 'le') => {
+    setActiveKey(key);
+    setSlideIndex(0);
+    if (sliderRef.current) {
+      sliderRef.current.scrollLeft = 0;
+    }
+  };
+
+  const handleSelectSlide = (i: number) => {
+    setSlideIndex(i);
+    if (sliderRef.current) {
+      const pageWidth = sliderRef.current.clientWidth;
+      sliderRef.current.scrollTo({
+        left: i * pageWidth,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  const handleScroll = () => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      if (!sliderRef.current) return;
+      const { scrollLeft, clientWidth } = sliderRef.current;
+      if (clientWidth > 0) {
+        const newIndex = Math.min(
+          floorItems.length - 1,
+          Math.max(0, Math.round(scrollLeft / clientWidth))
+        );
+        setSlideIndex((prev) => (prev !== newIndex ? newIndex : prev));
+      }
+    });
+  };
+
+  return (
+    <div className={`${jakarta.className} w-full overflow-x-hidden bg-white text-black`}>
+      {/* ---------------- NAVBAR ---------------- */}
+      <header className="flex items-center justify-end px-4 pt-5">
+        <Link
+          href={LOGIN_HREF}
+          className="flex h-[44px] w-[120px] items-center justify-center rounded-[12px] bg-[#333333] text-[16px] font-semibold text-white active:opacity-80"
+        >
+          Masuk
+        </Link>
+      </header>
+
+      {/* ---------------- HERO ---------------- */}
+      <section className="mt-[72px] px-4">
+        <div
+          className="relative rounded-[28px] px-6 pb-8 pt-[230px]"
+          style={{ background: 'linear-gradient(90deg, #183449 0%, #588CBC 100%)' }}
+        >
+          <div className="absolute right-0 top-[-64px] aspect-[617/745] w-[62%]">
+            <Image
+              src="/Landing/GedungSFD.png"
+              alt="Gedung SFD"
+              width={617}
+              height={745}
+              priority
+              className="h-full w-full rounded-br-[28px] object-cover"
+            />
           </div>
-        </div>
 
-        {/* Gedung Cards List */}
-        <div className="flex flex-col gap-3">
-          {gedungList.map((gedung, i) => (
-            <motion.div
-              key={gedung.name}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * i, duration: 0.3 }}
-            >
-              <Link
-                href={gedung.href}
-                className="w-full bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between active:scale-[0.98] transition-all duration-200 group"
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className={`w-12 h-12 rounded-2xl ${gedung.bgLight} flex items-center justify-center ${gedung.iconColor} shrink-0`}>
-                    <Building2 size={22} />
-                  </div>
-                  <div className="flex flex-col text-left">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-black text-slate-800 tracking-tight">{gedung.name}</h4>
-                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${gedung.badge}`}>
-                        {gedung.badgeText}
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-bold text-emerald-600 mt-0.5">{gedung.subtitle}</span>
-                    <p className="text-[10px] text-slate-400 font-medium line-clamp-1 mt-0.5">{gedung.desc}</p>
-                  </div>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors shrink-0 ml-2">
-                  <ChevronRight size={16} />
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+          <div className="leading-[34px] text-[#FCFCFC]">
+            <span className="text-[28px] font-bold">LOREM IPSUM&nbsp; </span>
+            <span className={`${fasthand.className} text-[44px] font-normal`}>Dolor</span>
+          </div>
 
-        {/* Info Card FAQ */}
-        <div className="bg-emerald-50/60 border border-emerald-100/70 p-4 rounded-3xl flex items-start gap-3 mt-1">
-          <HelpCircle size={18} className="text-emerald-700 shrink-0 mt-0.5" />
-          <p className="text-[11px] text-emerald-800 font-medium leading-relaxed">
-            Perlu bantuan mendesak mengenai admisi UNJ? Silakan <Link href="/login" className="font-bold underline text-emerald-900">masuk ke akun</Link> untuk mengirim pesan ke admin secara instan.
+          <p className="mt-4 text-[15px] leading-[24px] text-[#FCFCFC]">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
           </p>
+
+          <Link
+            href={LOGIN_HREF}
+            className="mt-6 flex h-[48px] w-[160px] items-center justify-center rounded-[12px] bg-white text-[16px] font-semibold text-[#333333] active:opacity-80"
+          >
+            Masuk
+          </Link>
+        </div>
+      </section>
+
+      {/* ---------------- DATA REAL-TIME ---------------- */}
+      <section className="mt-[64px] px-4">
+        <h2 className="text-center text-[30px] font-semibold leading-[40px]">Data Real-Time</h2>
+        <p className="mt-3 text-center text-[15px] leading-[24px]">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+          incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+        </p>
+
+        {/* tombol gedung (geser ke samping kalau layar sempit) */}
+        <div className="-mx-4 mt-6 flex gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {gedungList.map((g) => {
+            const isActive = g.key === activeKey;
+            return (
+              <button
+                key={g.key}
+                type="button"
+                onClick={() => handleSelectGedung(g.key as 'sfd' | 'ls' | 'le')}
+                aria-pressed={isActive}
+                className={`h-[48px] shrink-0 rounded-[12px] px-6 text-[15px] font-semibold transition-colors duration-300 ${
+                  isActive
+                    ? 'bg-[#333333] text-white'
+                    : 'border border-[#333333] bg-transparent text-black'
+                }`}
+              >
+                {g.label}
+              </button>
+            );
+          })}
         </div>
 
-      </main>
+        {/* slider kartu denah lantai: 1 kartu per slide di mobile, swipe horizontal */}
+        <motion.div
+          key={activeGedung.key}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+          className="mt-6 w-full"
+        >
+          <div
+            ref={sliderRef}
+            onScroll={handleScroll}
+            className="flex w-full overflow-x-auto snap-x snap-mandatory select-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {floorItems.map((item) => (
+              <div key={item.lantai} className="w-full shrink-0 snap-start px-0.5">
+                <figure className="flex flex-col items-center">
+                  <div className="w-full rounded-[20px] bg-[#D9D9D9] p-3 shadow-xs">
+                    <div
+                      className="flex w-full items-center justify-center overflow-hidden rounded-[12px] bg-white p-2"
+                      style={{ aspectRatio: item.ratio }}
+                    >
+                      <div className="h-full w-full pointer-events-none select-none" aria-hidden="true">
+                        <item.Map
+                          className="h-full w-full object-contain"
+                          selectedCode={null}
+                          onSelectRoom={() => {}}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <figcaption className="mt-4 flex flex-col items-center text-center">
+                    <span className="text-[18px] font-semibold text-[#333333]">
+                      Lantai {item.lantai}
+                    </span>
+                    <span className="my-1.5 h-[4px] w-[32px] rounded-full bg-[#C2AC72]" />
+                    <span className="text-[14px] font-medium text-[#B8B8B8]">
+                      {activeGedung.label}
+                    </span>
+                  </figcaption>
+                </figure>
+              </div>
+            ))}
+          </div>
 
-      {/* Mobile Footer */}
-      <footer className="mt-8 px-6 text-center">
-        <p className="text-[10px] text-slate-400 font-medium">
-          © 2026 Universitas Negeri Jakarta — HelpDesk Admisi
+          {floorItems.length > 1 && (
+            <div className="mt-6">
+              <DotIndicator
+                total={floorItems.length}
+                activeIndex={slideIndex}
+                onSelect={handleSelectSlide}
+                variant="light"
+              />
+            </div>
+          )}
+        </motion.div>
+      </section>
+
+      {/* ---------------- RESPONSIVE WEBSITE ---------------- */}
+      <section className="mt-[64px] px-4">
+        <div className="relative z-0 mx-auto aspect-[474/558] w-full max-w-[300px] flex items-center justify-center bg-white">
+          <video
+            src="/Landing/Responsive.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            disablePictureInPicture
+            disableRemotePlayback
+            controlsList="nodownload noremoteplayback noplaybackrate"
+            aria-hidden="true"
+            style={{
+              filter: 'brightness(1.03) contrast(1.04)',
+            }}
+            className="pointer-events-none h-full w-full select-none object-contain scale-[1.14] [clip-path:inset(3px_3px_3px_3px)]"
+          />
+        </div>
+
+        <div className="relative z-10 mt-6">
+          <p className="text-[15px] font-semibold leading-[28px] text-[#B8B8B8]">
+            Lorem Ipsum dolor sit
+          </p>
+          <h2 className="mt-1 text-[30px] font-semibold leading-[40px]">Responsive Website</h2>
+          <p className="mt-3 text-[15px] leading-[24px]">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          </p>
+          <Link
+            href="#"
+            className="mt-6 flex h-[48px] w-[160px] items-center justify-center rounded-[12px] bg-[#333333] text-[16px] font-semibold text-white active:opacity-80"
+          >
+            Lorem ipsum
+          </Link>
+        </div>
+      </section>
+
+      {/* ---------------- MASALAH YANG DISELESAIKAN ---------------- */}
+      <section className="mt-[64px] bg-[#333333] px-4 pb-[64px] pt-[56px]">
+        <p className="text-center text-[14px] leading-[24px] text-[#E3E3E3]">
+          Lorem Ipsum dolor sit
         </p>
-      </footer>
+        <h2 className="mt-1 text-center text-[28px] font-semibold leading-[36px] text-white">
+          Masalah yang Diselesaikan
+        </h2>
 
+        <div className="mx-auto mt-8 max-w-[430px]">
+          <TestimonialCarousel />
+        </div>
+      </section>
+
+      {/* ---------------- HOW WE WORKS ---------------- */}
+      <section className="px-4 pb-[80px] pt-[72px]">
+        <div className="flex items-center gap-4">
+          <span className="h-[6px] w-[48px] rounded-[2px] bg-[#C2AC72]" />
+          <span className="text-[18px] font-medium">How We Works</span>
+        </div>
+
+        <h2 className="mt-4 text-[30px] font-bold leading-[40px]">
+          How We <span className="text-[#C2AC72]">Get It Done</span>
+        </h2>
+
+        <h2 className="mt-[64px] text-[30px] font-semibold">Fitur</h2>
+      </section>
     </div>
   );
 }
