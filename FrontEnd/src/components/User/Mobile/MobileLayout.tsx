@@ -472,7 +472,7 @@ const MobileLayout = () => {
                   {/* Admin Room Item - Refined & Clean */}
                   <main className="flex-1 px-6 overflow-y-auto scrollbar-hide pb-32">
                     <div className="flex flex-col gap-4 mt-2">
-                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] ml-2">Admin Helpdesk Admisi</h4>
+                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] ml-2">Admin Helpdesk </h4>
                       <motion.button
                         whileTap={{ scale: 0.96 }}
                         onClick={() => setChatView('ROOM')}
@@ -486,7 +486,7 @@ const MobileLayout = () => {
                         <div className="flex-1 text-left">
                           <div className="flex justify-between items-center">
                             <h4 className="text-base font-black text-slate-800 tracking-tight flex items-center gap-1">
-                              <span>Admin Admisi</span>
+                              <span>Admin </span>
                               <ChevronRight size={16} className="text-slate-400" />
                             </h4>
                           </div>
@@ -533,7 +533,7 @@ const MobileLayout = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <h2 className="font-black text-slate-800 text-sm tracking-tight truncate">
-                              Admin Admisi UNJ
+                              Admin  UNJ
                           </h2>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600">Online</p>
@@ -815,8 +815,8 @@ const MobileLayout = () => {
                             />
                         </motion.div>
                         <div className="flex flex-col">
-                          <h2 className="text-sm font-black text-white tracking-tighter leading-none uppercase">Admin Admisi UNJ</h2>
-                          <span className="text-[8px] font-black text-emerald-300 uppercase tracking-widest mt-0.5">UNJ ADMISI 2026</span>
+                          <h2 className="text-sm font-black text-white tracking-tighter leading-none uppercase">Admin  UNJ</h2>
+                          <span className="text-[8px] font-black text-emerald-300 uppercase tracking-widest mt-0.5">UNJ  2026</span>
                         </div>
                     </div>
                  </div>
@@ -851,7 +851,7 @@ const MobileLayout = () => {
                                 <div className="absolute inset-0 bg-emerald-500/10 scale-0 group-hover:scale-100 transition-transform duration-700 rounded-full"></div>
                                 <Image src="/unj.png" alt="Logo" width={50} height={50} className="relative z-10" />
                             </div>
-                            <h2 className="text-xl font-black text-slate-800 tracking-tight mb-2">Admin Admisi UNJ</h2>
+                            <h2 className="text-xl font-black text-slate-800 tracking-tight mb-2">Admin  UNJ</h2>
                             <p className="text-[12px] font-medium text-slate-400 leading-relaxed mb-8 px-4">
                               Klik tombol dibawah ini untuk mulai berkonsultasi dengan petugas kami.
                             </p>

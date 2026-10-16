@@ -36,12 +36,13 @@ func main() {
 
 	// CORS Setup
 	frontendUrl := os.Getenv("FRONTEND_URL")
-	if frontendUrl == "" {
-		frontendUrl = "http://localhost:3000"
+	allowedOrigins := []string{"http://localhost:3000"}
+	if frontendUrl != "" && frontendUrl != "http://localhost:3000" {
+		allowedOrigins = append(allowedOrigins, frontendUrl)
 	}
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{frontendUrl},
+		AllowOrigins:     allowedOrigins,
 		AllowMethods:     []string{"POST", "GET", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

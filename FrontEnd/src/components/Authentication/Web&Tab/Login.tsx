@@ -56,7 +56,7 @@ const WebLogin = ({ onNavigate, onLogin, loading, captcha, onRefreshCaptcha }: L
             </div>
             <h1 className="text-4xl font-black text-white leading-tight drop-shadow-sm">
               Sistem Bantuan <br /> 
-              <span className="text-emerald-100 italic">Admisi UNJ</span>
+              <span className="text-emerald-100 italic">Admin UNJ</span>
             </h1>
             <p className="text-emerald-50 mt-4 text-base max-w-xs leading-relaxed font-medium">
               Kelola pertanyaan calon user dengan lebih cepat, aman, dan profesional melalui dashboard terpadu.

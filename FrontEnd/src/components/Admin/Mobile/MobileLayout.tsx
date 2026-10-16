@@ -769,8 +769,8 @@ const MobileLayout = () => {
                                 />
                             </motion.div>
                             <div>
-                                <h1 className="text-xl font-black tracking-tight leading-none">Admin Admisi UNJ</h1>
-                                <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-widest mt-1">Admisi 2026</p>
+                                <h1 className="text-xl font-black tracking-tight leading-none">Admin UNJ</h1>
+                                <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-widest mt-1">Admin 2026</p>
                             </div>
                         </div>
                      </div>
@@ -983,7 +983,7 @@ const MobileLayout = () => {
                       <div className="flex items-center justify-between relative z-10 mb-8">
                         <div className="flex flex-col gap-1">
                           <p className="text-[10px] font-black text-emerald-300 uppercase tracking-widest">Server Status</p>
-                          <h4 className="text-lg font-bold">Admisi UNJ Gateway</h4>
+                          <h4 className="text-lg font-bold">Admin UNJ Gateway</h4>
                           <div className="flex items-center gap-2 mt-2">
                             <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
                             <span className="text-[10px] font-black text-emerald-400 uppercase">System Operational</span>
@@ -1043,7 +1043,7 @@ const MobileLayout = () => {
                     <div className="bg-emerald-50/50 p-6 rounded-[32px] border border-emerald-100/50 flex gap-4 items-start">
                       <div className="text-xl">💡</div>
                       <p className="text-[11px] font-medium text-emerald-800 leading-relaxed">
-                        *Tips:* Pastikan selalu membalas pesan user dalam waktu kurang dari 15 menit untuk menjaga performa layanan Admisi UNJ.
+                        *Tips:* Pastikan selalu membalas pesan user dalam waktu kurang dari 15 menit untuk menjaga performa layanan Admin UNJ.
                       </p>
                     </div>
 

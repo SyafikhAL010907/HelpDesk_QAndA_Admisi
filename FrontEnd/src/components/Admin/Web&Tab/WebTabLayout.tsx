@@ -76,7 +76,7 @@ const WebTabLayout = () => {
   const [blessMessage, setBlessMessage] = useState('');
   const [blessFile, setBlessFile] = useState<{ name: string, data: string, type: string } | null>(null);
   const [blessTargetMode, setBlessTargetMode] = useState<'waiting_room' | 'all_users' | 'specific_users'>('waiting_room');
-  const [allUsers, setAllUsers] = useState<{username: string, gmail: string}[]>([]);
+  const [allUsers, setAllUsers] = useState<{ username: string, gmail: string }[]>([]);
   const [selectedBlessUsers, setSelectedBlessUsers] = useState<string[]>([]);
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [isBlasting, setIsBlasting] = useState(false);
@@ -95,9 +95,9 @@ const WebTabLayout = () => {
   const [isAILoading, setIsAILoading] = useState(false); // Loading state saat toggle
   const [showAIConfirm, setShowAIConfirm] = useState(false); // Konfirmasi sebelum toggle AI
   const [pendingAIState, setPendingAIState] = useState(false); // State AI yang akan diaktifkan
-  const [alertConfig, setAlertConfig] = useState<{show: boolean, type: 'alert' | 'confirm', message: string, title?: string, onConfirm?: () => void}>({show: false, type: 'alert', message: ''});
+  const [alertConfig, setAlertConfig] = useState<{ show: boolean, type: 'alert' | 'confirm', message: string, title?: string, onConfirm?: () => void }>({ show: false, type: 'alert', message: '' });
 
-  const showAlert = (message: string, title?: string) => setAlertConfig({show: true, type: 'alert', message, title});
+  const showAlert = (message: string, title?: string) => setAlertConfig({ show: true, type: 'alert', message, title });
   // ─────────────────────────────────────────────────────────────────────────
 
   const downloadFile = (dataUrl: string, fileName: string) => {
@@ -186,7 +186,7 @@ const WebTabLayout = () => {
     const parts = text.split(regex);
     return (
       <span className="whitespace-pre-wrap leading-relaxed">
-        {parts.map((part, i) => 
+        {parts.map((part, i) =>
           part.toLowerCase() === query.toLowerCase() ? (
             <span key={i} className="bg-amber-300 text-slate-900 font-extrabold px-1 rounded-sm shadow-sm border border-amber-400 mx-0.5 select-all">
               {part}
@@ -311,17 +311,17 @@ const WebTabLayout = () => {
     const storedUser = localStorage.getItem('user');
     if (!storedUser) return;
     const { token } = JSON.parse(storedUser);
-    
+
     try {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chat/mark-unread/${selectedChat.id}`, {
-            method: 'POST',
-            headers: { 'Authorization': token }
-        });
-        setIsRoomMenuOpen(false);
-        setSelectedChat(null); 
-        fetchRooms(token);
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chat/mark-unread/${selectedChat.id}`, {
+        method: 'POST',
+        headers: { 'Authorization': token }
+      });
+      setIsRoomMenuOpen(false);
+      setSelectedChat(null);
+      fetchRooms(token);
     } catch (err) {
-        console.error("Gagal tandai belum dibaca:", err);
+      console.error("Gagal tandai belum dibaca:", err);
     }
   };
 
@@ -350,7 +350,7 @@ const WebTabLayout = () => {
     if (storedUser && selectedChat && adminGmail) {
       const { token } = JSON.parse(storedUser);
       fetchMessages(selectedChat.id, token);
-      
+
       const interval = setInterval(() => fetchMessages(selectedChat.id, token), 3000);
       return () => clearInterval(interval);
     }
@@ -364,7 +364,7 @@ const WebTabLayout = () => {
         scrollToBottom('auto'); // Langsung ke bawah tanpa animasi biar cepet
         lastRoomIdRef.current = selectedChat.id;
         setShouldAutoScroll(true);
-      } 
+      }
       // Jika user emang di posisi bawah, ikuti pesan baru
       else if (shouldAutoScroll) {
         scrollToBottom('smooth');
@@ -389,7 +389,7 @@ const WebTabLayout = () => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': token
         },
@@ -513,7 +513,7 @@ const WebTabLayout = () => {
       showAlert('Pilih minimal satu user tujuan!', 'Pilih User');
       return;
     }
-    
+
     const storedUser = localStorage.getItem('user');
     if (!storedUser) return;
     const { token, gmail } = JSON.parse(storedUser);
@@ -531,7 +531,7 @@ const WebTabLayout = () => {
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chat/broadcast`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': token
         },
@@ -555,7 +555,7 @@ const WebTabLayout = () => {
 
   const handleBulkDelete = async () => {
     if (selectedRooms.length === 0) return;
-    
+
     setAlertConfig({
       show: true,
       type: 'confirm',
@@ -569,7 +569,7 @@ const WebTabLayout = () => {
         try {
           const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chat/delete-bulk`, {
             method: 'POST',
-            headers: { 
+            headers: {
               'Content-Type': 'application/json',
               'Authorization': token
             },
@@ -581,8 +581,8 @@ const WebTabLayout = () => {
             setSelectedRooms([]);
             setIsDeleteMode(false);
             if (selectedChat && selectedRooms.includes(selectedChat.id)) {
-                setSelectedChat(null);
-                setMessages([]);
+              setSelectedChat(null);
+              setMessages([]);
             }
             fetchRooms(token);
           } else {
@@ -598,7 +598,7 @@ const WebTabLayout = () => {
   };
 
   const toggleSelectRoom = (id: number) => {
-    setSelectedRooms(prev => 
+    setSelectedRooms(prev =>
       prev.includes(id) ? prev.filter(rid => rid !== id) : [...prev, id]
     );
   };
@@ -639,7 +639,7 @@ const WebTabLayout = () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
             'Authorization': token
           },
@@ -670,84 +670,84 @@ const WebTabLayout = () => {
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans text-slate-900">
       {/* Sidebar - Chat List */}
       <aside className="w-[300px] lg:w-[380px] bg-white border-r border-slate-100 flex flex-col z-20 relative shadow-[10px_0_30px_-15px_rgba(0,0,0,0.05)] transition-all duration-500">
-        
+
         {/* TOP PREMIUM CARD (Floating Style) */}
         <div className="p-5 pt-8">
-            <div className="bg-linear-to-br from-emerald-600 to-emerald-800 rounded-[40px] p-8 text-white shadow-2xl shadow-emerald-900/20 relative overflow-hidden group">
-                {/* Decorative Elements */}
-                <div className="absolute top-[-30px] right-[-30px] w-48 h-48 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
-                <div className="absolute bottom-[-30px] left-[-30px] w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700"></div>
+          <div className="bg-linear-to-br from-emerald-600 to-emerald-800 rounded-[40px] p-8 text-white shadow-2xl shadow-emerald-900/20 relative overflow-hidden group">
+            {/* Decorative Elements */}
+            <div className="absolute top-[-30px] right-[-30px] w-48 h-48 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+            <div className="absolute bottom-[-30px] left-[-30px] w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700"></div>
 
-                <div className="relative z-10 flex flex-col gap-10">
-                    {/* Top Row: Logo & Welcome Message */}
-                    <div className="flex items-center gap-5">
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="p-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl"
-                        >
-                            <Image
-                                src="/unj.png"
-                                alt="Logo UNJ"
-                                width={50}
-                                height={50}
-                                className="object-contain drop-shadow-2xl"
-                            />
-                        </motion.div>
-                        <div className="flex flex-col">
-                            <h4 className="text-xl font-bold leading-tight tracking-tight text-white drop-shadow-sm">Selamat Datang,<br />{adminName}!</h4>
-                        </div>
-                    </div>
-
-                    {/* Bottom Row: Integrated Stats & Toggle (Stretched 50/50) */}
-                    <div className="flex items-center gap-3 w-full max-w-[320px] relative z-20">
-                         {/* Mini Stats - Flex 1 */}
-                         <div className="flex-1 flex items-center justify-center gap-2 bg-white/10 backdrop-blur-md py-2 rounded-2xl border border-white/10 shadow-sm">
-                            <div className="w-5 h-5 bg-emerald-400 rounded-lg flex items-center justify-center text-emerald-900 shadow-sm">
-                                <MessageSquare size={10} />
-                            </div>
-                            <span className="text-[9px] font-black text-white whitespace-nowrap uppercase tracking-tighter">
-                                {rooms.filter(r => (r.unread_count || 0) > 0).length} Respon
-                            </span>
-                         </div>
-
-                         {/* Mini Toggle - Flex 1 */}
-                         <div className="flex-1 flex items-center justify-between gap-2 bg-white/10 backdrop-blur-md px-3 py-2 rounded-2xl border border-white/10 shadow-sm group/mini">
-                            <div className="flex items-center gap-1.5">
-                                <Settings size={12} className="text-emerald-200 group-hover/mini:rotate-90 transition-transform duration-500" />
-                                <span className="text-[9px] font-black text-white uppercase tracking-tighter">AI</span>
-                            </div>
-                            <div 
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    // ⚠️  DISABLE: Ganti handleAIToggleRequest → setIsInfoActive(!isInfoActive)
-                                    if (!isAILoading) handleAIToggleRequest(!isInfoActive);
-                                }}
-                                className={cn(
-                                    "relative w-8 h-4 rounded-full p-0.5 transition-all duration-500 cursor-pointer",
-                                    isInfoActive ? "bg-emerald-400" : "bg-white/20",
-                                    isAILoading && "opacity-60 cursor-wait"
-                                )}
-                            >
-                                <motion.div 
-                                    animate={{ x: isInfoActive ? 16 : 0 }}
-                                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                                    className="w-3 h-3 bg-white rounded-full shadow-md flex items-center justify-center"
-                                >
-                                    {isAILoading ? (
-                                        <div className="w-2 h-2 border border-emerald-400 border-t-transparent rounded-full animate-spin" />
-                                    ) : (
-                                        <div className={cn(
-                                            "w-1 h-1 rounded-full",
-                                            isInfoActive ? "bg-emerald-500" : "bg-slate-300"
-                                        )} />
-                                    )}
-                                </motion.div>
-                            </div>
-                         </div>
-                    </div>
+            <div className="relative z-10 flex flex-col gap-10">
+              {/* Top Row: Logo & Welcome Message */}
+              <div className="flex items-center gap-5">
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="p-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-xl"
+                >
+                  <Image
+                    src="/unj.png"
+                    alt="Logo UNJ"
+                    width={50}
+                    height={50}
+                    className="object-contain drop-shadow-2xl"
+                  />
+                </motion.div>
+                <div className="flex flex-col">
+                  <h4 className="text-xl font-bold leading-tight tracking-tight text-white drop-shadow-sm">Selamat Datang,<br />{adminName}!</h4>
                 </div>
+              </div>
+
+              {/* Bottom Row: Integrated Stats & Toggle (Stretched 50/50) */}
+              <div className="flex items-center gap-3 w-full max-w-[320px] relative z-20">
+                {/* Mini Stats - Flex 1 */}
+                <div className="flex-1 flex items-center justify-center gap-2 bg-white/10 backdrop-blur-md py-2 rounded-2xl border border-white/10 shadow-sm">
+                  <div className="w-5 h-5 bg-emerald-400 rounded-lg flex items-center justify-center text-emerald-900 shadow-sm">
+                    <MessageSquare size={10} />
+                  </div>
+                  <span className="text-[9px] font-black text-white whitespace-nowrap uppercase tracking-tighter">
+                    {rooms.filter(r => (r.unread_count || 0) > 0).length} Respon
+                  </span>
+                </div>
+
+                {/* Mini Toggle - Flex 1 */}
+                <div className="flex-1 flex items-center justify-between gap-2 bg-white/10 backdrop-blur-md px-3 py-2 rounded-2xl border border-white/10 shadow-sm group/mini">
+                  <div className="flex items-center gap-1.5">
+                    <Settings size={12} className="text-emerald-200 group-hover/mini:rotate-90 transition-transform duration-500" />
+                    <span className="text-[9px] font-black text-white uppercase tracking-tighter">AI</span>
+                  </div>
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // ⚠️  DISABLE: Ganti handleAIToggleRequest → setIsInfoActive(!isInfoActive)
+                      if (!isAILoading) handleAIToggleRequest(!isInfoActive);
+                    }}
+                    className={cn(
+                      "relative w-8 h-4 rounded-full p-0.5 transition-all duration-500 cursor-pointer",
+                      isInfoActive ? "bg-emerald-400" : "bg-white/20",
+                      isAILoading && "opacity-60 cursor-wait"
+                    )}
+                  >
+                    <motion.div
+                      animate={{ x: isInfoActive ? 16 : 0 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                      className="w-3 h-3 bg-white rounded-full shadow-md flex items-center justify-center"
+                    >
+                      {isAILoading ? (
+                        <div className="w-2 h-2 border border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <div className={cn(
+                          "w-1 h-1 rounded-full",
+                          isInfoActive ? "bg-emerald-500" : "bg-slate-300"
+                        )} />
+                      )}
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
 
         <div className="px-4 pb-4">
@@ -769,7 +769,7 @@ const WebTabLayout = () => {
           <div className="flex bg-slate-50/80 p-1.5 rounded-2xl border border-slate-100 min-h-[46px] items-center justify-center relative overflow-hidden">
             <AnimatePresence mode="wait">
               {isDeleteMode ? (
-                <motion.div 
+                <motion.div
                   key="delete-mode-active"
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -777,14 +777,14 @@ const WebTabLayout = () => {
                   transition={{ duration: 0.2 }}
                   className="flex w-full gap-1.5"
                 >
-                  <button 
+                  <button
                     onClick={toggleSelectAll}
                     className="flex-1 py-2 px-3 rounded-xl text-[10px] font-black text-emerald-600 bg-white shadow-xs border border-emerald-50 whitespace-nowrap"
                   >
                     {selectedRooms.length === filteredRooms.length ? "Batal Semua" : "Pilih Semua"}
                   </button>
 
-                  <button 
+                  <button
                     onClick={() => {
                       setIsDeleteMode(false);
                       setSelectedRooms([]);
@@ -794,7 +794,7 @@ const WebTabLayout = () => {
                     Batal
                   </button>
 
-                  <button 
+                  <button
                     onClick={handleBulkDelete}
                     disabled={selectedRooms.length === 0}
                     className={cn(
@@ -806,7 +806,7 @@ const WebTabLayout = () => {
                   </button>
                 </motion.div>
               ) : (
-                <motion.button 
+                <motion.button
                   key="delete-mode-off"
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -825,12 +825,12 @@ const WebTabLayout = () => {
 
         <div className="px-4 pb-2">
           <div className="flex bg-slate-50/80 p-1.5 rounded-2xl border border-slate-100 gap-1.5">
-            <button 
+            <button
               onClick={() => setActiveFilter('unreading')}
               className={cn(
                 "flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all duration-300 flex items-center justify-center gap-1.5",
-                activeFilter === 'unreading' 
-                  ? "bg-white text-emerald-600 shadow-sm ring-1 ring-slate-200/50" 
+                activeFilter === 'unreading'
+                  ? "bg-white text-emerald-600 shadow-sm ring-1 ring-slate-200/50"
                   : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
               )}
             >
@@ -839,18 +839,18 @@ const WebTabLayout = () => {
                 <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
               )}
             </button>
-            <button 
+            <button
               onClick={() => setActiveFilter('reading')}
               className={cn(
                 "flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all duration-300",
-                activeFilter === 'reading' 
-                  ? "bg-white text-emerald-600 shadow-sm ring-1 ring-slate-200/50" 
+                activeFilter === 'reading'
+                  ? "bg-white text-emerald-600 shadow-sm ring-1 ring-slate-200/50"
                   : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
               )}
             >
               Reading
             </button>
-            <button 
+            <button
               onClick={() => setShowBlessModal(true)}
               className={cn(
                 "flex-1 py-2 px-3 rounded-xl text-xs font-black transition-all duration-300 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50"
@@ -865,7 +865,7 @@ const WebTabLayout = () => {
         <AnimatePresence>
           {showBlessModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -882,7 +882,7 @@ const WebTabLayout = () => {
 
                   {/* Target Selector */}
                   <div className="mb-6 bg-slate-50 p-1.5 rounded-2xl border border-slate-100 flex gap-1.5">
-                    <button 
+                    <button
                       onClick={() => setBlessTargetMode('waiting_room')}
                       className={cn(
                         "flex-1 py-2.5 px-3 rounded-xl text-[11px] font-black transition-all duration-300",
@@ -891,7 +891,7 @@ const WebTabLayout = () => {
                     >
                       Active Room
                     </button>
-                    <button 
+                    <button
                       onClick={() => setBlessTargetMode('all_users')}
                       className={cn(
                         "flex-1 py-2.5 px-3 rounded-xl text-[11px] font-black transition-all duration-300",
@@ -900,7 +900,7 @@ const WebTabLayout = () => {
                     >
                       Semua Akun
                     </button>
-                    <button 
+                    <button
                       onClick={() => setBlessTargetMode('specific_users')}
                       className={cn(
                         "flex-1 py-2.5 px-3 rounded-xl text-[11px] font-black transition-all duration-300",
@@ -913,7 +913,7 @@ const WebTabLayout = () => {
 
                   <AnimatePresence mode="wait">
                     {blessTargetMode === 'specific_users' && (
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
@@ -921,9 +921,9 @@ const WebTabLayout = () => {
                       >
                         <div className="relative">
                           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                          <input 
-                            type="text" 
-                            placeholder="Cari nama atau email..." 
+                          <input
+                            type="text"
+                            placeholder="Cari nama atau email..."
                             value={userSearchQuery}
                             onChange={(e) => setUserSearchQuery(e.target.value)}
                             className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
@@ -938,12 +938,12 @@ const WebTabLayout = () => {
                               )}>
                                 {selectedBlessUsers.includes(user.gmail) && <CheckCheck size={10} />}
                               </div>
-                              <input 
-                                type="checkbox" 
-                                className="hidden" 
+                              <input
+                                type="checkbox"
+                                className="hidden"
                                 checked={selectedBlessUsers.includes(user.gmail)}
                                 onChange={() => {
-                                  setSelectedBlessUsers(prev => 
+                                  setSelectedBlessUsers(prev =>
                                     prev.includes(user.gmail) ? prev.filter(g => g !== user.gmail) : [...prev, user.gmail]
                                   );
                                 }}
@@ -961,7 +961,7 @@ const WebTabLayout = () => {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                  
+
                   <div className="mb-4">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Pilih Templat:</p>
                     <div className="flex flex-wrap gap-2">
@@ -989,14 +989,14 @@ const WebTabLayout = () => {
                     placeholder={blessFile ? "Tambahkan keterangan file..." : "Tulis pengumuman di sini..."}
                     className="w-full h-32 p-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none font-medium"
                   />
-                  
+
                   <div className="mt-4 flex items-center justify-between">
                     <div className="flex flex-col gap-3 w-full">
                       <div className="flex items-center gap-2">
-                        <input 
-                          type="file" 
-                          id="bless-file" 
-                          className="hidden" 
+                        <input
+                          type="file"
+                          id="bless-file"
+                          className="hidden"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
@@ -1017,7 +1017,7 @@ const WebTabLayout = () => {
                             }
                           }}
                         />
-                        <label 
+                        <label
                           htmlFor="bless-file"
                           className="flex items-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-xl text-xs font-bold cursor-pointer transition-all border border-emerald-100"
                         >
@@ -1025,7 +1025,7 @@ const WebTabLayout = () => {
                           {blessFile ? 'Ganti File' : 'Lampirkan File'}
                         </label>
                         {blessFile && (
-                          <button 
+                          <button
                             onClick={() => setBlessFile(null)}
                             className="text-rose-500 text-xs font-bold hover:underline"
                           >
@@ -1036,7 +1036,7 @@ const WebTabLayout = () => {
 
                       {/* Preview Section */}
                       {blessFile && (
-                        <motion.div 
+                        <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           className="p-3 bg-slate-50 rounded-2xl border border-slate-100"
@@ -1044,9 +1044,9 @@ const WebTabLayout = () => {
                           {blessFile.type === 'image' ? (
                             <div className="flex flex-col gap-2">
                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Preview Gambar:</p>
-                              <img 
-                                src={blessFile.data} 
-                                alt="Preview" 
+                              <img
+                                src={blessFile.data}
+                                alt="Preview"
                                 onClick={() => setSelectedImage(blessFile.data)}
                                 className="w-full max-h-48 object-contain rounded-xl cursor-zoom-in hover:opacity-90 transition-all border border-slate-200 bg-slate-100/50"
                               />
@@ -1059,7 +1059,7 @@ const WebTabLayout = () => {
                                 </div>
                                 <p className="text-xs font-bold text-slate-700 truncate">{blessFile.name}</p>
                               </div>
-                              <button 
+                              <button
                                 onClick={() => viewFile(blessFile.data)}
                                 className="px-3 py-1.5 bg-white border border-slate-200 text-[10px] font-black text-slate-600 rounded-lg hover:bg-slate-50 transition-all flex items-center gap-1"
                               >
@@ -1073,9 +1073,9 @@ const WebTabLayout = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="p-6 bg-slate-50 flex gap-3">
-                  <button 
+                  <button
                     onClick={() => {
                       setShowBlessModal(false);
                       setBlessFile(null);
@@ -1086,7 +1086,7 @@ const WebTabLayout = () => {
                   >
                     Batal
                   </button>
-                  <button 
+                  <button
                     onClick={handleBlessChat}
                     disabled={isBlasting || (!blessMessage.trim() && !blessFile)}
                     className="flex-2 py-3.5 bg-emerald-500 text-white rounded-xl text-sm font-black shadow-lg shadow-emerald-200 hover:bg-emerald-600 transition-all disabled:opacity-50 disabled:shadow-none"
@@ -1110,10 +1110,10 @@ const WebTabLayout = () => {
                   onClick={() => isDeleteMode ? toggleSelectRoom(chat.id) : handleSelectRoom(chat)}
                   className={cn(
                     "relative p-4 flex items-center gap-4 rounded-[24px] cursor-pointer transition-all duration-300 group",
-                    isDeleteMode && selectedRooms.includes(chat.id) ? "bg-red-50 border-red-100 shadow-sm" : 
-                    isActive
-                      ? "bg-white shadow-[0_10px_25px_-5px_rgba(16,185,129,0.1)] border border-emerald-50"
-                      : "hover:bg-slate-50/80 border border-transparent"
+                    isDeleteMode && selectedRooms.includes(chat.id) ? "bg-red-50 border-red-100 shadow-sm" :
+                      isActive
+                        ? "bg-white shadow-[0_10px_25px_-5px_rgba(16,185,129,0.1)] border border-emerald-50"
+                        : "hover:bg-slate-50/80 border border-transparent"
                   )}
                 >
                   {isDeleteMode && (
@@ -1151,20 +1151,20 @@ const WebTabLayout = () => {
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                        <p className={cn(
-                          "text-xs truncate pr-4 mt-1 flex-1",
-                          (chat.unread > 0 || chat.is_marked_unread) ? "text-slate-700 font-bold" : "text-slate-400 font-medium"
-                        )}>
-                          {chat.lastMessage}
-                        </p>
-                        {chat.unread > 0 ? (
-                          <div className="bg-emerald-500 text-white text-[10px] font-bold h-5 min-w-[20px] px-1.5 flex items-center justify-center rounded-full shadow-lg shadow-emerald-200/50 animate-bounce">
-                            {chat.unread}
-                          </div>
-                        ) : chat.is_marked_unread ? (
-                          <div className="bg-emerald-500 w-3 h-3 rounded-full shadow-lg shadow-emerald-200/50 animate-pulse mt-1 mr-1"></div>
-                        ) : null}
-                      </div>
+                      <p className={cn(
+                        "text-xs truncate pr-4 mt-1 flex-1",
+                        (chat.unread > 0 || chat.is_marked_unread) ? "text-slate-700 font-bold" : "text-slate-400 font-medium"
+                      )}>
+                        {chat.lastMessage}
+                      </p>
+                      {chat.unread > 0 ? (
+                        <div className="bg-emerald-500 text-white text-[10px] font-bold h-5 min-w-[20px] px-1.5 flex items-center justify-center rounded-full shadow-lg shadow-emerald-200/50 animate-bounce">
+                          {chat.unread}
+                        </div>
+                      ) : chat.is_marked_unread ? (
+                        <div className="bg-emerald-500 w-3 h-3 rounded-full shadow-lg shadow-emerald-200/50 animate-pulse mt-1 mr-1"></div>
+                      ) : null}
+                    </div>
                   </div>
                 </motion.div>
               );
@@ -1174,40 +1174,40 @@ const WebTabLayout = () => {
 
         {/* LOGOUT BUTTON AT BOTTOM */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/50">
-            <button
-                onClick={async () => { 
-                    const storedUser = localStorage.getItem('user');
-                    if (storedUser) {
-                        const { token } = JSON.parse(storedUser);
-                        try {
-                            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
-                                method: 'POST',
-                                headers: { 'Authorization': `Bearer ${token}` }
-                            });
-                        } catch (err) {
-                            console.error("Logout error:", err);
-                        }
-                    }
-                    localStorage.removeItem('user'); 
-                    window.location.reload(); 
-                }}
-                className="w-full flex items-center justify-center gap-3 py-3.5 bg-white border border-rose-100 text-rose-600 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all duration-300 shadow-sm active:scale-[0.98]"
-            >
-                <LogOut size={18} />
-                Keluar Akun
-            </button>
+          <button
+            onClick={async () => {
+              const storedUser = localStorage.getItem('user');
+              if (storedUser) {
+                const { token } = JSON.parse(storedUser);
+                try {
+                  await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                  });
+                } catch (err) {
+                  console.error("Logout error:", err);
+                }
+              }
+              localStorage.removeItem('user');
+              window.location.reload();
+            }}
+            className="w-full flex items-center justify-center gap-3 py-3.5 bg-white border border-rose-100 text-rose-600 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all duration-300 shadow-sm active:scale-[0.98]"
+          >
+            <LogOut size={18} />
+            Keluar Akun
+          </button>
         </div>
       </aside>
 
       {/* Main Chat Area */}
       <main className="flex-1 flex flex-col bg-slate-50 relative overflow-hidden">
         {selectedChat ? (
-          <div 
+          <div
             className="flex-1 flex flex-col bg-slate-50 relative overflow-hidden"
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20c0-11.046 8.954-20 20-20v20H20zM0 20c11.046 0 20-8.954 20-20v20H0zM0 20c11.046 0 20 8.954 20 20H0V20zm20 20c0-11.046 8.954-20 20-20v20H20z' fill='%23059669' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E")`
             }}
-          >  
+          >
             <header className="px-8 py-5 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between z-10 shadow-sm">
               <div className="flex items-center gap-4">
                 <Avatar size="md" />
@@ -1231,15 +1231,15 @@ const WebTabLayout = () => {
               </div>
               <div className="flex items-center gap-2 relative">
                 {isLocalSearchOpen ? (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: 340 }}
                     exit={{ opacity: 0, width: 0 }}
                     className="flex items-center bg-slate-50 border border-slate-200 rounded-[24px] px-4 py-1.5 h-10 ring-4 ring-emerald-500/5 focus-within:border-emerald-200 focus-within:bg-white focus-within:ring-emerald-500/10 transition-all duration-300 gap-2"
                   >
                     <SearchIcon size={16} className="text-emerald-500 shrink-0" />
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       autoFocus
                       value={localSearchQuery}
                       onChange={(e) => setLocalSearchQuery(e.target.value)}
@@ -1251,7 +1251,7 @@ const WebTabLayout = () => {
                         <span className="text-[10px] font-black text-slate-500 min-w-[30px] text-center select-none">
                           {searchMatchIndex}/{searchMatches.length}
                         </span>
-                        <button 
+                        <button
                           onClick={() => {
                             if (searchMatches.length === 0) return;
                             const nextIdx = searchMatchIndex <= 1 ? searchMatches.length : searchMatchIndex - 1;
@@ -1262,7 +1262,7 @@ const WebTabLayout = () => {
                         >
                           <ChevronUp size={14} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => {
                             if (searchMatches.length === 0) return;
                             const nextIdx = searchMatchIndex >= searchMatches.length ? 1 : searchMatchIndex + 1;
@@ -1275,7 +1275,7 @@ const WebTabLayout = () => {
                         </button>
                       </div>
                     )}
-                    <button 
+                    <button
                       onClick={() => {
                         setLocalSearchQuery('');
                         setIsLocalSearchOpen(false);
@@ -1286,7 +1286,7 @@ const WebTabLayout = () => {
                     </button>
                   </motion.div>
                 ) : (
-                  <button 
+                  <button
                     onClick={() => setIsLocalSearchOpen(true)}
                     className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all"
                   >
@@ -1294,7 +1294,7 @@ const WebTabLayout = () => {
                   </button>
                 )}
                 <div className="relative">
-                  <button 
+                  <button
                     onClick={() => setIsRoomMenuOpen(!isRoomMenuOpen)}
                     className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"
                   >
@@ -1304,13 +1304,13 @@ const WebTabLayout = () => {
                     {isRoomMenuOpen && (
                       <>
                         <div className="fixed inset-0 z-40" onClick={() => setIsRoomMenuOpen(false)}></div>
-                        <motion.div 
+                        <motion.div
                           initial={{ opacity: 0, scale: 0.95, y: 10 }}
                           animate={{ opacity: 1, scale: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.95, y: 10 }}
                           className="absolute right-0 top-12 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 origin-top-right"
                         >
-                          <button 
+                          <button
                             onClick={handleMarkAsUnread}
                             className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
                           >
@@ -1321,7 +1321,7 @@ const WebTabLayout = () => {
                     )}
                   </AnimatePresence>
                 </div>
-                <button 
+                <button
                   onClick={() => setSelectedChat(null)}
                   className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-100"
                 >
@@ -1330,7 +1330,7 @@ const WebTabLayout = () => {
               </div>
             </header>
 
-            <div 
+            <div
               ref={scrollContainerRef}
               onScroll={handleScroll}
               className="flex-1 overflow-y-auto p-4 lg:p-10 flex flex-col gap-8 scrollbar-hide"
@@ -1340,7 +1340,7 @@ const WebTabLayout = () => {
                   Secure Communication
                 </span>
               </div>
-              
+
               <AnimatePresence>
                 {(() => {
                   const filteredMessages = localSearchQuery.trim()
@@ -1348,100 +1348,100 @@ const WebTabLayout = () => {
                     : messages;
                   return filteredMessages.map((msg: Message, idx: number) => {
                     const isMe = msg.sender === 'admin';
-                  return (
-                    <motion.div
-                      id={`msg-${msg.id || msg.timestamp}`}
-                      key={msg.id || idx}
-                      initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      className={cn(
-                        "flex flex-col gap-1.5 max-w-[75%]",
-                        isMe ? "self-end items-end" : "self-start items-start"
-                      )}
-                    >
-                      <div className={cn(
-                        "px-6 py-4 rounded-4xl shadow-md text-sm font-medium leading-relaxed relative",
-                        isMe
-                          ? "bg-linear-to-br from-emerald-400 to-emerald-500 text-white rounded-tr-none border border-emerald-300 shadow-emerald-100"
-                          : "bg-white text-slate-700 rounded-tl-none border border-slate-100 shadow-slate-100/50"
-                      )}>
-                        {msg.type === 'image' ? (
-                          <div className="flex flex-col gap-2">
-                            {(() => {
+                    return (
+                      <motion.div
+                        id={`msg-${msg.id || msg.timestamp}`}
+                        key={msg.id || idx}
+                        initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        className={cn(
+                          "flex flex-col gap-1.5 max-w-[75%]",
+                          isMe ? "self-end items-end" : "self-start items-start"
+                        )}
+                      >
+                        <div className={cn(
+                          "px-6 py-4 rounded-4xl shadow-md text-sm font-medium leading-relaxed relative",
+                          isMe
+                            ? "bg-linear-to-br from-emerald-400 to-emerald-500 text-white rounded-tr-none border border-emerald-300 shadow-emerald-100"
+                            : "bg-white text-slate-700 rounded-tl-none border border-slate-100 shadow-slate-100/50"
+                        )}>
+                          {msg.type === 'image' ? (
+                            <div className="flex flex-col gap-2">
+                              {(() => {
+                                const parts = msg.text.split('|');
+                                const imgData = parts.length > 1 ? parts[1] : msg.text;
+                                const caption = parts.length > 2 ? parts[2] : null;
+                                return (
+                                  <>
+                                    <img
+                                      src={imgData}
+                                      alt="Sent image"
+                                      onClick={() => setSelectedImage(imgData)}
+                                      className="rounded-2xl max-w-[240px] h-auto shadow-sm border border-slate-100 cursor-zoom-in hover:opacity-90 transition-all"
+                                    />
+                                    {caption && (
+                                      <FormattedText text={caption} className="text-sm font-medium leading-relaxed mt-1 px-1" />
+                                    )}
+                                  </>
+                                );
+                              })()}
+                            </div>
+                          ) : msg.type === 'file' ? (
+                            (() => {
                               const parts = msg.text.split('|');
-                              const imgData = parts.length > 1 ? parts[1] : msg.text;
-                              const caption = parts.length > 2 ? parts[2] : null;
+                              const fileName = parts.length > 1 ? parts[0] : "Dokumen";
+                              const fileData = parts.length > 1 ? parts[1] : msg.text;
                               return (
                                 <>
-                                  <img 
-                                    src={imgData} 
-                                    alt="Sent image" 
-                                    onClick={() => setSelectedImage(imgData)}
-                                    className="rounded-2xl max-w-[240px] h-auto shadow-sm border border-slate-100 cursor-zoom-in hover:opacity-90 transition-all"
-                                  />
-                                  {caption && (
-                                    <FormattedText text={caption} className="text-sm font-medium leading-relaxed mt-1 px-1" />
-                                  )}
+                                  <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100/50 min-w-[200px]">
+                                    <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                                      <FileText size={20} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-xs font-bold text-slate-700 truncate">{fileName}</p>
+                                      <div className="flex items-center gap-3 mt-1">
+                                        <button
+                                          onClick={() => viewFile(fileData)}
+                                          className="text-[10px] font-black text-emerald-600 hover:underline flex items-center gap-1"
+                                        >
+                                          <Eye size={10} />
+                                          Lihat
+                                        </button>
+                                        <button
+                                          onClick={() => downloadFile(fileData, fileName)}
+                                          className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1"
+                                        >
+                                          <Download size={10} />
+                                          Download
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  {(() => {
+                                    const caption = msg.text.split('|')[2];
+                                    return caption ? (
+                                      <div className="mt-3 px-1 border-t border-slate-100 pt-3">
+                                        <FormattedText text={caption} className="text-sm font-medium leading-relaxed" />
+                                      </div>
+                                    ) : null;
+                                  })()}
                                 </>
                               );
-                            })()}
+                            })()
+                          ) : (
+                            renderHighlightedText(msg.text, localSearchQuery)
+                          )}
+                          <div className={cn(
+                            "flex items-center gap-2 mt-2.5 justify-end",
+                            isMe ? "text-emerald-50" : "text-slate-400"
+                          )}>
+                            <span className="text-[10px] font-bold">{msg.timestamp}</span>
+                            {isMe && <CheckCheck size={14} className="text-emerald-100" />}
                           </div>
-                        ) : msg.type === 'file' ? (
-                          (() => {
-                            const parts = msg.text.split('|');
-                            const fileName = parts.length > 1 ? parts[0] : "Dokumen";
-                            const fileData = parts.length > 1 ? parts[1] : msg.text;
-                            return (
-                              <>
-                                <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100/50 min-w-[200px]">
-                                <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
-                                  <FileText size={20} />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-bold text-slate-700 truncate">{fileName}</p>
-                                  <div className="flex items-center gap-3 mt-1">
-                                    <button 
-                                      onClick={() => viewFile(fileData)}
-                                      className="text-[10px] font-black text-emerald-600 hover:underline flex items-center gap-1"
-                                    >
-                                      <Eye size={10} />
-                                      Lihat
-                                    </button>
-                                    <button 
-                                      onClick={() => downloadFile(fileData, fileName)}
-                                      className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1"
-                                    >
-                                      <Download size={10} />
-                                      Download
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                              {(() => {
-                                const caption = msg.text.split('|')[2];
-                                return caption ? (
-                                  <div className="mt-3 px-1 border-t border-slate-100 pt-3">
-                                    <FormattedText text={caption} className="text-sm font-medium leading-relaxed" />
-                                  </div>
-                                ) : null;
-                              })()}
-                              </>
-                            );
-                          })()
-                        ) : (
-                          renderHighlightedText(msg.text, localSearchQuery)
-                        )}
-                        <div className={cn(
-                          "flex items-center gap-2 mt-2.5 justify-end",
-                          isMe ? "text-emerald-50" : "text-slate-400"
-                        )}>
-                          <span className="text-[10px] font-bold">{msg.timestamp}</span>
-                          {isMe && <CheckCheck size={14} className="text-emerald-100" />}
                         </div>
-                      </div>
-                    </motion.div>
-                  );
-                });
+                      </motion.div>
+                    );
+                  });
                 })()}
               </AnimatePresence>
               <div ref={messagesEndRef} />
@@ -1451,7 +1451,7 @@ const WebTabLayout = () => {
               <div className="bg-white border border-slate-100 rounded-[32px] shadow-2xl shadow-slate-200/50 overflow-hidden">
                 <div className="p-6 flex flex-col gap-4">
                   <div className="flex items-stretch gap-4">
-                    <motion.button 
+                    <motion.button
                       whileHover={{ y: -2, scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       type="button"
@@ -1497,7 +1497,7 @@ const WebTabLayout = () => {
                           animate={{ opacity: 1 }}
                           className="flex-1 p-4 border-2 border-dashed border-slate-100 rounded-[28px] flex items-center justify-center bg-slate-50/30"
                         >
-                           <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Silakan pilih template untuk mempercepat balasan</p>
+                          <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Silakan pilih template untuk mempercepat balasan</p>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -1506,30 +1506,30 @@ const WebTabLayout = () => {
                   <form onSubmit={handleSendMessage} className="flex flex-col gap-4">
                     <div className="flex items-end gap-3">
                       {/* Attachment Button */}
-                      <input 
-                        type="file" 
-                        ref={fileInputRef} 
+                      <input
+                        type="file"
+                        ref={fileInputRef}
                         onChange={handleFileChange}
                         accept="image/*,application/pdf,video/*"
                         className="hidden"
                       />
-                      <motion.button 
-                        type="button" 
+                      <motion.button
+                        type="button"
                         whileTap={{ scale: 0.95 }}
                         onClick={handleFileClick}
                         className="w-12 h-12 mb-1 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all shrink-0"
                       >
                         <Paperclip size={24} />
                       </motion.button>
-                      
+
                       <div className="flex-1 relative">
                         <textarea
                           id="admin-web-message-input"
                           value={manualNote}
                           onChange={(e) => {
-                              setManualNote(e.target.value);
-                              e.target.style.height = 'auto';
-                              e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
+                            setManualNote(e.target.value);
+                            e.target.style.height = 'auto';
+                            e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
                           }}
                           placeholder={selectedResponse ? "Add personal notes..." : "Type your message or select template..."}
                           className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[24px] text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none font-medium max-h-[150px] scrollbar-hide"
@@ -1557,7 +1557,7 @@ const WebTabLayout = () => {
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto p-12 scrollbar-hide bg-[#F8FAFB]">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="max-w-5xl mx-auto flex flex-col gap-10"
@@ -1593,26 +1593,26 @@ const WebTabLayout = () => {
                     <div className={cn(
                       "absolute -right-4 -top-4 w-16 h-16 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 opacity-20",
                       stat.color === 'emerald' ? "bg-emerald-400" :
-                      stat.color === 'rose' ? "bg-rose-400" :
-                      stat.color === 'cyan' ? "bg-cyan-400" :
-                      stat.color === 'indigo' ? "bg-indigo-400" : "bg-amber-400"
+                        stat.color === 'rose' ? "bg-rose-400" :
+                          stat.color === 'cyan' ? "bg-cyan-400" :
+                            stat.color === 'indigo' ? "bg-indigo-400" : "bg-amber-400"
                     )}></div>
                     <div className="flex justify-between items-start mb-4 relative z-10">
                       <div className={cn(
                         "w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 duration-500",
                         stat.color === 'emerald' ? "bg-emerald-50 text-emerald-600" :
-                        stat.color === 'rose' ? "bg-rose-50 text-rose-600" :
-                        stat.color === 'cyan' ? "bg-cyan-50 text-cyan-600" :
-                        stat.color === 'indigo' ? "bg-indigo-50 text-indigo-600" : "bg-amber-50 text-amber-600"
+                          stat.color === 'rose' ? "bg-rose-50 text-rose-600" :
+                            stat.color === 'cyan' ? "bg-cyan-50 text-cyan-600" :
+                              stat.color === 'indigo' ? "bg-indigo-50 text-indigo-600" : "bg-amber-50 text-amber-600"
                       )}>
                         <stat.icon size={20} />
                       </div>
                       <span className={cn(
                         "text-[7px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest whitespace-nowrap",
                         stat.color === 'emerald' ? "bg-emerald-50 text-emerald-600" :
-                        stat.color === 'rose' ? "bg-rose-50 text-rose-600" :
-                        stat.color === 'cyan' ? "bg-cyan-50 text-cyan-600" :
-                        stat.color === 'indigo' ? "bg-indigo-50 text-indigo-600" : "bg-amber-50 text-amber-600"
+                          stat.color === 'rose' ? "bg-rose-50 text-rose-600" :
+                            stat.color === 'cyan' ? "bg-cyan-50 text-cyan-600" :
+                              stat.color === 'indigo' ? "bg-indigo-50 text-indigo-600" : "bg-amber-50 text-amber-600"
                       )}>{stat.detail}</span>
                     </div>
                     <div className="relative z-10">
@@ -1630,14 +1630,14 @@ const WebTabLayout = () => {
                 <div className="lg:col-span-2 bg-linear-to-br from-emerald-800 to-emerald-950 p-10 rounded-[48px] text-white shadow-2xl shadow-emerald-200/50 relative overflow-hidden group">
                   <div className="absolute right-[-40px] top-[-40px] w-80 h-80 bg-white/10 rounded-full blur-[80px] group-hover:scale-110 transition-transform duration-1000"></div>
                   <div className="absolute bottom-[-40px] left-[-40px] w-64 h-64 bg-emerald-400/20 rounded-full blur-[60px]"></div>
-                  
+
                   <div className="relative z-10 h-full flex flex-col justify-between gap-12">
                     <div className="flex items-start justify-between">
                       <div className="flex flex-col gap-2">
                         <span className="px-3 py-1 bg-emerald-400/20 border border-white/10 rounded-full text-[9px] font-black uppercase tracking-[0.2em] w-fit backdrop-blur-md">
                           System Performance
                         </span>
-                        <h4 className="text-3xl font-bold tracking-tight">Gateway Admisi UNJ</h4>
+                        <h4 className="text-3xl font-bold tracking-tight">Gateway Admin UNJ</h4>
                         <div className="flex items-center gap-3 mt-2">
                           <div className="relative flex items-center justify-center">
                             <span className="w-3 h-3 bg-emerald-400 rounded-full animate-ping opacity-75"></span>
@@ -1684,7 +1684,7 @@ const WebTabLayout = () => {
                           <div className={cn(
                             "w-12 h-12 rounded-2xl flex items-center justify-center transition-colors shadow-sm",
                             action.color === 'indigo' ? "bg-indigo-50 text-indigo-600" :
-                            action.color === 'amber' ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
+                              action.color === 'amber' ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
                           )}>
                             <action.icon size={22} />
                           </div>
@@ -1719,7 +1719,7 @@ const WebTabLayout = () => {
       <AnimatePresence>
         {isTemplatePopupOpen && (
           <div className="fixed inset-0 z-9999 flex items-center justify-center p-6">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -1738,7 +1738,7 @@ const WebTabLayout = () => {
                   <h3 className="text-xl font-black tracking-tight">Template Balasan</h3>
                   <p className="text-emerald-100/60 text-[10px] font-bold uppercase tracking-widest mt-1">Pilih kategori dan pertanyaan</p>
                 </div>
-                <button 
+                <button
                   onClick={() => setIsTemplatePopupOpen(false)}
                   className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all"
                 >
@@ -1755,8 +1755,8 @@ const WebTabLayout = () => {
                       onClick={() => setActiveCategory(cat)}
                       className={cn(
                         "px-4 py-3 rounded-xl text-left text-[11px] font-black uppercase tracking-wider transition-all",
-                        activeCategory === cat 
-                          ? "bg-emerald-600 text-white shadow-lg shadow-emerald-100" 
+                        activeCategory === cat
+                          ? "bg-emerald-600 text-white shadow-lg shadow-emerald-100"
                           : "text-slate-400 hover:bg-white hover:text-emerald-600"
                       )}
                     >
@@ -1779,7 +1779,7 @@ const WebTabLayout = () => {
                         className="p-5 bg-white border border-slate-100 rounded-3xl text-left hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-50 transition-all group"
                       >
                         <div className="flex items-center gap-2 mb-2">
-                           <span className="px-2 py-0.5 bg-emerald-50 text-[8px] font-black text-emerald-600 rounded uppercase tracking-widest">{resp.keyword}</span>
+                          <span className="px-2 py-0.5 bg-emerald-50 text-[8px] font-black text-emerald-600 rounded uppercase tracking-widest">{resp.keyword}</span>
                         </div>
                         <p className="text-sm font-black text-slate-800 leading-snug group-hover:text-emerald-700 transition-colors">{resp.question}</p>
                         <p className="text-[11px] text-slate-400 mt-2 line-clamp-2 leading-relaxed">{resp.response}</p>
@@ -1796,14 +1796,14 @@ const WebTabLayout = () => {
       {/* Image Lightbox Modal */}
       <AnimatePresence>
         {selectedImage && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSelectedImage(null)}
             className="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-md cursor-zoom-out"
           >
-            <motion.img 
+            <motion.img
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -1811,7 +1811,7 @@ const WebTabLayout = () => {
               alt="Enlarged"
               className="max-w-full max-h-full rounded-2xl shadow-2xl object-contain"
             />
-            <button 
+            <button
               className="absolute top-8 right-8 text-white/50 hover:text-white transition-colors text-xs font-black uppercase tracking-widest"
               onClick={() => setSelectedImage(null)}
             >
@@ -1905,11 +1905,10 @@ const WebTabLayout = () => {
                   </button>
                   <button
                     onClick={() => handleToggleAI(pendingAIState)}
-                    className={`flex-1 py-3.5 rounded-2xl text-xs font-black text-white shadow-lg transition-all active:scale-95 ${
-                      pendingAIState
-                        ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-200'
-                        : 'bg-slate-700 hover:bg-slate-800 shadow-slate-200'
-                    }`}
+                    className={`flex-1 py-3.5 rounded-2xl text-xs font-black text-white shadow-lg transition-all active:scale-95 ${pendingAIState
+                      ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-200'
+                      : 'bg-slate-700 hover:bg-slate-800 shadow-slate-200'
+                      }`}
                   >
                     {pendingAIState ? '🚀 Ya, Aktifkan!' : '🔕 Ya, Matikan'}
                   </button>
@@ -1919,7 +1918,7 @@ const WebTabLayout = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      <CustomAlert config={alertConfig} onClose={() => setAlertConfig({...alertConfig, show: false})} />
+      <CustomAlert config={alertConfig} onClose={() => setAlertConfig({ ...alertConfig, show: false })} />
       {/* ──────────────────────────────────────────────────────────────────── */}
     </div>
   );

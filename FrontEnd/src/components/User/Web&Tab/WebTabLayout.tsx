@@ -413,10 +413,10 @@ const WebTabLayout = () => {
                                 />
                             </motion.div>
                             <div className="flex flex-col">
-                                <h3 className="text-lg font-black tracking-tighter leading-none">Q & A ADMISI UNJ</h3>
+                                <h3 className="text-lg font-black tracking-tighter leading-none">Q & A  UNJ</h3>
                                 <div className="flex items-center gap-1 mt-1">
                                     <span className="px-1.5 py-0.5 bg-emerald-500 text-[7px] font-black text-white rounded-md uppercase tracking-wider border border-emerald-400 shadow-sm">
-                                        HelpDesk Admisi
+                                        HelpDesk 
                                     </span>
                                 </div>
                             </div>
@@ -526,7 +526,7 @@ const WebTabLayout = () => {
                 <Avatar src="/unj.png" size="md" />
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="font-black text-slate-800 tracking-tight">Admin Admisi UNJ</h2>
+                    <h2 className="font-black text-slate-800 tracking-tight">Admin  UNJ</h2>
                     <span className="px-1.5 py-0.5 bg-slate-900 text-white text-[8px] font-black rounded-md tracking-tighter uppercase">OFFICIAL</span>
                   </div>
                 </div>
@@ -818,7 +818,7 @@ const WebTabLayout = () => {
                       <div className="absolute inset-0 bg-emerald-500/10 scale-0 group-hover:scale-100 transition-transform duration-700 rounded-full"></div>
                       <Image src="/unj.png" alt="Logo" width={60} height={60} className="relative z-10" />
                   </div>
-                  <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-3">Admin Admisi UNJ</h2>
+                  <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-3">Admin  UNJ</h2>
                   <p className="text-sm font-medium text-slate-400 leading-relaxed mb-8">
                     Klik tombol dibawah ini untuk  mulai berkonsultasi dengan petugas kami.
                   </p>

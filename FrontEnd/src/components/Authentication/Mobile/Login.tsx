@@ -48,7 +48,7 @@ const MobileLogin = ({ onNavigate, onLogin, loading, captcha, onRefreshCaptcha }
              </div>
           </div>
           <h2 className="text-2xl font-black text-slate-800 tracking-tight">Masuk Akun</h2>
-          <p className="text-[10px] font-black text-emerald-600 mt-2 uppercase tracking-[0.2em] bg-emerald-50 px-3 py-1 rounded-full">Admin Admisi UNJ</p>
+          <p className="text-[10px] font-black text-emerald-600 mt-2 uppercase tracking-[0.2em] bg-emerald-50 px-3 py-1 rounded-full">Admin UNJ</p>
         </motion.div>
 
         {/* LOGIN FORM */}

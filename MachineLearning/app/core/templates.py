@@ -381,7 +381,7 @@ https://psikologi.unj.ac.id/""",
 Nama:
 NIM:
 Prodi:
-No. Peserta:
+No. Peserta: 
 Kantor ADMISI hanya memiliki informasi mengenai penerimaan mahasiswa baru, jika sudah mendapatkan NIM/mahasiswa lama artinya bukan ranah kami lagi ya kak""",
     },
     {
@@ -419,6 +419,7 @@ Kantor ADMISI hanya memiliki informasi mengenai penerimaan mahasiswa baru, jika 
     {
         "id": "c42",
         "category": "Jalur Nasional",
+        
         "keyword": "SNBP",
         "question": "Pertanyaan terkait snbp?",
         "synonyms": ["snbp", "snbp"],

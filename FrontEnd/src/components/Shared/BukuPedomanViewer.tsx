@@ -48,7 +48,7 @@ export default function BukuPedomanViewer() {
         <div className="flex items-center gap-2">
           <BookOpen className="text-emerald-600 shrink-0 animate-pulse" size={24} />
           <h2 className="text-sm font-extrabold text-slate-800 tracking-tight uppercase">
-            Admin Admisi
+            Admin
           </h2>
         </div>
         <span className="text-[10px] font-black bg-emerald-100/80 text-emerald-700 px-2.5 py-1 rounded-full uppercase tracking-widest border border-emerald-200/40">

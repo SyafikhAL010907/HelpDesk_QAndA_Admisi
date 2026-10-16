@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Admin Admisi UNJ",
-  description: "Panel Bantuan dan Layanan Informasi Admisi UNJ",
+  title: "Admin  UNJ",
+  description: "Panel Bantuan dan Layanan Informasi UNJ",
 };
 
 export default function RootLayout({
