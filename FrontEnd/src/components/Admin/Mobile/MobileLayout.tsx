@@ -27,7 +27,10 @@ import {
   ChevronUp,
   ChevronDown,
   LogOut,
-  X
+  X,
+  Building2,
+  Cpu,
+  HardHat
 } from 'lucide-react';
 import { Message, CannedResponse, BlastTemplate } from '@/constants/chatTypes';
 import { cannedResponses } from '@/constants/cannedResponses';
@@ -38,6 +41,7 @@ import CustomAlert from '@/components/Shared/CustomAlert';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const toLocalTime = (dateStr: string) => {
     if (!dateStr) return '--:--';
@@ -750,8 +754,8 @@ const MobileLayout = () => {
                 {/* Premium Header (Logo & Welcome) */}
                 <div className="bg-emerald-800 rounded-b-[40px] px-6 pt-12 pb-14 relative overflow-hidden shadow-lg shadow-emerald-900/10">
                    {/* Decorative Circles */}
-                   <div className="absolute top-[-20px] right-[-20px] w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-                   <div className="absolute bottom-[-20px] left-[-20px] w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl"></div>
+                   <div className="absolute -top-5 -right-5 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                   <div className="absolute -bottom-5 -left-5 w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl"></div>
 
                    <header className="relative z-10 flex flex-col gap-6">
                      <div className="flex justify-between items-center text-white">
@@ -793,7 +797,7 @@ const MobileLayout = () => {
                 <div className="px-4 -mt-7 relative z-30 pb-3">
                   {activeTab === 'home' ? (
                      /* PREMIUM LARGE TOGGLE SWITCH (Replaces Quick Access) */
-                     <div className="w-full bg-white rounded-[32px] p-4 shadow-xl shadow-emerald-900/10 border border-emerald-100/50 flex items-center justify-between group transition-all relative overflow-hidden">
+                     <div className="w-full bg-white rounded-4xl p-4 shadow-xl shadow-emerald-900/10 border border-emerald-100/50 flex items-center justify-between group transition-all relative overflow-hidden">
                        <div className="flex items-center gap-4">
                          <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shadow-inner">
                            <Settings size={24} className="group-hover:rotate-90 transition-transform duration-500" />
@@ -860,7 +864,7 @@ const MobileLayout = () => {
                                )}
                            </div>
                        </div>
-                        <div className="bg-white/80 backdrop-blur-sm p-1.5 rounded-2xl border border-slate-50 min-h-[46px] items-center justify-center relative overflow-hidden shadow-xs">
+                        <div className="bg-white/80 backdrop-blur-sm p-1.5 rounded-2xl border border-slate-50 min-h-11.5 items-center justify-center relative overflow-hidden shadow-xs">
                           <AnimatePresence mode="wait">
                             {isDeleteMode ? (
                               <motion.div 
@@ -939,7 +943,7 @@ const MobileLayout = () => {
                         { label: 'User Online', value: rooms.filter(r => r.is_online).length, icon: Search, color: 'amber', detail: 'Live' }
                       ].map((stat, i) => (
                         <div key={stat.label} className={cn(
-                          "bg-white p-5 rounded-[32px] border border-slate-100 shadow-sm flex flex-col gap-3 relative overflow-hidden group",
+                          "bg-white p-5 rounded-4xl border border-slate-100 shadow-sm flex flex-col gap-3 relative overflow-hidden group",
                           i === 4 ? "col-span-2" : ""
                         )}>
                           <div className={cn(
@@ -979,7 +983,7 @@ const MobileLayout = () => {
 
                     {/* SYSTEM STATUS CARD (Emerald Theme) */}
                     <div className="bg-linear-to-br from-emerald-800 to-emerald-950 p-7 rounded-[40px] text-white shadow-xl shadow-emerald-200 relative overflow-hidden">
-                      <div className="absolute right-[-20px] top-[-20px] w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                      <div className="absolute -right-5 -top-5 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
                       <div className="flex items-center justify-between relative z-10 mb-8">
                         <div className="flex flex-col gap-1">
                           <p className="text-[10px] font-black text-emerald-300 uppercase tracking-widest">Server Status</p>
@@ -1008,39 +1012,78 @@ const MobileLayout = () => {
                       </div>
                     </div>
 
-                    {/* QUICK ACTIONS */}
-                    <div className="flex flex-col gap-4">
-                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-4">Informasi Tambahan</h4>
-                      <div className="bg-white rounded-[32px] border border-slate-100 overflow-hidden divide-y divide-slate-50">
-                        <div className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
-                              <LayoutGrid size={20} />
-                            </div>
-                            <div>
-                              <p className="text-xs font-bold text-slate-700">Manajemen Kuota</p>
-                              <p className="text-[9px] font-medium text-slate-400 mt-0.5">Pantau pendaftar per jalur</p>
-                            </div>
-                          </div>
-                          <ChevronRight size={16} className="text-slate-300" />
-                        </div>
-                        <div className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
-                              <Search size={20} />
-                            </div>
-                            <div>
-                              <p className="text-xs font-bold text-slate-700">Log Aktivitas</p>
-                              <p className="text-[9px] font-medium text-slate-400 mt-0.5">Cek histori broadcast admin</p>
-                            </div>
-                          </div>
-                          <ChevronRight size={16} className="text-slate-300" />
-                        </div>
-                      </div>
-                    </div>
+
+
+                   {/* DENAH GEDUNG */}
+<div className="flex flex-col gap-4">
+  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-4">
+    Denah Gedung
+  </h4>
+  
+  {/* Diubah jadi grid 3 kolom untuk desktop, 1 kolom untuk mobile */}
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    {[
+      // 1. Gedung LE
+      { href: '/denah-le', code: 'LE', label: 'Gedung L Rumpun Elektro', desc: 'Eksplorasi denah lantai Gedung LE', icon: Cpu, border: 'border-blue-100 hover:border-blue-400 active:border-blue-400', tile: 'bg-blue-50 text-blue-600', glow: 'bg-blue-400', badge: 'bg-blue-50 text-blue-600', image: '/Lantai3.png' },
+      // 2. Gedung SFD
+      { href: '/denah-sfd', code: 'SFD', label: 'Gedung SFD Tower A', desc: 'Eksplorasi denah lantai Gedung SFD', icon: Building2, border: 'border-emerald-100 hover:border-emerald-400 active:border-emerald-400', tile: 'bg-emerald-50 text-emerald-600', glow: 'bg-emerald-400', badge: 'bg-emerald-50 text-emerald-600', image: '/Lantai3.png' },
+      // 3. Gedung LS
+      { href: '/denah-ls', code: 'LS', label: 'Gedung L Rumpun Sipil', desc: 'Denah lantai Gedung LS (Segera Hadir)', icon: HardHat, border: 'border-orange-100 hover:border-orange-400 active:border-orange-400', tile: 'bg-orange-50 text-orange-600', glow: 'bg-orange-400', badge: 'bg-orange-50 text-orange-600', image: '/Lantai3.png' }
+    ].map((gedung) => (
+      <Link
+        key={gedung.href}
+        href={gedung.href}
+        className={cn(
+          // border diubah ke border-2, ditambah flex-col biar susunannya rapi ke bawah (Gambar -> Info)
+          "group relative flex flex-col gap-3 overflow-hidden rounded-[28px] border-2 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md active:scale-[0.98]",
+          gedung.border
+        )}
+      >
+        {/* Efek Glow Pojok Kanan */}
+        <div className={cn(
+          "pointer-events-none absolute -right-5 -top-5 h-24 w-24 rounded-full opacity-10 blur-2xl transition-opacity duration-300 group-hover:opacity-30",
+          gedung.glow
+        )}></div>
+
+        {/* Container Gambar (Posisi Teratas) - Tanpa zoom efek */}
+        <div className="w-full h-28 rounded-xl overflow-hidden relative flex items-center justify-center bg-slate-50 border-2 border-slate-100/60 shrink-0">
+          <img 
+            src={gedung.image} 
+            alt={gedung.label} 
+            className="w-full h-full object-cover" 
+            loading="lazy"
+          />
+        </div>
+
+        {/* Info Gedung (Bawah Gambar) */}
+        <div className="relative z-10 flex min-w-0 items-start gap-3 mt-1">
+          <div className={cn(
+            "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-110",
+            gedung.tile
+          )}>
+            <gedung.icon size={22} strokeWidth={1.75} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <span className={cn(
+              "mb-1 inline-block rounded-full px-2 py-0.5 text-[7px] font-black uppercase tracking-widest",
+              gedung.badge
+            )}>{gedung.code}</span>
+            <p className="text-xs font-bold leading-snug text-slate-700 truncate">{gedung.label}</p>
+            <p className="mt-0.5 text-[9px] font-medium text-slate-400 truncate">{gedung.desc}</p>
+          </div>
+        </div>
+
+        {/* Panah (Icon Arrow) di Pojok Kanan Bawah */}
+        <div className="mt-auto flex justify-end w-full">
+          <ChevronRight size={16} className="relative z-10 shrink-0 text-slate-300 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-slate-500" />
+        </div>
+      </Link>
+    ))}
+  </div>
+</div>
 
                     {/* QUOTE / TIP */}
-                    <div className="bg-emerald-50/50 p-6 rounded-[32px] border border-emerald-100/50 flex gap-4 items-start">
+                    <div className="bg-emerald-50/50 p-6 rounded-4xl border border-emerald-100/50 flex gap-4 items-start">
                       <div className="text-xl">💡</div>
                       <p className="text-[11px] font-medium text-emerald-800 leading-relaxed">
                         *Tips:* Pastikan selalu membalas pesan user dalam waktu kurang dari 15 menit untuk menjaga performa layanan Admin UNJ.
@@ -1095,7 +1138,7 @@ const MobileLayout = () => {
                                {chat.last_message}
                              </p>
                              {chat.unread_count > 0 ? (
-                               <div className="bg-emerald-500 text-white text-[9px] font-bold h-4 min-w-[16px] px-1.5 flex items-center justify-center rounded-full shadow-lg shadow-emerald-200 animate-bounce">
+                               <div className="bg-emerald-500 text-white text-[9px] font-bold h-4 min-w-4 px-1.5 flex items-center justify-center rounded-full shadow-lg shadow-emerald-200 animate-bounce">
                                  {chat.unread_count}
                                </div>
                              ) : chat.is_marked_unread ? (
@@ -1130,7 +1173,7 @@ const MobileLayout = () => {
                         initial={{ y: 100, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: 100, opacity: 0 }}
-                        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-60 w-[92%] max-w-lg h-[76px] pointer-events-none"
+                        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-60 w-[92%] max-w-lg h-19 pointer-events-none"
                     >
                         <nav className="relative flex items-center justify-between px-6 h-full pointer-events-auto">
                             <NotchedBackground />
@@ -1138,11 +1181,11 @@ const MobileLayout = () => {
                             {navItems.map((item) => {
                                 if (item.isFAB) {
                                     return (
-                                        <div key="fab-slot" className="relative flex flex-col items-center w-[60px]">
+                                        <div key="fab-slot" className="relative flex flex-col items-center w-15">
                                             <motion.button
                                                 whileTap={{ scale: 0.9 }}
                                                 onClick={() => setShowBlessModal(true)}
-                                                className="absolute -top-14 w-[64px] h-[64px] bg-emerald-600 rounded-full flex items-center justify-center shadow-[0_15px_30px_rgba(16,185,129,0.4)] z-70 border-4 border-white overflow-hidden group"
+                                                className="absolute -top-14 w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center shadow-[0_15px_30px_rgba(16,185,129,0.4)] z-70 border-4 border-white overflow-hidden group"
                                             >
                                                 {/* Professional Megaphone Model */}
                                                 <div className="relative flex items-center justify-center">
@@ -1178,12 +1221,12 @@ const MobileLayout = () => {
                                                     } catch (e) {}
                                                 }
                                                 localStorage.removeItem('user');
-                                                window.location.reload();
+                                                window.location.href = '/login';
                                                 return;
                                             }
                                         }}
                                         className={cn(
-                                            "relative flex flex-col items-center justify-center w-[50px] transition-all duration-500 py-1",
+                                            "relative flex flex-col items-center justify-center w-12.5 transition-all duration-500 py-1",
                                             active ? "scale-105" : "opacity-40 hover:opacity-100"
                                         )}
                                     >
@@ -1268,7 +1311,7 @@ const MobileLayout = () => {
                       value={localSearchQuery}
                       onChange={(e) => setLocalSearchQuery(e.target.value)}
                       placeholder="Cari..."
-                      className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none focus-visible:outline-none text-xs font-semibold text-slate-700 placeholder:text-slate-400 h-full p-0 min-w-[60px]"
+                      className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none focus-visible:outline-none text-xs font-semibold text-slate-700 placeholder:text-slate-400 h-full p-0 min-w-15"
                     />
                     {localSearchQuery.trim() && (
                       <div className="flex items-center gap-1 shrink-0 bg-slate-100/80 px-1.5 py-0.5 rounded-lg">
@@ -1386,7 +1429,7 @@ const MobileLayout = () => {
                               src={imgData} 
                               alt="Sent image" 
                               onClick={() => setSelectedImage(imgData)}
-                              className="rounded-2xl max-w-[200px] h-auto shadow-sm border border-slate-100 cursor-zoom-in active:scale-95 transition-all"
+                              className="rounded-2xl max-w-50 h-auto shadow-sm border border-slate-100 cursor-zoom-in active:scale-95 transition-all"
                             />
                             {caption && (
                               <FormattedText text={caption} className="text-[13px] font-medium leading-relaxed mt-1 px-1" />
@@ -1402,7 +1445,7 @@ const MobileLayout = () => {
                         const fileData = parts.length > 1 ? parts[1] : msg.text;
                         return (
                           <div className="flex flex-col">
-                            <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100/50 min-w-[180px]">
+                            <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100/50 min-w-45">
                             <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
                               <FileText size={18} />
                             </div>
@@ -1507,7 +1550,7 @@ const MobileLayout = () => {
                                 e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
                             }}
                             placeholder="Tulis pesan..."
-                            className="flex-1 py-2.5 px-2 text-[13px] font-medium text-slate-700 bg-transparent focus:outline-none resize-none max-h-[120px] scrollbar-hide"
+                            className="flex-1 py-2.5 px-2 text-[13px] font-medium text-slate-700 bg-transparent focus:outline-none resize-none max-h-30 scrollbar-hide"
                             rows={1}
                         />
                         <button 
@@ -1547,11 +1590,11 @@ const MobileLayout = () => {
                 </p>
 
                 {/* Target Selector */}
-                <div className="mb-6 bg-slate-50 p-1 rounded-[16px] border border-slate-100 flex gap-1">
+                <div className="mb-6 bg-slate-50 p-1 rounded-2xl border border-slate-100 flex gap-1">
                   <button 
                     onClick={() => setBlessTargetMode('waiting_room')}
                     className={cn(
-                      "flex-1 py-2 px-2 rounded-[12px] text-[10px] font-black transition-all duration-300",
+                      "flex-1 py-2 px-2 rounded-xl text-[10px] font-black transition-all duration-300",
                       blessTargetMode === 'waiting_room' ? "bg-white text-emerald-600 shadow-sm ring-1 ring-slate-200/50" : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
                     )}
                   >
@@ -1560,7 +1603,7 @@ const MobileLayout = () => {
                   <button 
                     onClick={() => setBlessTargetMode('all_users')}
                     className={cn(
-                      "flex-1 py-2 px-2 rounded-[12px] text-[10px] font-black transition-all duration-300",
+                      "flex-1 py-2 px-2 rounded-xl text-[10px] font-black transition-all duration-300",
                       blessTargetMode === 'all_users' ? "bg-white text-emerald-600 shadow-sm ring-1 ring-slate-200/50" : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
                     )}
                   >
@@ -1569,7 +1612,7 @@ const MobileLayout = () => {
                   <button 
                     onClick={() => setBlessTargetMode('specific_users')}
                     className={cn(
-                      "flex-1 py-2 px-2 rounded-[12px] text-[10px] font-black transition-all duration-300",
+                      "flex-1 py-2 px-2 rounded-xl text-[10px] font-black transition-all duration-300",
                       blessTargetMode === 'specific_users' ? "bg-white text-emerald-600 shadow-sm ring-1 ring-slate-200/50" : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
                     )}
                   >
@@ -1592,12 +1635,12 @@ const MobileLayout = () => {
                           placeholder="Cari nama atau email..." 
                           value={userSearchQuery}
                           onChange={(e) => setUserSearchQuery(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-[12px] text-[11px] font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                          className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[11px] font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
                         />
                       </div>
-                      <div className="max-h-40 overflow-y-auto bg-slate-50 rounded-[12px] border border-slate-100 p-1.5 flex flex-col gap-1 scrollbar-hide">
+                      <div className="max-h-40 overflow-y-auto bg-slate-50 rounded-xl border border-slate-100 p-1.5 flex flex-col gap-1 scrollbar-hide">
                         {allUsers.filter(u => u.username.toLowerCase().includes(userSearchQuery.toLowerCase()) || u.gmail.toLowerCase().includes(userSearchQuery.toLowerCase())).map(user => (
-                          <label key={user.gmail} className="flex items-center gap-3 p-2 hover:bg-white rounded-[8px] cursor-pointer transition-all border border-transparent hover:border-slate-200 hover:shadow-sm">
+                          <label key={user.gmail} className="flex items-center gap-3 p-2 hover:bg-white rounded-lg cursor-pointer transition-all border border-transparent hover:border-slate-200 hover:shadow-sm">
                             <div className={cn(
                               "w-4 h-4 rounded shadow-inner flex items-center justify-center transition-colors border shrink-0",
                               selectedBlessUsers.includes(user.gmail) ? "bg-emerald-500 border-emerald-500 text-white" : "bg-white border-slate-300"
@@ -1685,7 +1728,7 @@ const MobileLayout = () => {
                         />
                         <label 
                           htmlFor="bless-file-mobile"
-                          className="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 active:bg-emerald-100 text-emerald-600 rounded-[16px] text-[10px] font-black cursor-pointer transition-all border border-emerald-100"
+                          className="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 active:bg-emerald-100 text-emerald-600 rounded-2xl text-[10px] font-black cursor-pointer transition-all border border-emerald-100"
                         >
                           <Paperclip size={14} />
                           {blessFile ? 'Ganti File' : 'Lampirkan File'}
@@ -1888,11 +1931,11 @@ const MobileLayout = () => {
               exit={{ opacity: 0, y: 80, scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm bg-white rounded-[32px] overflow-hidden shadow-2xl"
+              className="w-full max-w-sm bg-white rounded-4xl overflow-hidden shadow-2xl"
             >
               {/* Header Gradient */}
               <div className={`p-6 ${pendingAIState ? 'bg-linear-to-br from-emerald-500 to-emerald-700' : 'bg-linear-to-br from-slate-600 to-slate-800'} relative overflow-hidden`}>
-                <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+                <div className="absolute -top-5 -right-5 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
                 <div className="relative z-10 flex items-center gap-4">
                   <div className="w-14 h-14 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20 shadow-lg">
                     <span className="text-2xl">{pendingAIState ? '🤖' : '🔕'}</span>

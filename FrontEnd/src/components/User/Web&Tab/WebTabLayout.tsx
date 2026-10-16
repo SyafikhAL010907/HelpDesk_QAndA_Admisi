@@ -22,12 +22,15 @@ import {
   LayoutGrid,
   Trash2,
   Calendar,
-  ChevronRight
+  ChevronRight,
+  Building2,
+  Cpu,
+  HardHat
 } from 'lucide-react';
 import { Message, CannedResponse } from '@/constants/chatTypes';
 import { cannedQuestions as cannedResponses } from '@/constants/cannedQuestions';
 import { jadwalPenmaba } from '@/constants/jadwalPenmaba';
-import BukuPedomanViewer from '@/components/Shared/BukuPedomanViewer';
+import Link from 'next/link';
 import Avatar from '@/components/Shared/Avatar';
 import FormattedText from '@/components/Shared/FormattedText';
 import CustomAlert from '@/components/Shared/CustomAlert';
@@ -387,14 +390,14 @@ const WebTabLayout = () => {
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans text-slate-900">
       {/* Sidebar - Integrated Info (Instead of Chat List) */}
-      <aside className="w-[300px] lg:w-[380px] bg-white border-r border-slate-100 flex flex-col z-20 relative shadow-[10px_0_30px_-15px_rgba(0,0,0,0.05)] transition-all duration-500">
+      <aside className="w-75 lg:w-95 bg-white border-r border-slate-100 flex flex-col z-20 relative shadow-[10px_0_30px_-15px_rgba(0,0,0,0.05)] transition-all duration-500">
         
         {/* TOP PREMIUM CARD (Matching Mobile Header style) */}
         <div className="p-4">
-            <div className="bg-linear-to-br from-emerald-600 to-emerald-800 rounded-[32px] p-6 text-white shadow-2xl shadow-emerald-200/50 relative overflow-hidden group">
+            <div className="bg-linear-to-br from-emerald-600 to-emerald-800 rounded-4xl p-6 text-white shadow-2xl shadow-emerald-200/50 relative overflow-hidden group">
                 {/* Decorative Elements */}
-                <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-700"></div>
-                <div className="absolute bottom-[-20px] left-[-20px] w-24 h-24 bg-emerald-400/20 rounded-full blur-xl group-hover:scale-125 transition-transform duration-700"></div>
+                <div className="absolute -top-5 -right-5 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-700"></div>
+                <div className="absolute -bottom-5 -left-5 w-24 h-24 bg-emerald-400/20 rounded-full blur-xl group-hover:scale-125 transition-transform duration-700"></div>
 
                 <div className="relative z-10 flex flex-col gap-8">
                     {/* Header Row */}
@@ -501,7 +504,7 @@ const WebTabLayout = () => {
                         }
                     }
                     localStorage.removeItem('user'); 
-                    window.location.reload(); 
+                    window.location.href = '/login'; 
                 }}
                 className="w-full flex items-center justify-center gap-3 py-3.5 bg-white border border-rose-100 text-rose-600 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all duration-300 shadow-sm active:scale-[0.98]"
             >
@@ -537,7 +540,7 @@ const WebTabLayout = () => {
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: 340 }}
                     exit={{ opacity: 0, width: 0 }}
-                    className="flex items-center bg-slate-50 border border-slate-200 rounded-[24px] px-4 py-1.5 h-10 ring-4 ring-emerald-500/5 focus-within:border-emerald-200 focus-within:bg-white focus-within:ring-emerald-500/10 transition-all duration-300 gap-2"
+                    className="flex items-center bg-slate-50 border border-slate-200 rounded-3xl px-4 py-1.5 h-10 ring-4 ring-emerald-500/5 focus-within:border-emerald-200 focus-within:bg-white focus-within:ring-emerald-500/10 transition-all duration-300 gap-2"
                   >
                     <SearchIcon size={16} className="text-emerald-500 shrink-0" />
                     <input 
@@ -546,11 +549,11 @@ const WebTabLayout = () => {
                       value={localSearchQuery}
                       onChange={(e) => setLocalSearchQuery(e.target.value)}
                       placeholder="Cari pesan..."
-                      className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none focus-visible:outline-none text-xs font-semibold text-slate-700 placeholder:text-slate-400 h-full p-0 min-w-[100px]"
+                      className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none focus-visible:outline-none text-xs font-semibold text-slate-700 placeholder:text-slate-400 h-full p-0 min-w-25"
                     />
                     {localSearchQuery.trim() && (
                       <div className="flex items-center gap-1 shrink-0 bg-slate-100/80 px-2 py-1 rounded-xl">
-                        <span className="text-[10px] font-black text-slate-500 min-w-[30px] text-center select-none">
+                        <span className="text-[10px] font-black text-slate-500 min-w-7.5 text-center select-none">
                           {searchMatchIndex}/{searchMatches.length}
                         </span>
                         <button 
@@ -651,7 +654,7 @@ const WebTabLayout = () => {
                                 src={imgData} 
                                 alt="Sent image" 
                                 onClick={() => setSelectedImage(imgData)}
-                                className="rounded-2xl max-w-[240px] h-auto shadow-sm border border-slate-100 cursor-zoom-in hover:opacity-90 transition-all"
+                                className="rounded-2xl max-w-60 h-auto shadow-sm border border-slate-100 cursor-zoom-in hover:opacity-90 transition-all"
                               />
                                {caption && (
                                  <FormattedText text={caption} className="text-sm font-medium leading-relaxed mt-1 px-1" />
@@ -668,7 +671,7 @@ const WebTabLayout = () => {
                         const caption = parts.length > 2 ? parts[2] : null;
                         return (
                           <>
-                            <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100/50 min-w-[200px]">
+                            <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100/50 min-w-50">
                               <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
                                 <FileText size={20} />
                               </div>
@@ -721,7 +724,7 @@ const WebTabLayout = () => {
 
         {/* Input Area */}
         <div className="px-4 lg:px-8 pb-8 pt-2">
-          <div className="bg-white border border-slate-100 rounded-[32px] shadow-2xl shadow-slate-200/50 overflow-hidden">
+          <div className="bg-white border border-slate-100 rounded-4xl shadow-2xl shadow-slate-200/50 overflow-hidden">
             <div className="p-6 flex flex-col gap-4">
               {selectedResponse && (
                 <div className="flex items-stretch gap-4 w-full">
@@ -783,7 +786,7 @@ const WebTabLayout = () => {
                           e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
                       }}
                       placeholder="Tulis pertanyaanmu di sini..."
-                      className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[24px] text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none font-medium max-h-[150px] scrollbar-hide"
+                      className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none font-medium max-h-37.5 scrollbar-hide"
                       rows={1}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
@@ -796,7 +799,7 @@ const WebTabLayout = () => {
                   <button
                     type="submit"
                     disabled={!manualNote.trim() && !selectedResponse}
-                    className="w-14 h-14 bg-emerald-800 text-white rounded-[24px] flex items-center justify-center shadow-xl shadow-emerald-200/50 hover:bg-emerald-900 hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:shadow-none shrink-0"
+                    className="w-14 h-14 bg-emerald-800 text-white rounded-3xl flex items-center justify-center shadow-xl shadow-emerald-200/50 hover:bg-emerald-900 hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:shadow-none shrink-0"
                   >
                     <Send size={24} className="ml-1" />
                   </button>
@@ -819,6 +822,24 @@ const WebTabLayout = () => {
                       <Image src="/unj.png" alt="Logo" width={60} height={60} className="relative z-10" />
                   </div>
                   <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-3">Admin  UNJ</h2>
+                  {/* Jadwal Penmaba Card (Replaces Search Bar) */}
+                  <motion.button 
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setIsJadwalModalOpen(true)}
+                      className="w-full bg-white rounded-full shadow-xl shadow-slate-200/40 p-1 border-2 border-emerald-50 hover:border-emerald-400 focus:outline-none transition-all duration-300 flex items-center justify-between mb-8"
+                  >
+                      <div className="flex items-center gap-3 px-3 h-11">
+                          <Calendar size={18} className="text-emerald-600 shrink-0" />
+                          <div className="flex flex-col text-left">
+                              <span className="text-[11px] font-black text-slate-800 leading-tight">Cek Jadwal Penting Penmaba 2026</span>
+                              <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider leading-tight mt-0.5">Info pendaftaran & ujian</span>
+                          </div>
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mr-1 shrink-0">
+                          <ChevronRight size={14} />
+                      </div>
+                  </motion.button>
+
                   <p className="text-sm font-medium text-slate-400 leading-relaxed mb-8">
                     Klik tombol dibawah ini untuk  mulai berkonsultasi dengan petugas kami.
                   </p>
@@ -833,29 +854,95 @@ const WebTabLayout = () => {
                       </span>
                     )}
                   </button>
-
-                  {/* Jadwal Penmaba Card (Replaces Search Bar) */}
-                  <motion.button 
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setIsJadwalModalOpen(true)}
-                      className="w-full bg-white rounded-full shadow-xl shadow-slate-200/40 p-1 border-2 border-emerald-50 hover:border-emerald-400 focus:outline-none transition-all duration-300 flex items-center justify-between mt-2"
-                  >
-                      <div className="flex items-center gap-3 px-3 h-11">
-                          <Calendar size={18} className="text-emerald-600 shrink-0" />
-                          <div className="flex flex-col text-left">
-                              <span className="text-[11px] font-black text-slate-800 leading-tight">Cek Jadwal Penting Penmaba 2026</span>
-                              <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider leading-tight mt-0.5">Info pendaftaran & ujian</span>
-                          </div>
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mr-1 shrink-0">
-                          <ChevronRight size={14} />
-                      </div>
-                  </motion.button>
               </motion.div>
 
-              <div className="w-full max-w-2xl mt-4 border-t border-slate-100/80 pt-4">
-                <BukuPedomanViewer />
+              <div className="w-full mt-4 border-t border-slate-100/80 pt-4">
+  <div className="flex flex-col gap-5 text-left">
+    
+    {/* Header Section */}
+    <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div className="flex items-center gap-3">
+        <Building2 size={22} className="text-emerald-600" />
+        <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Denah Gedung</h3>
+      </div>
+      <span className="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-full uppercase tracking-widest">
+        3 Gedung
+      </span>
+    </div>
+
+    {/* List Container - Diubah jadi Grid 3 Kolom */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 mt-2">
+      {[
+        // Urutan 1: Elektro (LE)
+        { href: '/denah-le', code: 'LE', label: 'Gedung L Rumpun Elektro', desc: 'Eksplorasi denah lantai Gedung LE', icon: Cpu, border: 'border-blue-100 hover:border-blue-400', tile: 'bg-blue-50 text-blue-600', glow: 'bg-blue-400', badge: 'bg-blue-50 text-blue-600', image: '/Lantai3.png' },
+        // Urutan 2: SFD 
+        { href: '/denah-sfd', code: 'SFD', label: 'Gedung SFD Tower A', desc: 'Eksplorasi denah lantai Gedung SFD', icon: Building2, border: 'border-emerald-100 hover:border-emerald-400', tile: 'bg-emerald-50 text-emerald-600', glow: 'bg-emerald-400', badge: 'bg-emerald-50 text-emerald-600', image: '/Lantai3.png' },
+        // Urutan 3: Sipil (LS)
+        { href: '/denah-ls', code: 'LS', label: 'Gedung L Rumpun Sipil', desc: 'Denah lantai Gedung LS (Segera Hadir)', icon: HardHat, border: 'border-orange-100 hover:border-orange-400', tile: 'bg-orange-50 text-orange-600', glow: 'bg-orange-400', badge: 'bg-orange-50 text-orange-600', image: '/Lantai3.png' }
+      ].map((gedung, i) => (
+        <motion.div
+          key={gedung.href}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 + i * 0.1 }}
+          className="h-full"
+        >
+          <Link
+            href={gedung.href}
+            className={cn(
+              // border diubah jadi border-2 biar lebih tebal
+              "group relative flex flex-col w-full h-full gap-5 overflow-hidden rounded-[28px] border-2 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/60 active:scale-[0.99]",
+              gedung.border
+            )}
+          >
+            {/* Efek Glow di Pojok Kanan Atas */}
+            <div className={cn(
+              "pointer-events-none absolute -right-6 -top-6 h-32 w-32 rounded-full opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-20",
+              gedung.glow
+            )}></div>
+
+            {/* Container Gambar (Posisi Teratas) - border-2 ditambahin & efek zoom gambar dihapus */}
+            <div className="w-full h-40 rounded-2xl overflow-hidden relative flex items-center justify-center bg-slate-50 border-2 border-slate-100/60">
+              <img 
+                src={gedung.image} 
+                alt={gedung.label} 
+                className="w-full h-full object-cover" 
+                loading="lazy"
+              />
+            </div>
+
+            {/* Container Icon & Teks */}
+            <div className="relative z-10 flex items-start gap-4">
+              <div className={cn(
+                "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-110",
+                gedung.tile
+              )}>
+                <gedung.icon size={22} strokeWidth={1.75} />
               </div>
+              <div className="min-w-0 flex-1">
+                <span className={cn(
+                  "mb-1 inline-block rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-widest",
+                  gedung.badge
+                )}>{gedung.code}</span>
+                <p className="text-base font-bold leading-snug text-slate-700 truncate">{gedung.label}</p>
+                <p className="mt-0.5 text-xs font-medium text-slate-400 truncate">{gedung.desc}</p>
+              </div>
+            </div>
+
+            {/* Tombol "Lihat Denah" di bagian paling bawah */}
+            <span className={cn(
+              "relative z-10 flex w-full justify-between items-center mt-auto rounded-2xl px-5 py-3 text-[11px] font-black uppercase tracking-widest transition-colors",
+              gedung.badge
+            )}>
+              Lihat Denah
+              <ChevronRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+            </span>
+          </Link>
+        </motion.div>
+      ))}
+    </div>
+  </div>
+</div>
           </div>
         )}
       </main>
@@ -986,7 +1073,7 @@ const WebTabLayout = () => {
             >
               {/* Modal Header */}
               <div className="px-8 py-6 bg-emerald-800 text-white flex items-center justify-between relative shrink-0">
-                <div className="absolute top-[-30px] right-[-30px] w-36 h-36 bg-white/10 rounded-full blur-2xl"></div>
+                <div className="absolute -top-7.5 -right-7.5 w-36 h-36 bg-white/10 rounded-full blur-2xl"></div>
                 <div className="relative z-10 text-white">
                   <h3 className="text-xl font-black tracking-tight flex items-center gap-2">
                     <Calendar size={24} className="text-emerald-300" />

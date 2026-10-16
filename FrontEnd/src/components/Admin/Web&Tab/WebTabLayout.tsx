@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   Search,
   MoreVertical,
@@ -24,7 +25,10 @@ import {
   LogOut,
   Settings,
   X,
-  LayoutGrid
+  LayoutGrid,
+  Building2,
+  Cpu,
+  HardHat
 } from 'lucide-react';
 import { ChatSession, CannedResponse, Message } from '@/constants/chatTypes';
 import { cannedResponses } from '@/constants/cannedResponses';
@@ -669,14 +673,14 @@ const WebTabLayout = () => {
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans text-slate-900">
       {/* Sidebar - Chat List */}
-      <aside className="w-[300px] lg:w-[380px] bg-white border-r border-slate-100 flex flex-col z-20 relative shadow-[10px_0_30px_-15px_rgba(0,0,0,0.05)] transition-all duration-500">
+      <aside className="w-75 lg:w-95 bg-white border-r border-slate-100 flex flex-col z-20 relative shadow-[10px_0_30px_-15px_rgba(0,0,0,0.05)] transition-all duration-500">
 
         {/* TOP PREMIUM CARD (Floating Style) */}
         <div className="p-5 pt-8">
           <div className="bg-linear-to-br from-emerald-600 to-emerald-800 rounded-[40px] p-8 text-white shadow-2xl shadow-emerald-900/20 relative overflow-hidden group">
             {/* Decorative Elements */}
-            <div className="absolute top-[-30px] right-[-30px] w-48 h-48 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
-            <div className="absolute bottom-[-30px] left-[-30px] w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700"></div>
+            <div className="absolute -top-7.5 -right-7.5 w-48 h-48 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
+            <div className="absolute -bottom-7.5 -left-7.5 w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700"></div>
 
             <div className="relative z-10 flex flex-col gap-10">
               {/* Top Row: Logo & Welcome Message */}
@@ -766,7 +770,7 @@ const WebTabLayout = () => {
         </div>
 
         <div className="px-4 pb-2">
-          <div className="flex bg-slate-50/80 p-1.5 rounded-2xl border border-slate-100 min-h-[46px] items-center justify-center relative overflow-hidden">
+          <div className="flex bg-slate-50/80 p-1.5 rounded-2xl border border-slate-100 min-h-11.5 items-center justify-center relative overflow-hidden">
             <AnimatePresence mode="wait">
               {isDeleteMode ? (
                 <motion.div
@@ -869,7 +873,7 @@ const WebTabLayout = () => {
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="bg-white rounded-[32px] w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden shadow-2xl"
+                className="bg-white rounded-4xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden shadow-2xl"
               >
                 <div className="flex-1 overflow-y-auto p-8 scrollbar-hide">
                   <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6">
@@ -1109,7 +1113,7 @@ const WebTabLayout = () => {
                   initial={false}
                   onClick={() => isDeleteMode ? toggleSelectRoom(chat.id) : handleSelectRoom(chat)}
                   className={cn(
-                    "relative p-4 flex items-center gap-4 rounded-[24px] cursor-pointer transition-all duration-300 group",
+                    "relative p-4 flex items-center gap-4 rounded-3xl cursor-pointer transition-all duration-300 group",
                     isDeleteMode && selectedRooms.includes(chat.id) ? "bg-red-50 border-red-100 shadow-sm" :
                       isActive
                         ? "bg-white shadow-[0_10px_25px_-5px_rgba(16,185,129,0.1)] border border-emerald-50"
@@ -1158,7 +1162,7 @@ const WebTabLayout = () => {
                         {chat.lastMessage}
                       </p>
                       {chat.unread > 0 ? (
-                        <div className="bg-emerald-500 text-white text-[10px] font-bold h-5 min-w-[20px] px-1.5 flex items-center justify-center rounded-full shadow-lg shadow-emerald-200/50 animate-bounce">
+                        <div className="bg-emerald-500 text-white text-[10px] font-bold h-5 min-w-5 px-1.5 flex items-center justify-center rounded-full shadow-lg shadow-emerald-200/50 animate-bounce">
                           {chat.unread}
                         </div>
                       ) : chat.is_marked_unread ? (
@@ -1189,7 +1193,7 @@ const WebTabLayout = () => {
                 }
               }
               localStorage.removeItem('user');
-              window.location.reload();
+              window.location.href = '/login';
             }}
             className="w-full flex items-center justify-center gap-3 py-3.5 bg-white border border-rose-100 text-rose-600 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all duration-300 shadow-sm active:scale-[0.98]"
           >
@@ -1235,7 +1239,7 @@ const WebTabLayout = () => {
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: 340 }}
                     exit={{ opacity: 0, width: 0 }}
-                    className="flex items-center bg-slate-50 border border-slate-200 rounded-[24px] px-4 py-1.5 h-10 ring-4 ring-emerald-500/5 focus-within:border-emerald-200 focus-within:bg-white focus-within:ring-emerald-500/10 transition-all duration-300 gap-2"
+                    className="flex items-center bg-slate-50 border border-slate-200 rounded-3xl px-4 py-1.5 h-10 ring-4 ring-emerald-500/5 focus-within:border-emerald-200 focus-within:bg-white focus-within:ring-emerald-500/10 transition-all duration-300 gap-2"
                   >
                     <SearchIcon size={16} className="text-emerald-500 shrink-0" />
                     <input
@@ -1244,11 +1248,11 @@ const WebTabLayout = () => {
                       value={localSearchQuery}
                       onChange={(e) => setLocalSearchQuery(e.target.value)}
                       placeholder="Cari pesan..."
-                      className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none focus-visible:outline-none text-xs font-semibold text-slate-700 placeholder:text-slate-400 h-full p-0 min-w-[100px]"
+                      className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none focus-visible:outline-none text-xs font-semibold text-slate-700 placeholder:text-slate-400 h-full p-0 min-w-25"
                     />
                     {localSearchQuery.trim() && (
                       <div className="flex items-center gap-1 shrink-0 bg-slate-100/80 px-2 py-1 rounded-xl">
-                        <span className="text-[10px] font-black text-slate-500 min-w-[30px] text-center select-none">
+                        <span className="text-[10px] font-black text-slate-500 min-w-7.5 text-center select-none">
                           {searchMatchIndex}/{searchMatches.length}
                         </span>
                         <button
@@ -1377,7 +1381,7 @@ const WebTabLayout = () => {
                                       src={imgData}
                                       alt="Sent image"
                                       onClick={() => setSelectedImage(imgData)}
-                                      className="rounded-2xl max-w-[240px] h-auto shadow-sm border border-slate-100 cursor-zoom-in hover:opacity-90 transition-all"
+                                      className="rounded-2xl max-w-60 h-auto shadow-sm border border-slate-100 cursor-zoom-in hover:opacity-90 transition-all"
                                     />
                                     {caption && (
                                       <FormattedText text={caption} className="text-sm font-medium leading-relaxed mt-1 px-1" />
@@ -1393,7 +1397,7 @@ const WebTabLayout = () => {
                               const fileData = parts.length > 1 ? parts[1] : msg.text;
                               return (
                                 <>
-                                  <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100/50 min-w-[200px]">
+                                  <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100/50 min-w-50">
                                     <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
                                       <FileText size={20} />
                                     </div>
@@ -1448,7 +1452,7 @@ const WebTabLayout = () => {
             </div>
 
             <div className="px-4 lg:px-8 pb-8 pt-2">
-              <div className="bg-white border border-slate-100 rounded-[32px] shadow-2xl shadow-slate-200/50 overflow-hidden">
+              <div className="bg-white border border-slate-100 rounded-4xl shadow-2xl shadow-slate-200/50 overflow-hidden">
                 <div className="p-6 flex flex-col gap-4">
                   <div className="flex items-stretch gap-4">
                     <motion.button
@@ -1456,7 +1460,7 @@ const WebTabLayout = () => {
                       whileTap={{ scale: 0.98 }}
                       type="button"
                       onClick={() => setIsTemplatePopupOpen(true)}
-                      className="shrink-0 px-6 bg-white border border-emerald-100 text-emerald-600 rounded-[28px] shadow-lg flex flex-col items-center justify-center hover:border-emerald-500 hover:text-emerald-700 hover:shadow-xl hover:shadow-emerald-100 transition-all group gap-1 min-w-[120px]"
+                      className="shrink-0 px-6 bg-white border border-emerald-100 text-emerald-600 rounded-[28px] shadow-lg flex flex-col items-center justify-center hover:border-emerald-500 hover:text-emerald-700 hover:shadow-xl hover:shadow-emerald-100 transition-all group gap-1 min-w-30"
                     >
                       <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all">
                         <LayoutGrid size={18} />
@@ -1532,7 +1536,7 @@ const WebTabLayout = () => {
                             e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
                           }}
                           placeholder={selectedResponse ? "Add personal notes..." : "Type your message or select template..."}
-                          className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-[24px] text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none font-medium max-h-[150px] scrollbar-hide"
+                          className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none font-medium max-h-37.5 scrollbar-hide"
                           rows={1}
                           onKeyDown={(e) => {
                             if (e.key === 'Enter' && !e.shiftKey) {
@@ -1545,7 +1549,7 @@ const WebTabLayout = () => {
                       <button
                         type="submit"
                         disabled={!manualNote.trim() && !selectedResponse}
-                        className="w-14 h-14 bg-emerald-800 text-white rounded-[24px] flex items-center justify-center shadow-xl shadow-emerald-200/50 hover:bg-emerald-900 hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:shadow-none shrink-0"
+                        className="w-14 h-14 bg-emerald-800 text-white rounded-3xl flex items-center justify-center shadow-xl shadow-emerald-200/50 hover:bg-emerald-900 hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:shadow-none shrink-0"
                       >
                         <Send size={24} className="ml-1" />
                       </button>
@@ -1628,8 +1632,8 @@ const WebTabLayout = () => {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* SYSTEM STATUS CARD */}
                 <div className="lg:col-span-2 bg-linear-to-br from-emerald-800 to-emerald-950 p-10 rounded-[48px] text-white shadow-2xl shadow-emerald-200/50 relative overflow-hidden group">
-                  <div className="absolute right-[-40px] top-[-40px] w-80 h-80 bg-white/10 rounded-full blur-[80px] group-hover:scale-110 transition-transform duration-1000"></div>
-                  <div className="absolute bottom-[-40px] left-[-40px] w-64 h-64 bg-emerald-400/20 rounded-full blur-[60px]"></div>
+                  <div className="absolute -right-10 -top-10 w-80 h-80 bg-white/10 rounded-full blur-[80px] group-hover:scale-110 transition-transform duration-1000"></div>
+                  <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-emerald-400/20 rounded-full blur-[60px]"></div>
 
                   <div className="relative z-10 h-full flex flex-col justify-between gap-12">
                     <div className="flex items-start justify-between">
@@ -1668,34 +1672,56 @@ const WebTabLayout = () => {
 
                 {/* QUICK ACTIONS PANEL */}
                 <div className="flex flex-col gap-6">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-6">Quick Management</h4>
-                  <div className="flex flex-col gap-4">
-                    {[
-                      { label: 'Manajemen Kuota', desc: 'Pantau pendaftar jalur mandiri', icon: LayoutGrid, color: 'indigo' },
-                      { label: 'Log Aktivitas', desc: 'Histori broadcast petugas', icon: Search, color: 'amber' },
-                      { label: 'Template Blast', desc: 'Kelola pesan pengumuman', icon: FileText, color: 'emerald' }
-                    ].map((action, i) => (
-                      <motion.div
-                        key={action.label}
-                        whileHover={{ x: 10, backgroundColor: '#F1F5F9' }}
-                        className="bg-white p-5 rounded-[32px] border border-slate-100 flex items-center justify-between group cursor-pointer shadow-sm transition-all"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={cn(
-                            "w-12 h-12 rounded-2xl flex items-center justify-center transition-colors shadow-sm",
-                            action.color === 'indigo' ? "bg-indigo-50 text-indigo-600" :
-                              action.color === 'amber' ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
-                          )}>
-                            <action.icon size={22} />
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-slate-700">{action.label}</p>
-                            <p className="text-[10px] font-medium text-slate-400 mt-0.5">{action.desc}</p>
-                          </div>
-                        </div>
-                        <ChevronRight size={18} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
-                      </motion.div>
-                    ))}
+                  {/* DENAH GEDUNG */}
+                  <div className="flex flex-col gap-6">
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] ml-6">Denah Gedung</h4>
+                    <div className="flex flex-col gap-4">
+                      {[
+                        { href: '/denah-le', code: 'LE', label: 'Gedung L Rumpun Elektro', desc: 'Eksplorasi denah lantai Gedung LE', icon: Cpu, border: 'border-blue-100 hover:border-blue-300', tile: 'bg-blue-50 text-blue-600', glow: 'bg-blue-400', badge: 'bg-blue-50 text-blue-600', arrow: 'group-hover:text-blue-500' },
+                        { href: '/denah-ls', code: 'LS', label: 'Gedung L Rumpun Sipil', desc: 'Denah lantai Gedung LS (Segera Hadir)', icon: HardHat, border: 'border-orange-100 hover:border-orange-300', tile: 'bg-orange-50 text-orange-600', glow: 'bg-orange-400', badge: 'bg-orange-50 text-orange-600', arrow: 'group-hover:text-orange-500' },
+                        { href: '/denah-sfd', code: 'SFD', label: 'Gedung SFD Tower A', desc: 'Eksplorasi denah lantai Gedung SFD', icon: Building2, border: 'border-emerald-100 hover:border-emerald-300', tile: 'bg-emerald-50 text-emerald-600', glow: 'bg-emerald-400', badge: 'bg-emerald-50 text-emerald-600', arrow: 'group-hover:text-emerald-500' }
+                      ].map((gedung, i) => (
+                        <motion.div
+                          key={gedung.href}
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.15 + i * 0.1 }}
+                        >
+                          <Link
+                            href={gedung.href}
+                            className={cn(
+                              "group relative flex items-center justify-between gap-4 overflow-hidden rounded-4xl border bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-200/60",
+                              gedung.border
+                            )}
+                          >
+                            <div className={cn(
+                              "pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-30",
+                              gedung.glow
+                            )}></div>
+                            <div className="relative z-10 flex min-w-0 items-center gap-4">
+                              <div className={cn(
+                                "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-110",
+                                gedung.tile
+                              )}>
+                                <gedung.icon size={22} strokeWidth={1.75} />
+                              </div>
+                              <div className="min-w-0">
+                                <span className={cn(
+                                  "mb-1 inline-block rounded-full px-2 py-0.5 text-[8px] font-black uppercase tracking-widest",
+                                  gedung.badge
+                                )}>{gedung.code}</span>
+                                <p className="text-sm font-bold leading-snug text-slate-700">{gedung.label}</p>
+                                <p className="mt-0.5 text-[10px] font-medium text-slate-400">{gedung.desc}</p>
+                              </div>
+                            </div>
+                            <ChevronRight
+                              size={18}
+                              className={cn("relative z-10 shrink-0 text-slate-300 transition-all duration-300 group-hover:translate-x-1", gedung.arrow)}
+                            />
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1837,11 +1863,11 @@ const WebTabLayout = () => {
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 300, damping: 28 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm bg-white rounded-[32px] overflow-hidden shadow-2xl"
+              className="w-full max-w-sm bg-white rounded-4xl overflow-hidden shadow-2xl"
             >
               {/* Header Gradient */}
               <div className={`p-6 ${pendingAIState ? 'bg-linear-to-br from-emerald-500 to-emerald-700' : 'bg-linear-to-br from-slate-600 to-slate-800'} relative overflow-hidden`}>
-                <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+                <div className="absolute -top-5 -right-5 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
                 <div className="relative z-10 flex items-center gap-4">
                   <div className="w-14 h-14 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20 shadow-lg">
                     <span className="text-2xl">{pendingAIState ? '🤖' : '🔕'}</span>

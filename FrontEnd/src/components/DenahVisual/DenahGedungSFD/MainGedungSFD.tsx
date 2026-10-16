@@ -26,7 +26,7 @@ export default function MainGedungSFD() {
         {/* Kotak Lantai 3 */}
         <div
           onClick={() => setActiveLantai(3)}
-          className="cursor-pointer bg-white border-2 border-emerald-100 hover:border-emerald-500 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group min-h-[400px]"
+          className="cursor-pointer bg-white border-2 border-emerald-100 hover:border-emerald-500 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group min-h-100"
         >
           {/* Container Gambar - Proporsi pas h-64 */}
           <div className="w-full h-64 mb-6 bg-emerald-50/50 rounded-xl flex items-center justify-center relative overflow-hidden">
@@ -48,7 +48,7 @@ export default function MainGedungSFD() {
         {/* Kotak Lantai 8 */}
         <div
           onClick={() => setActiveLantai(8)}
-          className="cursor-pointer bg-white border-2 border-teal-100 hover:border-teal-500 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group min-h-[400px]"
+          className="cursor-pointer bg-white border-2 border-teal-100 hover:border-teal-500 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group min-h-100"
         >
           {/* Container Gambar - Proporsi pas h-64 */}
           <div className="w-full h-64 mb-6 bg-teal-50/50 rounded-xl flex items-center justify-center relative overflow-hidden">
