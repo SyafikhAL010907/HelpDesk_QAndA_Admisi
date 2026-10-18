@@ -11,7 +11,7 @@ export default function MainGedungSFD() {
       <div className="w-full max-w-5xl mb-6 flex items-center justify-start">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:text-emerald-600 hover:border-emerald-200 hover:shadow-xs transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:text-[#183449] hover:border-[#588CBC]/40 hover:shadow-xs transition-all"
         >
           <ArrowLeft size={16} />
           Kembali ke Beranda
@@ -33,10 +33,10 @@ export default function MainGedungSFD() {
         {/* Kotak Lantai 3 */}
         <Link
           href="/denah-sfd/lantai3"
-          className="cursor-pointer bg-white border-2 border-emerald-100 hover:border-emerald-500 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group min-h-100"
+          className="cursor-pointer bg-white border-2 border-slate-100 hover:border-[#588CBC] rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group min-h-100"
         >
           {/* Container Gambar - Proporsi pas h-64 */}
-          <div className="w-full h-64 mb-6 bg-emerald-50/50 rounded-xl flex items-center justify-center relative overflow-hidden">
+          <div className="w-full h-64 mb-6 bg-[#588CBC]/5 rounded-xl flex items-center justify-center relative overflow-hidden">
             <img
               src="/Lantai3.png"
               alt="Preview Denah Lantai 3"
@@ -45,7 +45,7 @@ export default function MainGedungSFD() {
             />
           </div>
           <div className="flex flex-col items-center text-center mt-auto">
-            <h2 className="text-2xl font-bold text-gray-800 group-hover:text-emerald-600 transition-colors">
+            <h2 className="text-2xl font-bold text-gray-800 group-hover:text-[#183449] transition-colors">
               Lantai 3
             </h2>
             <p className="text-base text-gray-500 mt-2">Buka denah Lantai 3</p>

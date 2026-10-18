@@ -444,11 +444,11 @@ const MobileLayout = () => {
                   className="flex flex-col h-full"
                 >
                   {/* List Header */}
-                  <div className="bg-emerald-800 rounded-b-[40px] px-6 pt-12 pb-16 shadow-2xl relative overflow-hidden">
+                  <div className="bg-[#183449] rounded-b-[40px] px-6 pt-12 pb-16 shadow-2xl relative overflow-hidden">
                     <div className="absolute -top-5 -right-5 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
                     <header className="relative z-10">
                       <h2 className="text-xl font-black text-white tracking-tight leading-none">Pesan Bantuan</h2>
-                      <p className="text-emerald-100/70 text-[10px] font-bold uppercase tracking-widest mt-2">Hubungi Admin UNJ</p>
+                      <p className="text-slate-300 text-[10px] font-bold uppercase tracking-widest mt-2">Hubungi Admin UNJ</p>
                     </header>
                   </div>
 
@@ -457,16 +457,16 @@ const MobileLayout = () => {
                       <motion.button 
                           whileTap={{ scale: 0.98 }}
                           onClick={() => setIsJadwalModalOpen(true)}
-                          className="w-full bg-white rounded-full shadow-xl shadow-slate-200/40 p-1.5 border-2 border-emerald-50 hover:border-emerald-400 focus:outline-none transition-all duration-300 flex items-center justify-between"
+                          className="w-full bg-white rounded-full shadow-xl shadow-slate-200/40 p-1.5 border-2 border-[#B3B3B3] hover:border-[#588CBC] focus:outline-none transition-all duration-300 flex items-center justify-between"
                       >
                           <div className="flex items-center gap-3 px-4 h-11">
-                              <Calendar size={18} className="text-emerald-600 shrink-0" />
+                              <Calendar size={18} className="text-[#588CBC] shrink-0" />
                               <div className="flex flex-col text-left">
                                   <span className="text-[11px] font-black text-slate-800 leading-tight">Cek Jadwal Penting Penmaba 2026</span>
-                                  <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Info pendaftaran & ujian</span>
+                                  <span className="text-[9px] font-bold text-[#588CBC] uppercase tracking-wider">Info pendaftaran & ujian</span>
                               </div>
                           </div>
-                          <div className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mr-1">
+                          <div className="w-9 h-9 rounded-full bg-[#588CBC]/10 text-[#588CBC] flex items-center justify-center mr-1">
                               <ChevronRight size={16} />
                           </div>
                       </motion.button>
@@ -479,10 +479,10 @@ const MobileLayout = () => {
                       <motion.button
                         whileTap={{ scale: 0.96 }}
                         onClick={() => setChatView('ROOM')}
-                        className="w-full bg-white p-6 rounded-4xl shadow-xl shadow-slate-200/30 border border-slate-100 flex items-center gap-5 group active:bg-emerald-50 active:border-emerald-100 transition-all duration-300"
+                        className="w-full bg-white p-6 rounded-4xl shadow-xl shadow-slate-200/30 border border-slate-100 flex items-center gap-5 group active:bg-[#588CBC]/10 active:border-[#588CBC]/30 transition-all duration-300"
                       >
                         <div className="relative">
-                          <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 ring-4 ring-slate-50">
+                          <div className="w-16 h-16 bg-[#588CBC]/10 rounded-2xl flex items-center justify-center text-[#588CBC] ring-4 ring-slate-50">
                             <Image src="/unj.png" alt="UNJ" width={40} height={40} className="drop-shadow-md" />
                           </div>
                         </div>
@@ -494,16 +494,16 @@ const MobileLayout = () => {
                             </h4>
                           </div>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                        <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-[#588CBC] group-hover:text-white transition-all">
                            <MessageCircle size={18}     />
                         </div>
                       </motion.button>
 
-                      {/* Info Card - Lighter Emerald Gradient */}
-                      <div className="p-6 bg-linear-to-br from-emerald-500 to-emerald-700 rounded-4xl text-white relative overflow-hidden shadow-2xl shadow-emerald-200/50">
-                         <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl"></div>
+                      {/* Info Card - Dark Blue & Light Blue Gradient */}
+                      <div className="p-6 bg-linear-to-br from-[#183449] to-[#2B5474] rounded-4xl text-white relative overflow-hidden shadow-2xl shadow-[#183449]/20">
+                         <div className="absolute top-0 right-0 w-32 h-32 bg-[#588CBC]/15 rounded-full blur-3xl"></div>
                          <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-white mb-2">Info Layanan</h5>
-                         <p className="text-[11px] text-emerald-50 font-medium leading-relaxed">Admin akan merespon pesan Anda segera dalam jam operasional.</p>
+                         <p className="text-[11px] text-[#B3B3B3] font-medium leading-relaxed">Admin akan merespon pesan Anda segera dalam jam operasional.</p>
                       </div>
                     </div>
                   </main>
@@ -516,14 +516,17 @@ const MobileLayout = () => {
                   exit={{ opacity: 0, x: -20 }}
                   className="flex flex-col h-full bg-slate-50"
                   style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20c0-11.046 8.954-20 20-20v20H20zM0 20c11.046 0 20-8.954 20-20v20H0zM0 20c11.046 0 20 8.954 20 20H0V20zm20 20c0-11.046 8.954-20 20-20v20H20z' fill='%23059669' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E")`
+                    backgroundImage: `url('/Batik.png')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
                   }}
                 >
                   {/* Room Header */}
                   <header className="sticky top-0 bg-white/80 backdrop-blur-xl border-b border-slate-100/50 p-4 pt-12 flex items-center gap-3 z-30">
                     <button 
                       onClick={() => setChatView('LIST')}
-                      className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 active:bg-emerald-50 active:text-emerald-600 transition-all"
+                      className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 active:bg-[#588CBC]/10 active:text-[#588CBC] transition-all"
                     >
                       <ArrowLeft size={20} />
                     </button>
@@ -532,14 +535,14 @@ const MobileLayout = () => {
                       <div className="flex items-center gap-3 flex-1">
                         <div className="relative">
                             <Avatar src="/unj.png" size="sm" />
-                            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
+                            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#588CBC] border-2 border-white rounded-full"></span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <h2 className="font-black text-slate-800 text-sm tracking-tight truncate">
                               Admin  UNJ
                           </h2>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600">Online</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-[#588CBC]">Online</p>
                           </div>
                         </div>
                       </div>
@@ -551,9 +554,9 @@ const MobileLayout = () => {
                           initial={{ opacity: 0, width: 0 }}
                           animate={{ opacity: 1, width: "100%" }}
                           exit={{ opacity: 0, width: 0 }}
-                          className="flex items-center bg-slate-50 border border-slate-200 rounded-[18px] px-3 py-1 h-9 ring-4 ring-emerald-500/5 focus-within:border-emerald-200 focus-within:bg-white focus-within:ring-emerald-500/10 transition-all duration-300 gap-1.5 flex-1"
+                          className="flex items-center bg-slate-50 border border-slate-200 rounded-[18px] px-3 py-1 h-9 ring-4 ring-[#588CBC]/10 focus-within:border-[#588CBC] focus-within:bg-white focus-within:ring-[#588CBC]/20 transition-all duration-300 gap-1.5 flex-1"
                         >
-                          <Search size={14} className="text-emerald-500 shrink-0" />
+                          <Search size={14} className="text-[#588CBC] shrink-0" />
                           <input 
                             type="text" 
                             autoFocus
@@ -574,7 +577,7 @@ const MobileLayout = () => {
                                   setSearchMatchIndex(nextIdx);
                                   scrollToMatch(nextIdx);
                                 }}
-                                className="text-slate-400 hover:text-emerald-600 transition-colors"
+                                className="text-slate-400 hover:text-[#588CBC] transition-colors"
                               >
                                 <ChevronUp size={12} />
                               </button>
@@ -585,7 +588,7 @@ const MobileLayout = () => {
                                   setSearchMatchIndex(nextIdx);
                                   scrollToMatch(nextIdx);
                                 }}
-                                className="text-slate-400 hover:text-emerald-600 transition-colors"
+                                className="text-slate-400 hover:text-[#588CBC] transition-colors"
                               >
                                 <ChevronDown size={12} />
                               </button>
@@ -641,8 +644,8 @@ const MobileLayout = () => {
                           className={cn(
                             "max-w-[85%] px-5 py-3.5 rounded-4xl text-xs shadow-md relative",
                             isMe 
-                              ? "bg-linear-to-br from-emerald-400 to-emerald-500 text-white self-end rounded-tr-none border border-emerald-300 shadow-emerald-100" 
-                              : "bg-white text-slate-700 self-start rounded-tl-none border border-slate-100 shadow-slate-100/50"
+                              ? "bg-linear-to-br from-[#183449] to-[#285577] text-white self-end rounded-tr-none border border-[#588CBC]/40 shadow-lg shadow-[#183449]/15" 
+                              : "bg-white text-[#2B2B2B] self-start rounded-tl-none border border-[#B3B3B3] shadow-sm"
                           )}
                         >
                           {msg.type === 'image' ? (
@@ -675,7 +678,7 @@ const MobileLayout = () => {
                               return (
                                 <>
                                   <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100/50 min-w-45">
-                                    <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                                    <div className="w-10 h-10 bg-[#588CBC]/15 rounded-xl flex items-center justify-center text-[#588CBC]">
                                       <FileText size={18} />
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -683,7 +686,7 @@ const MobileLayout = () => {
                                       <div className="flex items-center gap-3 mt-1">
                                         <button 
                                           onClick={() => viewFile(fileData)}
-                                          className="text-[9px] font-black text-emerald-600 hover:underline flex items-center gap-1"
+                                          className="text-[9px] font-black text-[#588CBC] hover:underline flex items-center gap-1"
                                         >
                                           <Eye size={10} />
                                           Lihat
@@ -712,11 +715,11 @@ const MobileLayout = () => {
                           <div className="flex items-center justify-end gap-1.5 mt-2">
                             <span className={cn(
                                 "text-[9px] font-bold",
-                                isMe ? "text-emerald-50" : "text-slate-400"
+                                isMe ? "text-slate-300" : "text-[#848484]"
                             )}>
                               {msg.timestamp}
                             </span>
-                            {isMe && <CheckCheck size={12} className="text-emerald-100" />}
+                            {isMe && <CheckCheck size={12} className="text-[#588CBC]" />}
                           </div>
                         </motion.div>
                       );
@@ -727,21 +730,21 @@ const MobileLayout = () => {
 
                   {/* Input Area - Moved Lower (since bottom nav is hidden) */}
                   <div className="absolute bottom-6 left-4 right-4 z-20">
-                      <div className="bg-white border border-slate-100 rounded-[28px] overflow-hidden shadow-2xl shadow-emerald-200/20 p-2">
+                      <div className="bg-white border border-slate-100 rounded-[28px] overflow-hidden shadow-2xl shadow-slate-300/20 p-2">
                            <form onSubmit={handleSendMessage} className="flex flex-col gap-2">
                                {selectedResponse && (
                                  <motion.div
                                    initial={{ opacity: 0, height: 0 }}
                                    animate={{ opacity: 1, height: 'auto' }}
-                                   className="p-3 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-start justify-between gap-3 mx-2"
+                                   className="p-3 bg-[#588CBC]/10 border border-[#588CBC]/20 rounded-2xl flex items-start justify-between gap-3 mx-2"
                                  >
                                    <div className="flex-1 min-w-0 flex items-start gap-2">
-                                     <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                                       <Clock size={12} className="text-emerald-600" />
+                                     <div className="w-6 h-6 rounded-full bg-[#588CBC]/20 flex items-center justify-center shrink-0">
+                                       <Clock size={12} className="text-[#183449]" />
                                      </div>
                                      <div className="min-w-0 flex-1">
-                                       <p className="text-[8px] font-black text-emerald-800 uppercase tracking-widest mb-0.5">Draf:</p>
-                                       <p className="text-[10px] text-emerald-900/70 italic font-medium leading-relaxed whitespace-pre-wrap">"{selectedResponse.response}"</p>
+                                       <p className="text-[8px] font-black text-[#183449] uppercase tracking-widest mb-0.5">Draf:</p>
+                                       <p className="text-[10px] text-[#2B2B2B]/80 italic font-medium leading-relaxed whitespace-pre-wrap">"{selectedResponse.response}"</p>
                                      </div>
                                    </div>
                                    <button
@@ -756,10 +759,10 @@ const MobileLayout = () => {
                                <div className="flex items-end gap-2 bg-slate-50/50 rounded-2xl p-1">
                                  <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
                                  <div className="flex items-center gap-1 mb-1 ml-1">
-                                     <button type="button" onClick={handleFileClick} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-white hover:shadow-sm rounded-full active:text-emerald-600 transition-all">
+                                     <button type="button" onClick={handleFileClick} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-white hover:shadow-sm rounded-full active:text-[#588CBC] transition-all">
                                          <Paperclip size={20} />
                                      </button>
-                                     <button type="button" onClick={() => setIsTemplatePopupOpen(true)} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-white hover:shadow-sm rounded-full active:text-emerald-600 transition-all">
+                                     <button type="button" onClick={() => setIsTemplatePopupOpen(true)} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-white hover:shadow-sm rounded-full active:text-[#588CBC] transition-all">
                                          <LayoutGrid size={20} />
                                      </button>
                                  </div>
@@ -778,7 +781,7 @@ const MobileLayout = () => {
                                  <button 
                                      type="submit"
                                      disabled={!newMessage.trim() && !selectedResponse}
-                                     className="w-10 h-10 mb-0.5 mr-0.5 bg-emerald-800 text-white rounded-full flex items-center justify-center shadow-lg disabled:opacity-30 hover:scale-105 active:scale-95 transition-all shrink-0"
+                                     className="w-10 h-10 mb-0.5 mr-0.5 bg-[#183449] hover:bg-[#588CBC] text-white rounded-full flex items-center justify-center shadow-lg shadow-[#183449]/20 disabled:opacity-30 hover:scale-105 active:scale-95 transition-all shrink-0"
                                  >
                                      <Send size={18} className="ml-0.5" />
                                  </button>
@@ -798,8 +801,8 @@ const MobileLayout = () => {
             className="flex flex-col h-full bg-slate-50 overflow-hidden"
           >
             {/* Fixed Header - Higher Layer (z-30) */}
-            <div className="bg-emerald-800 rounded-b-[40px] px-8 pt-10 pb-12 shadow-2xl relative overflow-hidden shrink-0 z-30">
-               <div className="absolute -top-10 -right-10 w-64 h-64 bg-emerald-400/10 rounded-full blur-3xl animate-pulse"></div>
+            <div className="bg-linear-to-br from-[#183449] to-[#2B5474] rounded-b-[40px] px-8 pt-10 pb-12 shadow-2xl relative overflow-hidden shrink-0 z-30">
+               <div className="absolute -top-10 -right-10 w-64 h-64 bg-[#588CBC]/20 rounded-full blur-3xl animate-pulse"></div>
                <div className="absolute -bottom-5 -left-5 w-48 h-48 bg-white/5 rounded-full blur-2xl"></div>
 
                <header className="relative z-10 flex flex-col gap-6">
@@ -819,7 +822,7 @@ const MobileLayout = () => {
                         </motion.div>
                         <div className="flex flex-col">
                           <h2 className="text-sm font-black text-white tracking-tighter leading-none uppercase">Admin  UNJ</h2>
-                          <span className="text-[8px] font-black text-emerald-300 uppercase tracking-widest mt-0.5">UNJ  2026</span>
+                          <span className="text-[8px] font-black text-[#588CBC] uppercase tracking-widest mt-0.5">UNJ  2026</span>
                         </div>
                     </div>
                  </div>
@@ -830,11 +833,11 @@ const MobileLayout = () => {
                       animate={{ y: 0, opacity: 1 }}
                       className="text-2xl font-black text-white tracking-tight leading-tight"
                     >
-                      Halo, <span className="text-emerald-300">{userName}!</span>
+                      Halo, <span className="text-[#588CBC]">{userName}!</span>
                     </motion.h1>
                     <div className="flex items-center gap-2 mt-3">
-                       <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
-                       <p className="text-[9px] font-black text-emerald-100 uppercase tracking-[0.15em]">Admin Siap Membantu</p>
+                       <span className="w-1.5 h-1.5 bg-[#588CBC] rounded-full animate-pulse"></span>
+                       <p className="text-[9px] font-black text-white/80 uppercase tracking-[0.15em]">Admin Siap Membantu</p>
                     </div>
                  </div>
                </header>
@@ -850,8 +853,8 @@ const MobileLayout = () => {
                           animate={{ opacity: 1, scale: 1 }}
                           className="flex flex-col items-center max-w-sm"
                         >
-                            <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-emerald-100 relative overflow-hidden group">
-                                <div className="absolute inset-0 bg-emerald-500/10 scale-0 group-hover:scale-100 transition-transform duration-700 rounded-full"></div>
+                            <div className="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-slate-200 relative overflow-hidden group">
+                                <div className="absolute inset-0 bg-[#588CBC]/10 scale-0 group-hover:scale-100 transition-transform duration-700 rounded-full"></div>
                                 <Image src="/unj.png" alt="Logo" width={50} height={50} className="relative z-10" />
                             </div>
                             <h2 className="text-xl font-black text-slate-800 tracking-tight mb-2">Admin  UNJ</h2>
@@ -859,16 +862,16 @@ const MobileLayout = () => {
                             <motion.button
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => setIsJadwalModalOpen(true)}
-                                className="w-full bg-white rounded-full shadow-xl shadow-slate-200/40 p-1 border-2 border-emerald-50 hover:border-emerald-400 focus:outline-none transition-all duration-300 flex items-center justify-between mb-6"
+                                className="w-full bg-white rounded-full shadow-xl shadow-slate-200/40 p-1 border-2 border-slate-100 hover:border-[#588CBC] focus:outline-none transition-all duration-300 flex items-center justify-between mb-6"
                             >
                                 <div className="flex items-center gap-3 px-3 min-h-11 py-1">
-                                    <Calendar size={18} className="text-emerald-600 shrink-0" />
+                                    <Calendar size={18} className="text-[#183449] shrink-0" />
                                     <div className="flex flex-col text-left">
                                         <span className="text-[11px] font-black text-slate-800 leading-tight">Cek Jadwal Penting Penmaba 2026</span>
-                                        <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider leading-tight mt-0.5">Info pendaftaran & ujian</span>
+                                        <span className="text-[9px] font-bold text-[#588CBC] uppercase tracking-wider leading-tight mt-0.5">Info pendaftaran & ujian</span>
                                     </div>
                                 </div>
-                                <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mr-1 shrink-0">
+                                <div className="w-8 h-8 rounded-full bg-[#588CBC]/10 text-[#183449] flex items-center justify-center mr-1 shrink-0">
                                     <ChevronRight size={14} />
                                 </div>
                             </motion.button>
@@ -881,11 +884,11 @@ const MobileLayout = () => {
                                 setActiveTab('chats');
                                 setChatView('LIST');
                               }}
-                              className="px-8 py-3.5 bg-emerald-800 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-emerald-200 hover:bg-emerald-900 hover:scale-105 active:scale-95 transition-all w-full relative"
+                              className="px-8 py-3.5 bg-[#183449] hover:bg-[#588CBC] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#183449]/30 hover:scale-105 active:scale-95 transition-all w-full relative"
                             >
                               BUKA CHAT SEKARANG
                               {unreadCount > 0 && (
-                                <span className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-400 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white animate-bounce">
+                                <span className="absolute -top-2 -right-2 w-6 h-6 bg-[#588CBC] text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white animate-bounce">
                                   {unreadCount}
                                 </span>
                               )}
@@ -895,15 +898,15 @@ const MobileLayout = () => {
 
                     {/* Jam Layanan Section */}
                     <div className="p-6 bg-white border border-slate-100 rounded-[36px] shadow-xl shadow-slate-200/30 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-[#588CBC]/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] mb-5 px-1">Jam Operasional</h4>
                         <div className="flex items-center gap-5 relative z-10">
-                            <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center shadow-inner ring-4 ring-white">
-                                <Clock size={28} className="text-emerald-600" />
+                            <div className="w-14 h-14 rounded-2xl bg-[#588CBC]/10 flex items-center justify-center shadow-inner ring-4 ring-white">
+                                <Clock size={28} className="text-[#183449]" />
                             </div>
                             <div className="flex flex-col gap-1">
                                 <span className="text-[11px] font-black text-slate-400 uppercase tracking-tighter">Senin - Jumat</span>
-                                <span className="text-lg font-black text-slate-800 leading-none">09:00 - 16:00 <span className="text-[10px] text-emerald-600 font-black">WIB</span></span>
+                                <span className="text-lg font-black text-slate-800 leading-none">09:00 - 16:00 <span className="text-[10px] text-[#588CBC] font-black">WIB</span></span>
                             </div>
                         </div>
                     </div>
@@ -913,10 +916,10 @@ const MobileLayout = () => {
     {/* Header Section */}
     <div className="flex items-center justify-between border-b border-slate-100 pb-4">
       <div className="flex items-center gap-3">
-        <Building2 size={20} className="text-emerald-600" />
+        <Building2 size={20} className="text-[#183449]" />
         <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">Denah Gedung</h3>
       </div>
-      <span className="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-full uppercase tracking-widest">3 Gedung</span>
+      <span className="px-3 py-1 bg-[#588CBC]/10 text-[#183449] text-[10px] font-black rounded-full uppercase tracking-widest">3 Gedung</span>
     </div>
 
     {/* List Container - Diubah jadi Grid 3 Kolom biar nyamping */}
@@ -925,7 +928,7 @@ const MobileLayout = () => {
         // Urutan 1: Elektro (LE)
         { href: '/denah-le', code: 'LE', label: 'Gedung L Rumpun Elektro', desc: 'Eksplorasi denah lantai Gedung LE', icon: Cpu, border: 'border-blue-100 hover:border-blue-300', tile: 'bg-blue-50 text-blue-600', glow: 'bg-blue-400', badge: 'bg-blue-50 text-blue-600', image: '/Lantai3.png' },
         // Urutan 2: SFD 
-        { href: '/denah-sfd', code: 'SFD', label: 'Gedung SFD Tower A', desc: 'Eksplorasi denah lantai Gedung SFD', icon: Building2, border: 'border-emerald-100 hover:border-emerald-300', tile: 'bg-emerald-50 text-emerald-600', glow: 'bg-emerald-400', badge: 'bg-emerald-50 text-emerald-600', image: '/Lantai3.png' },
+        { href: '/denah-sfd', code: 'SFD', label: 'Gedung SFD Tower A', desc: 'Eksplorasi denah lantai Gedung SFD', icon: Building2, border: 'border-[#588CBC]/30 hover:border-[#588CBC]', tile: 'bg-[#588CBC]/10 text-[#183449]', glow: 'bg-[#588CBC]', badge: 'bg-[#588CBC]/10 text-[#183449]', image: '/Lantai3.png' },
         // Urutan 3: Sipil (LS)
         { href: '/denah-ls', code: 'LS', label: 'Gedung L Rumpun Sipil', desc: 'Denah lantai Gedung LS (Segera Hadir)', icon: HardHat, border: 'border-orange-100 hover:border-orange-300', tile: 'bg-orange-50 text-orange-600', glow: 'bg-orange-400', badge: 'bg-orange-50 text-orange-600', image: '/Lantai3.png' }
       ].map((gedung, i) => (
@@ -1000,8 +1003,8 @@ const MobileLayout = () => {
             animate={{ opacity: 1 }}
             className="flex flex-col h-full bg-slate-50 p-10 items-center justify-center"
           >
-             <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mb-6 ring-4 ring-white shadow-xl">
-                <User size={48} className="text-emerald-600" />
+             <div className="w-24 h-24 bg-[#588CBC]/20 rounded-full flex items-center justify-center mb-6 ring-4 ring-white shadow-xl">
+                <User size={48} className="text-[#183449]" />
              </div>
              <h2 className="text-2xl font-black text-slate-800">{userName}</h2>
              <p className="text-sm text-slate-400 font-medium">User Baru - 2026</p>
@@ -1053,7 +1056,7 @@ const MobileLayout = () => {
                           animate={activeTab === 'home' ? { scale: 1.2, y: -2 } : { scale: 1, y: 0 }}
                           className={cn(
                               "p-2 transition-all relative",
-                              activeTab === 'home' ? "text-emerald-600" : "text-slate-400"
+                              activeTab === 'home' ? "text-[#183449]" : "text-slate-400"
                           )}
                       >
                           <Home size={24} />
@@ -1062,7 +1065,7 @@ const MobileLayout = () => {
                           <motion.span 
                               initial={{ opacity: 0, y: 5 }}
                               animate={{ opacity: 1, y: 0 }}
-                              className="text-[8px] font-black uppercase tracking-widest text-emerald-600"
+                              className="text-[8px] font-black uppercase tracking-widest text-[#183449]"
                           >
                               HOME
                           </motion.span>
@@ -1081,13 +1084,13 @@ const MobileLayout = () => {
                           className={cn(
                             "w-16 h-16 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 relative",
                             activeTab === 'chats' 
-                              ? "bg-emerald-600 text-white shadow-emerald-200" 
-                              : "bg-white text-emerald-600 shadow-slate-200 border border-slate-100"
+                              ? "bg-[#183449] text-white shadow-[#183449]/30" 
+                              : "bg-white text-[#183449] shadow-slate-200 border border-slate-100"
                           )}
                       >
                           <MessageCircle size={28} />
                           {unreadCount > 0 && (
-                            <span className="absolute -top-1 -right-1 w-6 h-6 bg-emerald-400 text-white text-[10px] font-black rounded-full flex items-center justify-center border-4 border-white">
+                            <span className="absolute -top-1 -right-1 w-6 h-6 bg-[#588CBC] text-white text-[10px] font-black rounded-full flex items-center justify-center border-4 border-white">
                               {unreadCount}
                             </span>
                           )}
@@ -1143,10 +1146,10 @@ const MobileLayout = () => {
               className="relative w-full max-w-xl bg-white rounded-t-[40px] sm:rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
             >
               {/* Modal Header */}
-              <div className="px-8 py-6 bg-emerald-800 text-white flex items-center justify-between shrink-0">
+              <div className="px-8 py-6 bg-linear-to-r from-[#183449] to-[#2B5474] text-white flex items-center justify-between shrink-0">
                 <div>
                   <h3 className="text-lg font-black tracking-tight">Template Pertanyaan</h3>
-                  <p className="text-emerald-100/60 text-[9px] font-bold uppercase tracking-widest mt-1">Pilih kategori bantuan</p>
+                  <p className="text-white/70 text-[9px] font-bold uppercase tracking-widest mt-1">Pilih kategori bantuan</p>
                 </div>
                 <button 
                   onClick={() => setIsTemplatePopupOpen(false)}
@@ -1165,7 +1168,7 @@ const MobileLayout = () => {
                     className={cn(
                       "shrink-0 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all whitespace-nowrap",
                       activeCategory === cat 
-                        ? "bg-emerald-600 text-white shadow-lg shadow-emerald-100" 
+                        ? "bg-[#183449] text-white shadow-lg shadow-[#183449]/20" 
                         : "bg-white text-slate-400 border border-slate-100"
                     )}
                   >
@@ -1185,10 +1188,10 @@ const MobileLayout = () => {
                         setSelectedResponse(resp);
                         setIsTemplatePopupOpen(false);
                       }}
-                      className="p-5 bg-white border border-slate-100 rounded-[28px] text-left active:border-emerald-200 active:bg-emerald-50/30 transition-all shadow-sm"
+                      className="p-5 bg-white border border-slate-100 rounded-[28px] text-left active:border-[#588CBC]/40 active:bg-[#588CBC]/5 transition-all shadow-sm"
                     >
                       <div className="flex items-center gap-2 mb-2">
-                         <span className="px-2 py-0.5 bg-emerald-50 text-[7px] font-black text-emerald-600 rounded uppercase tracking-widest">{resp.keyword}</span>
+                         <span className="px-2 py-0.5 bg-[#588CBC]/15 text-[7px] font-black text-[#183449] rounded uppercase tracking-widest">{resp.keyword}</span>
                       </div>
                       <p className="text-sm font-black text-slate-800 leading-tight mb-2">{resp.question}</p>
                       <p className="text-[10px] text-slate-400 line-clamp-2 leading-relaxed">{resp.response}</p>
@@ -1245,14 +1248,14 @@ const MobileLayout = () => {
               className="bg-white rounded-t-[40px] w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl relative border-t border-slate-100"
             >
               {/* Modal Header */}
-              <div className="bg-emerald-800 p-6 flex justify-between items-center relative shrink-0">
+              <div className="bg-linear-to-r from-[#183449] to-[#2B5474] p-6 flex justify-between items-center relative shrink-0">
                 <div className="absolute -top-7.5 -right-7.5 w-36 h-36 bg-white/10 rounded-full blur-2xl"></div>
                 <div className="relative z-10 text-white">
                   <h3 className="text-lg font-black tracking-tight flex items-center gap-2">
-                    <Calendar size={22} className="text-emerald-300" />
+                    <Calendar size={22} className="text-[#588CBC]" />
                     Kalender & Jadwal
                   </h3>
-                  <p className="text-emerald-100/60 text-[9px] font-bold uppercase tracking-widest mt-1">
+                  <p className="text-white/70 text-[9px] font-bold uppercase tracking-widest mt-1">
                     Jadwal Penting PENMABA UNJ 2026
                   </p>
                 </div>
@@ -1271,14 +1274,14 @@ const MobileLayout = () => {
                     <motion.div
                       key={event.id}
                       whileTap={{ scale: 0.98 }}
-                      className="p-5 bg-white border border-slate-100 rounded-[28px] text-left active:border-emerald-200 active:bg-emerald-50/30 transition-all shadow-sm flex flex-col justify-between"
+                      className="p-5 bg-white border border-slate-100 rounded-[28px] text-left active:border-[#588CBC]/40 active:bg-[#588CBC]/5 transition-all shadow-sm flex flex-col justify-between"
                     >
                       <div className="flex items-center gap-2 mb-2 justify-between">
                          <span className={cn(
                            "px-2.5 py-1 text-[8px] font-black rounded uppercase tracking-widest",
                            event.category === 'PENDAFTARAN' && "bg-blue-50 text-blue-600",
                            event.category === 'UJIAN' && "bg-amber-50 text-amber-600",
-                           event.category === 'PENGUMUMAN' && "bg-emerald-50 text-emerald-600"
+                           event.category === 'PENGUMUMAN' && "bg-[#588CBC]/15 text-[#183449]"
                          )}>
                            {event.category}
                          </span>

@@ -32,7 +32,7 @@ export default function BukuPedomanViewer() {
             href={cleanUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-800 font-bold underline break-all bg-emerald-50 px-1.5 py-0.5 rounded transition-all mt-1 select-all"
+            className="inline-flex items-center gap-1 text-[#588CBC] hover:text-[#183449] font-bold underline break-all bg-[#588CBC]/10 px-1.5 py-0.5 rounded transition-all mt-1 select-all"
           >
             Lihat Link <ExternalLink size={12} />
           </a>
@@ -46,12 +46,12 @@ export default function BukuPedomanViewer() {
     <div className="w-full max-w-2xl mx-auto flex flex-col gap-4 py-4 px-1 select-none">
       <div className="flex items-center justify-between border-b border-slate-200/60 pb-3 mb-2">
         <div className="flex items-center gap-2">
-          <BookOpen className="text-emerald-600 shrink-0 animate-pulse" size={24} />
+          <BookOpen className="text-[#183449] shrink-0 animate-pulse" size={24} />
           <h2 className="text-sm font-extrabold text-slate-800 tracking-tight uppercase">
             Admin
           </h2>
         </div>
-        <span className="text-[10px] font-black bg-emerald-100/80 text-emerald-700 px-2.5 py-1 rounded-full uppercase tracking-widest border border-emerald-200/40">
+        <span className="text-[10px] font-black bg-[#588CBC]/15 text-[#183449] px-2.5 py-1 rounded-full uppercase tracking-widest border border-[#588CBC]/20">
           5 Halaman
         </span>
       </div>
@@ -64,7 +64,7 @@ export default function BukuPedomanViewer() {
             <div
               key={item.id}
               className={`bg-white border transition-all duration-300 rounded-2xl overflow-hidden shadow-xs hover:shadow-md select-none ${
-                isOpen ? 'border-emerald-500 ring-4 ring-emerald-500/5' : 'border-slate-100/80 hover:border-emerald-200'
+                isOpen ? 'border-[#588CBC] ring-4 ring-[#588CBC]/10' : 'border-slate-100/80 hover:border-[#588CBC]/40'
               }`}
             >
               {/* Header section / trigger */}
@@ -76,7 +76,7 @@ export default function BukuPedomanViewer() {
                 <div className="flex items-center gap-4">
                   {/* Visual design resembling second image */}
                   <div className="flex flex-col items-center shrink-0">
-                    <span className="text-3xl font-black text-emerald-600 tracking-tighter leading-none select-none">
+                    <span className="text-3xl font-black text-[#183449] tracking-tighter leading-none select-none">
                       {item.number}
                     </span>
                     <span className="text-[9px] font-bold text-slate-400 select-none uppercase tracking-wider mt-1">
@@ -85,7 +85,7 @@ export default function BukuPedomanViewer() {
                   </div>
 
                   {/* Divider line style */}
-                  <div className="h-10 w-0.5 bg-emerald-100/80 shrink-0"></div>
+                  <div className="h-10 w-0.5 bg-[#B3B3B3] shrink-0"></div>
 
                   <div className="flex flex-col flex-1">
                     <h3 className="text-sm font-bold text-slate-800 leading-snug select-none flex items-center justify-between">
@@ -96,7 +96,7 @@ export default function BukuPedomanViewer() {
                 </div>
 
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${
-                  isOpen ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'
+                  isOpen ? 'bg-[#588CBC]/15 text-[#588CBC]' : 'bg-slate-50 text-slate-400'
                 }`}>
                   {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </div>
@@ -122,7 +122,7 @@ export default function BukuPedomanViewer() {
                       <div className="flex flex-col gap-2.5">
                         {item.steps.map((step, sIndex) => (
                           <div key={sIndex} className="flex gap-3 items-start select-none">
-                            <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-black flex items-center justify-center shrink-0 mt-0.5 select-none">
+                            <span className="w-6 h-6 rounded-full bg-[#588CBC]/15 text-[#183449] text-xs font-black flex items-center justify-center shrink-0 mt-0.5 select-none">
                               {sIndex + 1}
                             </span>
                             <p className="text-[13px] text-slate-700 font-medium leading-relaxed flex-1 select-none">

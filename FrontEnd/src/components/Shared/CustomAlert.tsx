@@ -35,7 +35,7 @@ const CustomAlert: React.FC<CustomAlertProps> = ({ config, onClose }) => {
             className="w-full max-w-sm bg-white rounded-[32px] overflow-hidden shadow-2xl"
           >
             {/* Header Gradient */}
-            <div className={`p-6 ${isConfirm ? 'bg-linear-to-br from-amber-500 to-amber-700' : 'bg-linear-to-br from-emerald-500 to-emerald-700'} relative overflow-hidden`}>
+            <div className={`p-6 ${isConfirm ? 'bg-linear-to-br from-amber-500 to-amber-700' : 'bg-linear-to-br from-[#183449] to-[#2B5474]'} relative overflow-hidden`}>
               <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-white/10 rounded-full blur-2xl" />
               <div className="relative z-10 flex items-center gap-4">
                 <div className="w-14 h-14 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20 shadow-lg">
@@ -81,7 +81,7 @@ const CustomAlert: React.FC<CustomAlertProps> = ({ config, onClose }) => {
                 ) : (
                   <button
                     onClick={onClose}
-                    className="w-full py-3 px-4 rounded-xl text-xs font-black text-white bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-200 transition-all uppercase tracking-widest"
+                    className="w-full py-3 px-4 rounded-xl text-xs font-black text-white bg-[#183449] hover:bg-[#588CBC] shadow-lg shadow-[#183449]/20 transition-all uppercase tracking-widest"
                   >
                     Tutup
                   </button>

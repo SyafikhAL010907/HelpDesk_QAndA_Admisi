@@ -4,14 +4,119 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import { motion } from 'framer-motion';
+import { motion, MotionConfig, useInView, type HTMLMotionProps } from 'framer-motion';
 import { Plus_Jakarta_Sans, Fasthand } from 'next/font/google';
+import Navbar from '@/components/LandingPage/Navbar';
+import Footer from '@/components/LandingPage/Footer';
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
 });
 const fasthand = Fasthand({ subsets: ['latin'], weight: '400' });
+
+/* ------------------------------------------------------------------ */
+/*  ANIMASI MASUK (ringan: hanya opacity + transform, GPU-friendly)    */
+/* ------------------------------------------------------------------ */
+
+export const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+
+/** jeda tambahan supaya hero baru muncul ketika tirai loader mulai membuka */
+const AFTER_LOADER_OFFSET = 0.4;
+
+/**
+ * true saat loader (AppLoader) sudah selesai.
+ * - refresh / pertama kali buka  -> tunggu event "app:loaded" dari AppLoader
+ * - pindah halaman lewat link     -> loader sudah selesai, langsung true
+ * - kalau AppLoader tidak dipakai -> langsung true
+ */
+export function useAppReady() {
+  const [state, setState] = useState({ ready: false, offset: 0 });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    // Jika tidak ada loader atau loader sudah selesai sebelumnya, langsung tampilkan
+    if (root.dataset.appLoaded === 'true' || !document.querySelector('.pl-root')) {
+      setState({ ready: true, offset: 0 });
+      return;
+    }
+
+    // Tunggu event saat tirai loader mulai membuka
+    const onLoaded = () => setState({ ready: true, offset: AFTER_LOADER_OFFSET });
+    window.addEventListener('app:loaded', onLoaded, { once: true });
+
+    // Fallback keamanan jika event terlewat: tunggu sedikit setelah loader selesai (~4.2s)
+    const timer = setTimeout(() => {
+      setState({ ready: true, offset: 0 });
+    }, 4200);
+
+    return () => {
+      window.removeEventListener('app:loaded', onLoaded);
+      clearTimeout(timer);
+    };
+  }, []);
+
+  return state;
+}
+
+const MOTION_TAGS = {
+  div: motion.div,
+  p: motion.p,
+  h2: motion.h2,
+  h3: motion.h3,
+  span: motion.span,
+} as const;
+
+export type RevealProps = Omit<
+  HTMLMotionProps<'div'>,
+  'initial' | 'animate' | 'whileInView' | 'viewport' | 'transition' | 'ref'
+> & {
+  as?: keyof typeof MOTION_TAGS;
+  /** 'load' = muncul setelah loader selesai (hero) · 'view' = muncul saat di-scroll ke layar */
+  mode?: 'view' | 'load';
+  delay?: number;
+  x?: number;
+  y?: number;
+  scale?: number;
+  duration?: number;
+};
+
+export function Reveal({
+  as = 'div',
+  mode = 'view',
+  delay = 0,
+  x = 0,
+  y = 24,
+  scale = 1,
+  duration = 0.8,
+  children,
+  ...rest
+}: RevealProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { ready, offset } = useAppReady();
+  const inView = useInView(ref, { once: true, amount: 0.05 });
+  const Comp = MOTION_TAGS[as] as unknown as typeof motion.div;
+
+  const hidden = { opacity: 0, x, y, scale };
+  const shown = { opacity: 1, x: 0, y: 0, scale: 1 };
+  const show = ready && (mode === 'load' || inView);
+
+  return (
+    <Comp
+      ref={ref}
+      {...rest}
+      initial={hidden}
+      animate={show ? shown : hidden}
+      transition={{
+        duration,
+        delay: delay + (mode === 'load' ? offset : 0),
+        ease: EASE_OUT,
+      }}
+    >
+      {children}
+    </Comp>
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /*  REUSABLE DOT INDICATOR                                            */
@@ -48,8 +153,8 @@ export function DotIndicator({
               ? 'bg-[#333333]'
               : 'bg-[#B8B8B8] hover:bg-[#999999]'
             : isActive
-            ? 'bg-white'
-            : 'bg-white/35 hover:bg-white/60';
+              ? 'bg-white'
+              : 'bg-white/35 hover:bg-white/60';
 
         const sizeClass = isActive ? 'w-[28px]' : 'w-[8px]';
 
@@ -164,14 +269,6 @@ export const floorMaps = FLOOR_MAPS_REGISTRY;
 
 const LOGIN_HREF = '/login';
 
-const navLinks = [
-  { label: 'Lorem', href: '#' },
-  { label: 'Lorem', href: '#' },
-  { label: 'Lorem', href: '#' },
-  { label: 'Lorem', href: '#' },
-  { label: 'Lorem', href: '#' },
-];
-
 const gedungList = [
   { key: 'sfd', label: 'Gedung SFD', base: '/denah-sfd', floors: [3, 8] },
   { key: 'ls', label: 'Gedung L Sipil', base: '/denah-ls', floors: [1, 2, 3, 4] },
@@ -277,9 +374,8 @@ function TestimonialCarousel() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') setActive(i);
                 }}
-                className={`absolute overflow-hidden bg-white transition-all duration-700 ease-in-out outline-none ${
-                  isActive ? 'cursor-default' : 'cursor-pointer'
-                }`}
+                className={`absolute overflow-hidden bg-white transition-all duration-700 ease-in-out outline-none ${isActive ? 'cursor-default' : 'cursor-pointer'
+                  }`}
                 style={{
                   left: slot.left,
                   top: slot.top,
@@ -312,11 +408,10 @@ function TestimonialCarousel() {
                 </div>
 
                 <p
-                  className={`absolute text-[20px] font-medium leading-[40px] text-black transition-opacity ease-in-out ${
-                    isActive
+                  className={`absolute text-[20px] font-medium leading-[40px] text-black transition-opacity ease-in-out ${isActive
                       ? 'opacity-100 duration-500 delay-500'
                       : 'pointer-events-none opacity-0 duration-200'
-                  }`}
+                    }`}
                   style={{ left: 37, top: 28, width: 249 }}
                 >
                   {item.quote}
@@ -334,6 +429,267 @@ function TestimonialCarousel() {
         className="mt-8"
       />
     </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  FITUR UTAMA + CARA KERJA (dipakai bersama Web/Tab & Mobile)       */
+/* ------------------------------------------------------------------ */
+
+const iconProps = {
+  className: 'h-[55%] w-[55%]',
+  fill: 'none',
+  viewBox: '0 0 24 24',
+  stroke: 'currentColor',
+  strokeWidth: 1.8,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+};
+
+const FITUR_UTAMA = [
+  {
+    text: 'Lihat denah per lantai dan status ruangan secara real-time.',
+    tint: 'bg-[#E4EEE9] text-[#4E7A5C]',
+    icon: (
+      <svg {...iconProps} aria-hidden="true">
+        <path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 1 1 13 0c0 5.4-6.5 11-6.5 11z" />
+        <circle cx="12" cy="10" r="2.3" />
+      </svg>
+    ),
+  },
+  {
+    text: 'Ajukan ruangan yang kosong sesuai tanggal dan jam.',
+    tint: 'bg-[#FBE6EC] text-[#D0507A]',
+    icon: (
+      <svg {...iconProps} aria-hidden="true">
+        <rect x="3.5" y="5" width="17" height="15" rx="2.5" />
+        <path d="M3.5 10h17M8 3v4M16 3v4" />
+      </svg>
+    ),
+  },
+  {
+    text: 'Cek jumlah bangku dan fasilitas sebelum memilih ruangan.',
+    tint: 'bg-[#E6E9F7] text-[#4F5FB5]',
+    icon: (
+      <svg {...iconProps} aria-hidden="true">
+        <path d="M7 11V6.5A2.5 2.5 0 0 1 9.5 4h5A2.5 2.5 0 0 1 17 6.5V11" />
+        <path d="M5 11h14v4H5zM7 15v5M17 15v5" />
+      </svg>
+    ),
+  },
+  {
+    text: 'Hubungi admin dan dosen, atau tanya chatbot kapan saja.',
+    tint: 'bg-[#F1EAE0] text-[#8A6D3B]',
+    icon: (
+      <svg {...iconProps} aria-hidden="true">
+        <path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8l-5 4v-4H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
+      </svg>
+    ),
+  },
+];
+
+const CARA_KERJA = [
+  {
+    title: 'Pilih gedung dan lantai yang ingin kamu cek',
+    desc: 'Tentukan Gedung L atau SFD, lalu pilih lantai untuk membuka denah ruangan yang ingin dicek.',
+    illustration: (
+      <svg viewBox="0 0 100 100" className="h-full w-auto text-slate-800" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M20 90h60M30 90V20h40v70M40 35h5M55 35h5M40 50h5M55 50h5M40 65h5M55 65h5M45 90V75h10v15" strokeLinejoin="round" />
+        <circle cx="20" cy="50" r="8" fill="#cbd5e1" stroke="none" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Lihat status ruangan secara real-time',
+    desc: 'Cek ruangan yang tersedia, dipesan, atau sedang terpakai secara real-time, lengkap dengan fasilitasnya.',
+    illustration: (
+      <svg viewBox="0 0 100 100" className="h-full w-auto text-slate-800" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="20" y="25" width="60" height="50" rx="5" />
+        <path d="M20 40h60" strokeWidth="2" />
+        <circle cx="30" cy="32" r="2" fill="currentColor" />
+        <circle cx="40" cy="32" r="2" fill="currentColor" />
+        <rect x="30" y="55" width="15" height="10" rx="2" fill="#cbd5e1" stroke="none" />
+        <rect x="55" y="55" width="15" height="10" rx="2" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Ajukan booking untuk ruangan yang kosong',
+    desc: 'Pilih ruangan yang kosong, tentukan tanggal dan jam, lalu kirim pengajuan langsung dari website.',
+    illustration: (
+      <svg viewBox="0 0 100 100" className="h-full w-auto text-slate-800" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="25" y="20" width="50" height="35" rx="3" />
+        <path d="M40 55l-5 25M60 55l5 25M30 80h40M45 55v15M55 55v15M30 35l10-5 10 10 15-10" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Dapatkan konfirmasi langsung',
+    desc: 'Terima status pengajuan dan notifikasi, atau tanya lewat chat bila ada kendala.',
+    illustration: (
+      <svg viewBox="0 0 100 100" className="h-full w-auto text-slate-800" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="35" y="15" width="30" height="60" rx="4" />
+        <path d="M45 22h10M40 70h20" strokeLinecap="round" />
+        <circle cx="50" cy="50" r="8" fill="#fca5a5" stroke="none" />
+        <path d="M47 50l2 2 4-4" />
+      </svg>
+    ),
+  },
+];
+
+/* Card fitur: hover / focus => background berubah jadi #333333, teks jadi putih */
+export function FiturUtamaCards({ variant }: { variant: 'web' | 'mobile' }) {
+  const m = variant === 'mobile';
+
+  return (
+    <div
+      className={
+        m ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-[24px]'
+      }
+    >
+      {FITUR_UTAMA.map((item, i) => (
+        <Reveal
+          key={i}
+          tabIndex={0}
+          y={28}
+          delay={m ? 0 : i * 0.08}
+          className={`group flex cursor-pointer flex-col justify-between rounded-[16px] border border-[#EFEFEF] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] outline-none transition-colors duration-300 ease-in-out hover:bg-[#333333] focus-visible:bg-[#333333] ${m ? 'min-h-[190px] p-4' : 'min-h-[220px] p-5 lg:min-h-[260px] lg:p-6'
+            }`}
+        >
+          <span
+            className={`flex items-center justify-center rounded-full ${item.tint} ${m ? 'h-[36px] w-[36px]' : 'h-[44px] w-[44px]'
+              }`}
+          >
+            {item.icon}
+          </span>
+          <p
+            className={`font-medium text-[#333333] transition-colors duration-300 ease-in-out group-hover:text-white group-focus-visible:text-white ${m ? 'text-[13px] leading-[20px]' : 'text-[15px] leading-[24px] lg:text-[17px]'
+              }`}
+          >
+            {item.text}
+          </p>
+        </Reveal>
+      ))}
+    </div>
+  );
+}
+
+export function CaraKerjaSteps({ variant }: { variant: 'web' | 'mobile' }) {
+  const m = variant === 'mobile';
+
+  return (
+    <div className={m ? 'grid grid-cols-1 gap-12 max-w-[360px] mx-auto' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'}>
+      {CARA_KERJA.map((step, i) => (
+        <div
+          key={i}
+          className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.1)] p-8 relative pt-14 text-center flex flex-col items-center hover:shadow-[0_12px_40px_rgba(0,0,0,0.15)] transition-shadow duration-300"
+        >
+          {/* Floating Number Badge */}
+          <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 w-14 h-14 bg-white rounded-full border-[3px] border-[#333333] flex items-center justify-center text-xl font-bold text-gray-800 shadow-md">
+            {i + 1}
+          </div>
+
+          {/* SVG Illustration Placeholder */}
+          <div className="w-full h-32 mb-6 flex items-center justify-center">
+            {step.illustration}
+          </div>
+
+          {/* Content */}
+          <h3 className="font-bold text-lg mb-3 leading-snug text-gray-900">{step.title}</h3>
+          <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Data statis untuk Card
+const stepsData = [
+  {
+    id: 1,
+    image: "/Landing/Caker1.png",
+    title: "Pilih gedung dan lantai yang ingin kamu cek",
+    desc: "Tentukan Gedung L atau SFD, lalu pilih lantai untuk membuka denah ruangan yang ingin dicek."
+  },
+  {
+    id: 2,
+    image: "/Landing/Caker2.png",
+    title: "Lihat status ruangan secara real-time",
+    desc: "Cek ruangan yang tersedia, dipesan, atau sedang terpakai secara real-time, lengkap dengan fasilitasnya."
+  },
+  {
+    id: 3,
+    image: "/Landing/Caker3.png",
+    title: "Ajukan booking untuk ruangan yang kosong",
+    desc: "Pilih ruangan yang kosong, tentukan tanggal dan jam, lalu kirim pengajuan langsung dari website."
+  },
+  {
+    id: 4,
+    image: "/Landing/Caker4.png",
+    title: "Dapatkan konfirmasi langsung",
+    desc: "Terima status pengajuan dan notifikasi, atau tanya lewat chat bila ada kendala."
+  }
+];
+
+export function CaraKerjaSection({ variant }: { variant: 'web' | 'mobile' }) {
+  const m = variant === 'mobile';
+
+  return (
+    <section id="cara-kerja" className="relative w-full overflow-hidden bg-white">
+      {/* ================= TOP SECTION (GELAP) ================= */}
+      {/* pb harus >= nilai -mt di bawah supaya gelapnya turun sampai tengah kartu */}
+      <div className={`bg-[#333333] px-4 text-center ${m ? 'pt-16 pb-[210px]' : 'pt-24 pb-[200px]'}`}>
+        <div className="max-w-4xl mx-auto">
+          <Reveal as="p" y={16} className="text-gray-400 text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase mb-4">
+            Semua Info Ruangan, Satu Tempat
+          </Reveal>
+          <Reveal as="h2" y={20} delay={0.08} className={`text-white font-bold tracking-tight ${m ? 'text-3xl sm:text-4xl' : 'text-4xl sm:text-5xl'}`}>
+            Cara Kerja SiRuang
+          </Reveal>
+        </div>
+      </div>
+
+      {/* ================= CARDS SECTION (LAYER MENINDIH) ================= */}
+      {/* FIX: bg-white DIHAPUS dari wrapper ini (section sudah bg-white).
+          Sebelumnya wrapper putih ini ikut tertarik naik oleh -mt dan menutupi area gelap. */}
+      <div className={m ? 'pb-16' : 'pb-24 lg:pb-32'}>
+        <div
+          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full ${m ? '-mt-[200px]' : '-mt-[190px]'
+            }`}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 pt-8">
+            {stepsData.map((step) => (
+              <Reveal
+                key={step.id}
+                y={36}
+                delay={m ? 0 : (step.id - 1) * 0.1}
+                className="relative bg-white rounded-3xl p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100 flex flex-col items-center text-center mt-6 lg:mt-0"
+              >
+                {/* Number Badge Bulat */}
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
+                  <div className="w-10 h-10 rounded-full border-2 border-gray-800 flex items-center justify-center">
+                    <span className="text-gray-800 font-semibold text-lg">{step.id}</span>
+                  </div>
+                </div>
+
+                {/* Area Gambar (Caker1 - Caker4) */}
+                <div className="w-full h-40 mt-6 mb-6 flex items-center justify-center">
+                  <img
+                    src={step.image}
+                    alt={`Ilustrasi ${step.title}`}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+
+                {/* Teks Konten */}
+                <h3 className="text-gray-900 font-bold text-lg leading-tight mb-3">{step.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -436,7 +792,7 @@ export default function WebTabLayout() {
       setIsDragging(true);
       try {
         e.currentTarget.setPointerCapture(e.pointerId);
-      } catch {}
+      } catch { }
     }
     if (isDragging) {
       sliderRef.current.scrollLeft = dragStartScrollLeft.current - dx;
@@ -451,64 +807,49 @@ export default function WebTabLayout() {
         if (e.currentTarget.hasPointerCapture(e.pointerId)) {
           e.currentTarget.releasePointerCapture(e.pointerId);
         }
-      } catch {}
+      } catch { }
     }
   };
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className={`${jakarta.className} w-full overflow-x-hidden bg-white text-black`}>
       {/* ---------------- NAVBAR ---------------- */}
-      <header className={`${container} relative`}>
-        <div className="flex h-[56px] items-center justify-end pt-0 mt-[34px]">
-          <nav className="absolute left-1/2 top-[34px] flex h-[56px] -translate-x-1/2 items-center gap-6 lg:gap-[75px]">
-            {navLinks.map((l, i) => (
-              <Link
-                key={i}
-                href={l.href}
-                className="text-[20px] font-semibold text-black transition-opacity hover:opacity-60"
-              >
-                {l.label}
-              </Link>
-            ))}
-          </nav>
-
-          <Link
-            href={LOGIN_HREF}
-            className="flex h-[56px] w-[176px] items-center justify-center rounded-[15px] bg-[#333333] text-[20px] font-semibold text-white transition-opacity hover:opacity-85"
-          >
-            Masuk
-          </Link>
-        </div>
-      </header>
+      <Navbar variant="web" />
 
       {/* ---------------- HERO ---------------- */}
       <section className={`${container} mt-[120px] lg:mt-[243px]`}>
-        <div
+        <Reveal
+          mode="load"
+          y={32}
+          scale={0.985}
+          duration={0.9}
           className="relative min-h-[380px] rounded-[40px] lg:h-[561px]"
           style={{ background: 'linear-gradient(90deg, #183449 0%, #588CBC 100%)' }}
         >
           <div className="relative z-10 flex h-full w-[52%] flex-col justify-center py-10 pl-8 lg:w-[568px] lg:justify-start lg:py-0 lg:pl-[47px] lg:pt-[115px]">
-            <div className="whitespace-nowrap leading-[40px] text-[#FCFCFC]">
-              <span className="text-[32px] font-bold lg:text-[45px]">LOREM IPSUM&nbsp; </span>
+            <Reveal mode="load" y={22} delay={0.35} className="whitespace-nowrap leading-[40px] text-[#FCFCFC]">
+              <span className="text-[32px] font-bold lg:text-[45px]">Dashboard&nbsp; </span>
               <span className={`${fasthand.className} text-[50px] font-normal lg:text-[70px]`}>
-                Dolor
+                SiRuang
               </span>
-            </div>
+            </Reveal>
 
-            <p className="mt-[28px] max-w-[521px] text-[17px] leading-[28px] text-[#FCFCFC] lg:mt-[38px] lg:text-[25px] lg:leading-[40px]">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-            </p>
+            <Reveal as="p" mode="load" y={22} delay={0.48} className="mt-[28px] max-w-[521px] text-[17px] leading-[28px] text-[#FCFCFC] lg:mt-[38px] lg:text-[25px] lg:leading-[40px]">
+             Butuh ruangan sekarang? Cek slot kosong dan langsung booking sementara tanpa takut nabrak jadwal akademik kampus.
+            </Reveal>
 
+            <Reveal mode="load" y={22} delay={0.6}>
             <Link
               href={LOGIN_HREF}
               className="mt-[28px] flex h-[56px] w-[226px] items-center justify-center rounded-[15px] bg-white text-[20px] font-semibold text-[#333333] transition-opacity hover:opacity-90 lg:mt-[37px]"
             >
               Masuk
             </Link>
+            </Reveal>
           </div>
 
-          <div className="absolute bottom-0 right-0 aspect-[617/745] w-[50%] lg:w-[617px]">
+          <Reveal mode="load" x={56} y={0} delay={0.4} duration={0.95} className="absolute bottom-0 right-0 aspect-[617/745] w-[50%] lg:w-[617px]">
             <Image
               src="/Landing/GedungSFD.png"
               alt="Gedung SFD"
@@ -517,24 +858,24 @@ export default function WebTabLayout() {
               priority
               className="h-full w-full rounded-br-[40px] object-cover"
             />
-          </div>
-        </div>
+          </Reveal>
+        </Reveal>
       </section>
 
       {/* ---------------- DATA REAL-TIME ---------------- */}
-      <section className={`${container} mt-[100px] lg:mt-[188px]`}>
-        <h2 className="text-center text-[40px] font-semibold leading-[63px] lg:text-[50px]">
+      <section id="data-real-time" className={`${container} mt-[100px] lg:mt-[188px]`}>
+        <Reveal as="h2" className="text-center text-[40px] font-semibold leading-[63px] lg:text-[50px]">
           Data Real-Time
-        </h2>
+        </Reveal>
 
-        <p className="mx-auto mt-[28px] max-w-[860px] text-center text-[20px] leading-[34px] lg:mt-[38px] lg:text-[25px] lg:leading-[40px]">
+        <Reveal as="p" delay={0.08} className="mx-auto mt-[28px] max-w-[860px] text-center text-[20px] leading-[34px] lg:mt-[38px] lg:text-[25px] lg:leading-[40px]">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
           <br className="hidden lg:block" /> tempor incididunt ut labore et dolore magna aliqua. Ut
           enim ad minim veniam,
-        </p>
+        </Reveal>
 
         {/* tombol gedung */}
-        <div className="mt-[30px] flex flex-wrap items-center justify-center gap-4 lg:mt-[37px] lg:gap-[80px]">
+        <Reveal delay={0.16} className="mt-[30px] flex flex-wrap items-center justify-center gap-4 lg:mt-[37px] lg:gap-[80px]">
           {gedungList.map((g) => {
             const isActive = g.key === activeKey;
             return (
@@ -543,24 +884,24 @@ export default function WebTabLayout() {
                 type="button"
                 onClick={() => handleSelectGedung(g.key as 'sfd' | 'ls' | 'le')}
                 aria-pressed={isActive}
-                className={`flex h-[65px] min-w-[204px] cursor-pointer items-center justify-center rounded-[15px] px-10 text-[20px] font-semibold transition-colors duration-300 ${
-                  isActive
+                className={`flex h-[65px] min-w-[204px] cursor-pointer items-center justify-center rounded-[15px] px-10 text-[20px] font-semibold transition-colors duration-300 ${isActive
                     ? 'bg-[#333333] text-white'
                     : 'border border-[#333333] bg-transparent text-black hover:bg-[#333333]/5'
-                }`}
+                  }`}
               >
                 {g.label}
               </button>
             );
           })}
-        </div>
+        </Reveal>
 
         {/* kartu denah lantai slider (lebar penuh container, sejajar hero card) */}
         <motion.div
           key={activeGedung.key}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 'some' }}
+          transition={{ duration: 0.55, ease: EASE_OUT }}
           className="mt-[40px] w-full lg:mt-[66px]"
         >
           {totalPages <= 1 ? (
@@ -580,7 +921,7 @@ export default function WebTabLayout() {
                           <item.Map
                             className="h-full w-full object-contain"
                             selectedCode={null}
-                            onSelectRoom={() => {}}
+                            onSelectRoom={() => { }}
                           />
                         </div>
                       </div>
@@ -607,9 +948,8 @@ export default function WebTabLayout() {
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
                 onPointerCancel={handlePointerUp}
-                className={`flex w-full overflow-x-auto snap-x snap-mandatory select-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
-                  isDragging ? 'cursor-grabbing' : 'cursor-grab'
-                }`}
+                className={`flex w-full overflow-x-auto snap-x snap-mandatory select-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${isDragging ? 'cursor-grabbing' : 'cursor-grab'
+                  }`}
               >
                 {pages.map((pageCards, pageIdx) => (
                   <div
@@ -631,7 +971,7 @@ export default function WebTabLayout() {
                                 <item.Map
                                   className="h-full w-full object-contain"
                                   selectedCode={null}
-                                  onSelectRoom={() => {}}
+                                  onSelectRoom={() => { }}
                                 />
                               </div>
                             </div>
@@ -693,7 +1033,7 @@ export default function WebTabLayout() {
       {/* ---------------- RESPONSIVE WEBSITE ---------------- */}
       <section className={`${container} mt-[100px] lg:mt-[158px]`}>
         <div className="flex flex-col items-center gap-10 lg:flex-row lg:items-start lg:gap-0">
-          <div className="relative z-0 flex h-[420px] w-[357px] shrink-0 items-center justify-center bg-white lg:ml-[24px] lg:h-[558px] lg:w-[474px]">
+          <Reveal y={32} duration={0.9} className="relative z-0 flex h-[420px] w-[357px] shrink-0 items-center justify-center bg-white lg:ml-[24px] lg:h-[558px] lg:w-[474px]">
             <video
               src="/Landing/Responsive.mp4"
               autoPlay
@@ -708,11 +1048,11 @@ export default function WebTabLayout() {
               style={{
                 filter: 'brightness(1.03) contrast(1.04)',
               }}
-              className="pointer-events-none h-full w-full select-none object-contain transition-transform duration-300 md:scale-[1.22] lg:scale-[1.34] [clip-path:inset(3px_3px_3px_3px)]"
+              className="pointer-events-none h-full w-full select-none object-contain transition-transform duration-300 md:scale-[1.5] lg:scale-[2] [clip-path:inset(3px_3px_3px_3px)]"
             />
-          </div>
+          </Reveal>
 
-          <div className="relative z-10 w-full max-w-[712px] lg:ml-[63px] lg:mt-[9px]">
+          <Reveal delay={0.12} className="relative z-10 w-full max-w-[712px] lg:ml-[63px] lg:mt-[9px]">
             <p className="text-[20px] font-semibold leading-[40px] text-[#B8B8B8] lg:text-[23px]">
               Lorem Ipsum dolor sit
             </p>
@@ -731,37 +1071,51 @@ export default function WebTabLayout() {
             >
               Lorem ipsum
             </Link>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* ---------------- MASALAH YANG DISELESAIKAN ---------------- */}
       <section className="mt-[100px] bg-[#333333] px-4 pb-[100px] pt-[80px] lg:mt-[192px] lg:pb-[160px] lg:pt-[119px]">
-        <p className="text-center text-[20px] leading-[40px] text-[#E3E3E3] lg:text-[23px]">
+        <Reveal as="p" y={16} className="text-center text-[20px] leading-[40px] text-[#E3E3E3] lg:text-[23px]">
           Lorem Ipsum dolor sit
-        </p>
-        <h2 className="mt-[0px] text-center text-[36px] font-semibold leading-[63px] text-white lg:text-[50px]">
+        </Reveal>
+        <Reveal as="h2" y={20} delay={0.08} className="mt-[0px] text-center text-[36px] font-semibold leading-[63px] text-white lg:text-[50px]">
           Masalah yang Diselesaikan
-        </h2>
+        </Reveal>
 
-        <div className="mx-auto mt-[40px] max-w-[1161px] lg:mt-[83px]">
+        <Reveal y={40} delay={0.12} duration={0.9} className="mx-auto mt-[40px] max-w-[1161px] lg:mt-[83px]">
           <TestimonialCarousel />
+        </Reveal>
+      </section>
+
+      {/* ---------------- FITUR UTAMA ---------------- */}
+      <section className="mx-auto w-full max-w-[1440px] px-6 pb-[120px] pt-[80px] lg:px-[84px] lg:pt-[120px]">
+        {/* ---------------- FITUR UTAMA ---------------- */}
+        <div id="fitur">
+          <Reveal as="p" y={16} className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#B8B8B8]">
+            Semua info ruangan, satu tempat
+          </Reveal>
+          <Reveal as="h2" y={20} delay={0.08} className="mt-3 text-[40px] font-semibold leading-[56px] lg:text-[50px]">
+            Fitur Utama SiRuang
+          </Reveal>
+          <Reveal as="p" y={20} delay={0.16} className="mt-5 max-w-[760px] text-[20px] leading-[34px] lg:text-[22px] lg:leading-[36px]">
+            SiRuang membantu PJ kelas, dosen, dan mahasiswa melihat status ruangan, mengajukan
+            booking, dan berkomunikasi dalam satu website.
+          </Reveal>
+
+          <div className="mt-10 lg:mt-[56px]">
+            <FiturUtamaCards variant="web" />
+          </div>
         </div>
       </section>
 
-      {/* ---------------- HOW WE WORKS ---------------- */}
-      <section className="mx-auto w-full max-w-[1440px] px-6 pb-[120px] pt-[120px] lg:px-[84px] lg:pt-[231px]">
-        <div className="flex items-center gap-[27px] lg:pl-0">
-          <span className="h-[7px] w-[73px] rounded-[2px] bg-[#C2AC72]" />
-          <span className="text-[28px] font-medium leading-[47px]">How We Works</span>
-        </div>
+      {/* ---------------- CARA KERJA ---------------- */}
+      <CaraKerjaSection variant="web" />
 
-        <h2 className="mt-[16px] text-[40px] font-bold leading-[73px] lg:pl-[32px] lg:text-[50px]">
-          How We <span className="text-[#C2AC72]">Get It Done</span>
-        </h2>
-
-        <h2 className="mt-[120px] text-[40px] font-semibold lg:pl-[60px] lg:text-[50px]">Fitur</h2>
-      </section>
+      {/* ---------------- FOOTER ---------------- */}
+      <Footer variant="web" />
     </div>
+    </MotionConfig>
   );
 }

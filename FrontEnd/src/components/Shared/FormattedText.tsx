@@ -16,7 +16,7 @@ const FormattedText: React.FC<FormattedTextProps> = ({ text, className }) => {
     // Quote (>)
     if (line.startsWith('> ')) {
       return (
-        <blockquote className="border-l-4 border-emerald-300/50 pl-4 py-1 my-1 italic text-slate-500 bg-slate-50/50 rounded-r-lg">
+        <blockquote className="border-l-4 border-[#588CBC] pl-4 py-1 my-1 italic text-slate-500 bg-slate-50/50 rounded-r-lg">
           {parseInline(line.substring(2))}
         </blockquote>
       );

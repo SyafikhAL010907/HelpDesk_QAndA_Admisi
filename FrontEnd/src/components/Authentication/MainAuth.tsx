@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useIsMobile } from '@/hooks/useIsMobile';
 
 // Web Components
-import WebLogin from './Web&Tab/Login';
-import WebSignUp from './Web&Tab/SignUp';
+import AuthSlider from './Web&Tab/AuthSlider';
 import CustomAlert from '@/components/Shared/CustomAlert';
 
 // Mobile Components
@@ -23,7 +22,7 @@ const MainAuth = ({ initialMode, onLoginSuccess }: MainAuthProps) => {
     const router = useRouter();
     const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
     const [mounted, setMounted] = useState(false);
-    
+
     // Auth State
     const [loading, setLoading] = useState(false);
     const [captcha, setCaptcha] = useState({ kode: 0, pertanyaan: '', jawaban: '' });
@@ -106,33 +105,45 @@ const MainAuth = ({ initialMode, onLoginSuccess }: MainAuthProps) => {
 
     if (!mounted) return null;
 
-    if (mode === 'login') {
-        const LoginComp = isMobile ? MobileLogin : WebLogin;
+    // HP: tetap ganti halaman seperti sebelumnya
+    if (isMobile) {
         return (
             <>
-                <LoginComp 
-                    onNavigate={handleNavigate} 
-                    onLogin={handleLogin}
-                    loading={loading}
-                    captcha={captcha}
-                    onRefreshCaptcha={fetchCaptcha}
-                />
-                <CustomAlert config={alertConfig} onClose={() => setAlertConfig({...alertConfig, show: false})} />
-            </>
-        );
-    } else {
-        const SignUpComp = isMobile ? MobileSignUp : WebSignUp;
-        return (
-            <>
-                <SignUpComp 
-                    onNavigate={handleNavigate} 
-                    onSignUp={handleSignUp}
-                    loading={loading}
-                />
-                <CustomAlert config={alertConfig} onClose={() => setAlertConfig({...alertConfig, show: false})} />
+                {mode === 'login' ? (
+                    <MobileLogin
+                        onNavigate={handleNavigate}
+                        onLogin={handleLogin}
+                        loading={loading}
+                        captcha={captcha}
+                        onRefreshCaptcha={fetchCaptcha}
+                    />
+                ) : (
+                    <MobileSignUp
+                        onNavigate={handleNavigate}
+                        onSignUp={handleSignUp}
+                        loading={loading}
+                    />
+                )}
+                <CustomAlert config={alertConfig} onClose={() => setAlertConfig({ ...alertConfig, show: false })} />
             </>
         );
     }
+
+    // Web & Tab: satu komponen, overlay geser
+    return (
+        <>
+            <AuthSlider
+                mode={mode}
+                onModeChange={setMode}
+                onLogin={handleLogin}
+                onRegister={handleSignUp}
+                loading={loading}
+                captcha={captcha}
+                onRefreshCaptcha={fetchCaptcha}
+            />
+            <CustomAlert config={alertConfig} onClose={() => setAlertConfig({ ...alertConfig, show: false })} />
+        </>
+    );
 };
 
 export default MainAuth;

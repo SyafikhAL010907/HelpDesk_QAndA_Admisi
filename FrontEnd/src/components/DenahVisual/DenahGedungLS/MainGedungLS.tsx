@@ -11,7 +11,7 @@ export default function MainGedungLS() {
       <div className="w-full max-w-4xl mb-6 flex items-center justify-start">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:text-emerald-600 hover:border-emerald-200 hover:shadow-xs transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:text-[#183449] hover:border-[#588CBC]/40 hover:shadow-xs transition-all"
         >
           <ArrowLeft size={16} />
           Kembali ke Beranda
@@ -33,9 +33,9 @@ export default function MainGedungLS() {
         {/* Kotak Lantai 1 */}
         <Link
           href="/denah-ls/lantai1"
-          className="cursor-pointer bg-white border-2 border-emerald-100 hover:border-emerald-500 rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group h-64"
+          className="cursor-pointer bg-white border-2 border-slate-100 hover:border-[#588CBC] rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group h-64"
         >
-          <div className="w-full h-36 mb-4 bg-emerald-50/50 rounded-xl flex items-center justify-center relative overflow-hidden">
+          <div className="w-full h-36 mb-4 bg-[#588CBC]/5 rounded-xl flex items-center justify-center relative overflow-hidden">
             <img 
               src="/Lantai3.png" 
               alt="Preview Denah Lantai 1" 
@@ -44,7 +44,7 @@ export default function MainGedungLS() {
             />
           </div>
           <div className="flex flex-col items-center text-center">
-            <h2 className="text-xl font-bold text-gray-800 group-hover:text-emerald-600 transition-colors">Lantai 1</h2>
+            <h2 className="text-xl font-bold text-gray-800 group-hover:text-[#183449] transition-colors">Lantai 1</h2>
             <p className="text-sm text-gray-500 mt-1">Buka denah Lantai 1</p>
           </div>
         </Link>

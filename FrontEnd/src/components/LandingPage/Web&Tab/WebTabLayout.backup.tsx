@@ -6,6 +6,7 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import { Plus_Jakarta_Sans, Fasthand } from 'next/font/google';
+import Navbar from '@/components/LandingPage/Navbar';
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -164,14 +165,6 @@ export const floorMaps = FLOOR_MAPS_REGISTRY;
 
 const LOGIN_HREF = '/login';
 
-const navLinks = [
-  { label: 'Lorem', href: '#' },
-  { label: 'Lorem', href: '#' },
-  { label: 'Lorem', href: '#' },
-  { label: 'Lorem', href: '#' },
-  { label: 'Lorem', href: '#' },
-];
-
 const gedungList = [
   { key: 'sfd', label: 'Gedung SFD', base: '/denah-sfd', floors: [3, 8] },
   { key: 'ls', label: 'Gedung L Sipil', base: '/denah-ls', floors: [1, 2, 3, 4] },
@@ -182,13 +175,14 @@ const QUOTE =
   '“Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris ”';
 
 const testimonials = [1, 2, 3, 4, 5].map((n) => ({
-  src: `/SolusiMasalah/${n}.png`,
+  src: `/SolusiMasalah/1.png`,
   quote: QUOTE,
 }));
 
 /* ------------------------------------------------------------------ */
 /*  CAROUSEL CONFIG (ukuran dari Figma, canvas 1161 x 409)            */
 /* ------------------------------------------------------------------ */
+
 
 const CANVAS_W = 1161;
 const CANVAS_H = 409;
@@ -337,6 +331,232 @@ function TestimonialCarousel() {
 }
 
 /* ------------------------------------------------------------------ */
+/*  FITUR UTAMA + CARA KERJA (dipakai bersama Web/Tab & Mobile)       */
+/* ------------------------------------------------------------------ */
+
+const iconProps = {
+  className: 'h-[55%] w-[55%]',
+  fill: 'none',
+  viewBox: '0 0 24 24',
+  stroke: 'currentColor',
+  strokeWidth: 1.8,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+};
+
+const FITUR_UTAMA = [
+  {
+    text: 'Lihat denah per lantai dan status ruangan secara real-time.',
+    tint: 'bg-[#E4EEE9] text-[#4E7A5C]',
+    icon: (
+      <svg {...iconProps} aria-hidden="true">
+        <path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 1 1 13 0c0 5.4-6.5 11-6.5 11z" />
+        <circle cx="12" cy="10" r="2.3" />
+      </svg>
+    ),
+  },
+  {
+    text: 'Ajukan ruangan yang kosong sesuai tanggal dan jam.',
+    tint: 'bg-[#FBE6EC] text-[#D0507A]',
+    icon: (
+      <svg {...iconProps} aria-hidden="true">
+        <rect x="3.5" y="5" width="17" height="15" rx="2.5" />
+        <path d="M3.5 10h17M8 3v4M16 3v4" />
+      </svg>
+    ),
+  },
+  {
+    text: 'Cek jumlah bangku dan fasilitas sebelum memilih ruangan.',
+    tint: 'bg-[#E6E9F7] text-[#4F5FB5]',
+    icon: (
+      <svg {...iconProps} aria-hidden="true">
+        <path d="M7 11V6.5A2.5 2.5 0 0 1 9.5 4h5A2.5 2.5 0 0 1 17 6.5V11" />
+        <path d="M5 11h14v4H5zM7 15v5M17 15v5" />
+      </svg>
+    ),
+  },
+  {
+    text: 'Hubungi admin dan dosen, atau tanya chatbot kapan saja.',
+    tint: 'bg-[#F1EAE0] text-[#8A6D3B]',
+    icon: (
+      <svg {...iconProps} aria-hidden="true">
+        <path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8l-5 4v-4H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" />
+      </svg>
+    ),
+  },
+];
+
+const CARA_KERJA = [
+  {
+    title: 'Pilih gedung dan lantai yang ingin kamu cek',
+    desc: 'Tentukan Gedung L atau SFD, lalu pilih lantai untuk membuka denah ruangan yang ingin dicek.',
+    img: '/Landing/Caker1.png',
+  },
+  {
+    title: 'Lihat status ruangan secara real-time',
+    desc: 'Cek ruangan yang tersedia, dipesan, atau sedang terpakai secara real-time, lengkap dengan fasilitasnya.',
+    img: '/Landing/Caker2.png',
+  },
+  {
+    title: 'Ajukan booking untuk ruangan yang kosong',
+    desc: 'Pilih ruangan yang kosong, tentukan tanggal dan jam, lalu kirim pengajuan langsung dari website.',
+    img: '/Landing/Caker3.png',
+  },
+  {
+    title: 'Dapatkan konfirmasi langsung',
+    desc: 'Terima status pengajuan dan notifikasi, atau tanya lewat chat bila ada kendala.',
+    img: '/Landing/Caker4.png',
+  },
+];
+
+/* Card fitur: hover / focus => background berubah jadi #333333, teks jadi putih */
+export function FiturUtamaCards({ variant }: { variant: 'web' | 'mobile' }) {
+  const m = variant === 'mobile';
+
+  return (
+    <div
+      className={
+        m ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-[24px]'
+      }
+    >
+      {FITUR_UTAMA.map((item, i) => (
+        <div
+          key={i}
+          tabIndex={0}
+          className={`group flex cursor-pointer flex-col justify-between rounded-[16px] border border-[#EFEFEF] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] outline-none transition-colors duration-300 ease-in-out hover:bg-[#333333] focus-visible:bg-[#333333] ${
+            m ? 'min-h-[190px] p-4' : 'min-h-[220px] p-5 lg:min-h-[260px] lg:p-6'
+          }`}
+        >
+          <span
+            className={`flex items-center justify-center rounded-full ${item.tint} ${
+              m ? 'h-[36px] w-[36px]' : 'h-[44px] w-[44px]'
+            }`}
+          >
+            {item.icon}
+          </span>
+          <p
+            className={`font-medium text-[#333333] transition-colors duration-300 ease-in-out group-hover:text-white group-focus-visible:text-white ${
+              m ? 'text-[13px] leading-[20px]' : 'text-[15px] leading-[24px] lg:text-[17px]'
+            }`}
+          >
+            {item.text}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* Cara Kerja: 4 kartu putih, nomor di badge atas, gambar tanpa background.
+   Dipakai di dalam <CaraKerjaSection> supaya setengah kartu menimpa area gelap. */
+export function CaraKerjaSteps({ variant }: { variant: 'web' | 'mobile' }) {
+  const m = variant === 'mobile';
+
+  return (
+    <div
+      className={
+        m
+          ? 'mx-auto grid max-w-[340px] grid-cols-1 gap-14'
+          : 'grid grid-cols-1 gap-14 sm:grid-cols-2 lg:grid-cols-4 lg:gap-[36px]'
+      }
+    >
+      {CARA_KERJA.map((step, i) => (
+        <div
+          key={i}
+          className={`relative flex flex-col items-center rounded-[16px] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.10)] ${
+            m ? 'px-5 pb-8 pt-12' : 'min-h-[430px] px-6 pb-9 pt-14'
+          }`}
+        >
+          {/* badge nomor: lingkaran putih dengan ring gelap + halo putih */}
+          <span
+            className={`absolute left-1/2 flex -translate-x-1/2 items-center justify-center rounded-full bg-white font-medium text-[#333333] ring-[6px] ring-white ${
+              m
+                ? '-top-[22px] h-[44px] w-[44px] border-2 border-[#333333] text-[18px]'
+                : '-top-[30px] h-[60px] w-[60px] border-2 border-[#333333] text-[24px]'
+            }`}
+          >
+            {i + 1}
+          </span>
+
+          <div className={`flex w-full items-center justify-center ${m ? 'h-[170px]' : 'h-[210px]'}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={step.img}
+              alt=""
+              draggable={false}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+              className="h-full w-full object-contain"
+            />
+          </div>
+
+          <h3
+            className={`text-center font-bold text-black ${
+              m ? 'mt-6 text-[16px] leading-[22px]' : 'mt-9 text-[19px] leading-[28px]'
+            }`}
+          >
+            {step.title}
+          </h3>
+          <p
+            className={`text-center text-black ${
+              m ? 'mt-3 text-[12px] leading-[19px]' : 'mt-4 text-[13px] leading-[21px]'
+            }`}
+          >
+            {step.desc}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* Section Cara Kerja: bagian atas gelap, kartu menimpa batas gelap -> putih */
+export function CaraKerjaSection({ variant }: { variant: 'web' | 'mobile' }) {
+  const m = variant === 'mobile';
+
+  return (
+    <section id="cara-kerja" className="w-full bg-white">
+      <div
+        className={`bg-[#333333] text-center ${
+          m ? 'px-4 pb-[48px] pt-[56px]' : 'px-6 pb-[72px] pt-[90px] lg:pb-[84px] lg:pt-[110px]'
+        }`}
+      >
+        <p
+          className={`font-semibold uppercase tracking-[0.04em] text-[#B8B8B8] ${
+            m ? 'text-[11px]' : 'text-[14px]'
+          }`}
+        >
+          Semua info ruangan, satu tempat
+        </p>
+        <h2
+          className={`font-semibold text-white ${
+            m ? 'mt-2 text-[28px] leading-[36px]' : 'mt-4 text-[36px] leading-[56px] lg:text-[50px]'
+          }`}
+        >
+          Cara Kerja SiRuang
+        </h2>
+      </div>
+
+      <div className="relative">
+        {/* strip gelap di belakang bagian atas kartu */}
+        <div
+          aria-hidden="true"
+          className={`absolute inset-x-0 top-0 bg-[#333333] ${m ? 'h-[110px]' : 'h-[140px]'}`}
+        />
+        <div
+          className={`relative mx-auto w-full ${
+            m ? 'px-4 pb-[72px]' : 'max-w-[1440px] px-6 pb-[120px] lg:px-[84px]'
+          }`}
+        >
+          <CaraKerjaSteps variant={variant} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  PAGE                                                               */
 /* ------------------------------------------------------------------ */
 
@@ -457,28 +677,7 @@ export default function WebTabLayout() {
   return (
     <div className={`${jakarta.className} w-full overflow-x-hidden bg-white text-black`}>
       {/* ---------------- NAVBAR ---------------- */}
-      <header className={`${container} relative`}>
-        <div className="flex h-[56px] items-center justify-end pt-0 mt-[34px]">
-          <nav className="absolute left-1/2 top-[34px] flex h-[56px] -translate-x-1/2 items-center gap-6 lg:gap-[75px]">
-            {navLinks.map((l, i) => (
-              <Link
-                key={i}
-                href={l.href}
-                className="text-[20px] font-semibold text-black transition-opacity hover:opacity-60"
-              >
-                {l.label}
-              </Link>
-            ))}
-          </nav>
-
-          <Link
-            href={LOGIN_HREF}
-            className="flex h-[56px] w-[176px] items-center justify-center rounded-[15px] bg-[#333333] text-[20px] font-semibold text-white transition-opacity hover:opacity-85"
-          >
-            Masuk
-          </Link>
-        </div>
-      </header>
+      <Navbar variant="web" />
 
       {/* ---------------- HERO ---------------- */}
       <section className={`${container} mt-[120px] lg:mt-[243px]`}>
@@ -521,7 +720,7 @@ export default function WebTabLayout() {
       </section>
 
       {/* ---------------- DATA REAL-TIME ---------------- */}
-      <section className={`${container} mt-[100px] lg:mt-[188px]`}>
+      <section id="data-real-time" className={`${container} mt-[100px] lg:mt-[188px]`}>
         <h2 className="text-center text-[40px] font-semibold leading-[63px] lg:text-[50px]">
           Data Real-Time
         </h2>
@@ -707,7 +906,7 @@ export default function WebTabLayout() {
               style={{
                 filter: 'brightness(1.03) contrast(1.04)',
               }}
-              className="pointer-events-none h-full w-full select-none object-contain transition-transform duration-300 md:scale-[1.22] lg:scale-[1.34] [clip-path:inset(3px_3px_3px_3px)]"
+              className="pointer-events-none h-full w-full select-none object-contain transition-transform duration-300 md:scale-[1.5] lg:scale-[2] [clip-path:inset(3px_3px_3px_3px)]"
             />
           </div>
 
@@ -748,19 +947,29 @@ export default function WebTabLayout() {
         </div>
       </section>
 
-      {/* ---------------- HOW WE WORKS ---------------- */}
-      <section className="mx-auto w-full max-w-[1440px] px-6 pb-[120px] pt-[120px] lg:px-[84px] lg:pt-[231px]">
-        <div className="flex items-center gap-[27px] lg:pl-0">
-          <span className="h-[7px] w-[73px] rounded-[2px] bg-[#C2AC72]" />
-          <span className="text-[28px] font-medium leading-[47px]">How We Works</span>
+      {/* ---------------- FITUR UTAMA ---------------- */}
+      <section className="mx-auto w-full max-w-[1440px] px-6 pb-[120px] pt-[80px] lg:px-[84px] lg:pt-[120px]">
+        {/* ---------------- FITUR UTAMA ---------------- */}
+        <div id="fitur">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#B8B8B8]">
+            Semua info ruangan, satu tempat
+          </p>
+          <h2 className="mt-3 text-[40px] font-semibold leading-[56px] lg:text-[50px]">
+            Fitur Utama SiRuang
+          </h2>
+          <p className="mt-5 max-w-[760px] text-[20px] leading-[34px] lg:text-[22px] lg:leading-[36px]">
+            SiRuang membantu PJ kelas, dosen, dan mahasiswa melihat status ruangan, mengajukan
+            booking, dan berkomunikasi dalam satu website.
+          </p>
+
+          <div className="mt-10 lg:mt-[56px]">
+            <FiturUtamaCards variant="web" />
+          </div>
         </div>
-
-        <h2 className="mt-[16px] text-[40px] font-bold leading-[73px] lg:pl-[32px] lg:text-[50px]">
-          How We <span className="text-[#C2AC72]">Get It Done</span>
-        </h2>
-
-        <h2 className="mt-[120px] text-[40px] font-semibold lg:pl-[60px] lg:text-[50px]">Fitur</h2>
       </section>
+
+      {/* ---------------- CARA KERJA ---------------- */}
+      <CaraKerjaSection variant="web" />
     </div>
   );
 }

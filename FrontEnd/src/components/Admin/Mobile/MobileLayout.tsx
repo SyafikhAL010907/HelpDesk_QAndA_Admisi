@@ -2,10 +2,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Home, 
-  MessageCircle, 
-  Settings, 
+import {
+  Home,
+  MessageCircle,
+  Settings,
   Plus,
   History,
   Search,
@@ -44,33 +44,33 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const toLocalTime = (dateStr: string) => {
-    if (!dateStr) return '--:--';
-    try {
-        // Ambil teks jamnya langsung biar ga kegeser timezone browser
-        const timePart = dateStr.includes('T') ? dateStr.split('T')[1] : dateStr.split(' ')[1];
-        if (timePart) {
-            return timePart.substring(0, 5); // Ambil HH:mm
-        }
-        return format(new Date(dateStr), 'HH:mm');
-    } catch (e) {
-        return '--:--';
+  if (!dateStr) return '--:--';
+  try {
+    // Ambil teks jamnya langsung biar ga kegeser timezone browser
+    const timePart = dateStr.includes('T') ? dateStr.split('T')[1] : dateStr.split(' ')[1];
+    if (timePart) {
+      return timePart.substring(0, 5); // Ambil HH:mm
     }
+    return format(new Date(dateStr), 'HH:mm');
+  } catch (e) {
+    return '--:--';
+  }
 };
 import { usePathname, useRouter } from 'next/navigation';
 
 // --- Components from User Example Adapted for HelpDesk ---
 
 const NotchedBackground = () => (
-    <div className="absolute inset-0 z-0 pointer-events-none">
-        <svg
-            width="100%"
-            height="100%"
-            viewBox="0 0 1000 80"
-            preserveAspectRatio="xMidYMin slice"
-            className="drop-shadow-[0_-5px_20px_rgba(0,0,0,0.05)] filter transition-all duration-500"
-        >
-            <path
-                d="M-500,40 
+  <div className="absolute inset-0 z-0 pointer-events-none">
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 1000 80"
+      preserveAspectRatio="xMidYMin slice"
+      className="drop-shadow-[0_-5px_20px_rgba(0,0,0,0.05)] filter transition-all duration-500"
+    >
+      <path
+        d="M-500,40 
                    C-500,18 -482,0 -460,0 
                    L430,0 
                    C450,0 455,5 460,15 
@@ -83,11 +83,11 @@ const NotchedBackground = () => (
                    L-460,80 
                    C-482,80 -500,62 -500,40 
                    Z"
-                className="fill-white backdrop-blur-3xl stroke-slate-100"
-                strokeWidth="1"
-            />
-        </svg>
-    </div>
+        className="fill-white backdrop-blur-3xl stroke-slate-100"
+        strokeWidth="1"
+      />
+    </svg>
+  </div>
 );
 
 const MobileLayout = () => {
@@ -124,7 +124,7 @@ const MobileLayout = () => {
   const [blessMessage, setBlessMessage] = useState('');
   const [blessFile, setBlessFile] = useState<{ name: string, data: string, type: string } | null>(null);
   const [blessTargetMode, setBlessTargetMode] = useState<'waiting_room' | 'all_users' | 'specific_users'>('waiting_room');
-  const [allUsers, setAllUsers] = useState<{username: string, gmail: string}[]>([]);
+  const [allUsers, setAllUsers] = useState<{ username: string, gmail: string }[]>([]);
   const [selectedBlessUsers, setSelectedBlessUsers] = useState<string[]>([]);
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [isBlasting, setIsBlasting] = useState(false);
@@ -143,7 +143,7 @@ const MobileLayout = () => {
   const [selectedRooms, setSelectedRooms] = useState<number[]>([]);
   const [networkLatency, setNetworkLatency] = useState<number>(24);
   const [totalUsersCount, setTotalUsersCount] = useState<number>(12540);
-  const [alertConfig, setAlertConfig] = useState<{show: boolean, type: 'alert' | 'confirm', message: string, title?: string, onConfirm?: () => void}>({show: false, type: 'alert', message: ''});
+  const [alertConfig, setAlertConfig] = useState<{ show: boolean, type: 'alert' | 'confirm', message: string, title?: string, onConfirm?: () => void }>({ show: false, type: 'alert', message: '' });
   const [roomSearchQuery, setRoomSearchQuery] = useState('');
   const [localSearchQuery, setLocalSearchQuery] = useState('');
   const [isLocalSearchOpen, setIsLocalSearchOpen] = useState(false);
@@ -177,7 +177,7 @@ const MobileLayout = () => {
     const parts = text.split(regex);
     return (
       <span className="whitespace-pre-wrap leading-relaxed">
-        {parts.map((part, i) => 
+        {parts.map((part, i) =>
           part.toLowerCase() === query.toLowerCase() ? (
             <span key={i} className="bg-amber-300 text-slate-900 font-extrabold px-1 rounded-sm shadow-sm border border-amber-400 mx-0.5 select-all">
               {part}
@@ -190,7 +190,7 @@ const MobileLayout = () => {
     );
   };
 
-  const showAlert = (message: string, title?: string) => setAlertConfig({show: true, type: 'alert', message, title});
+  const showAlert = (message: string, title?: string) => setAlertConfig({ show: true, type: 'alert', message, title });
 
   const formatNumber = (num: number) => {
     return num.toLocaleString('id-ID');
@@ -337,17 +337,17 @@ const MobileLayout = () => {
     const storedUser = localStorage.getItem('user');
     if (!storedUser) return;
     const { token } = JSON.parse(storedUser);
-    
+
     try {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chat/mark-unread/${selectedChat.id}`, {
-            method: 'POST',
-            headers: { 'Authorization': token }
-        });
-        setIsRoomMenuOpen(false);
-        setSelectedChat(null); 
-        fetchRooms(token);
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chat/mark-unread/${selectedChat.id}`, {
+        method: 'POST',
+        headers: { 'Authorization': token }
+      });
+      setIsRoomMenuOpen(false);
+      setSelectedChat(null);
+      fetchRooms(token);
     } catch (err) {
-        console.error("Gagal tandai belum dibaca:", err);
+      console.error("Gagal tandai belum dibaca:", err);
     }
   };
 
@@ -424,7 +424,7 @@ const MobileLayout = () => {
     setView('ROOM');
     setIsFABOpen(false);
     markAsRead(chat.id);
-    
+
     // Pas buka chat, paksa scroll ke bawah dan reset state
     setShouldAutoScroll(true);
     setTimeout(() => scrollToBottom('auto'), 100);
@@ -505,7 +505,7 @@ const MobileLayout = () => {
       showAlert('Pilih minimal satu user tujuan!', 'Pilih User');
       return;
     }
-    
+
     const storedUser = localStorage.getItem('user');
     if (!storedUser) return;
     const { token, gmail } = JSON.parse(storedUser);
@@ -523,7 +523,7 @@ const MobileLayout = () => {
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chat/broadcast`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': token
         },
@@ -547,7 +547,7 @@ const MobileLayout = () => {
 
   const handleBulkDelete = async () => {
     if (selectedRooms.length === 0) return;
-    
+
     setAlertConfig({
       show: true,
       type: 'confirm',
@@ -561,7 +561,7 @@ const MobileLayout = () => {
         try {
           const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/chat/delete-bulk`, {
             method: 'POST',
-            headers: { 
+            headers: {
               'Content-Type': 'application/json',
               'Authorization': token
             },
@@ -586,7 +586,7 @@ const MobileLayout = () => {
   };
 
   const toggleSelectRoom = (id: number) => {
-    setSelectedRooms(prev => 
+    setSelectedRooms(prev =>
       prev.includes(id) ? prev.filter(rid => rid !== id) : [...prev, id]
     );
   };
@@ -626,7 +626,7 @@ const MobileLayout = () => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': token
         },
@@ -678,7 +678,7 @@ const MobileLayout = () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
             'Authorization': token
           },
@@ -713,11 +713,11 @@ const MobileLayout = () => {
   const arcItemVariants: any = {
     hidden: { opacity: 0, scale: 0, x: 0, y: 0 },
     visible: (custom: { x: number, y: number }) => ({
-        opacity: 1,
-        scale: 1,
-        x: custom.x,
-        y: custom.y,
-        transition: { type: "spring", damping: 12, stiffness: 200 }
+      opacity: 1,
+      scale: 1,
+      x: custom.x,
+      y: custom.y,
+      transition: { type: "spring", damping: 12, stiffness: 200 }
     }),
     exit: { opacity: 0, scale: 0, x: 0, y: 0, transition: { duration: 0.15 } }
   };
@@ -725,7 +725,7 @@ const MobileLayout = () => {
   // ARC FAB Items
   const R = 100;
   const fabItems = [
-    { icon: FileText, label: 'Template', angle: 150, color: 'bg-emerald-600 shadow-emerald-500/50' },
+    { icon: FileText, label: 'Template', angle: 150, color: 'bg-[#183449] shadow-[#183449]/30' },
     { icon: MessageCircle, label: 'Broadcast', angle: 90, color: 'bg-blue-600 shadow-blue-500/50' },
     { icon: LayoutGrid, label: 'Tools', angle: 30, color: 'bg-purple-600 shadow-purple-500/50' },
   ];
@@ -751,175 +751,176 @@ const MobileLayout = () => {
           >
             {/* FIXED HEADER SECTION */}
             <div className="sticky top-0 z-40 bg-slate-50 flex flex-col shrink-0 border-b border-slate-100/40">
-                {/* Premium Header (Logo & Welcome) */}
-                <div className="bg-emerald-800 rounded-b-[40px] px-6 pt-12 pb-14 relative overflow-hidden shadow-lg shadow-emerald-900/10">
-                   {/* Decorative Circles */}
-                   <div className="absolute -top-5 -right-5 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-                   <div className="absolute -bottom-5 -left-5 w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl"></div>
+              {/* Premium Header (Logo & Welcome) */}
+             <div className="bg-gradient-to-br from-[#07111E] to-[#0F2238] rounded-b-[40px] px-6 pt-12 pb-14 relative overflow-hidden shadow-lg shadow-slate-200/50">
+                {/* Decorative Circles */}
+                <div className="absolute -top-5 -right-5 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-5 -left-5 w-32 h-32 bg-[#588CBC]/20 rounded-full blur-2xl"></div>
 
-                   <header className="relative z-10 flex flex-col gap-6">
-                     <div className="flex justify-between items-center text-white">
-                        <div className="flex items-center gap-3 text-white">
-                            <motion.div 
-                              initial={{ scale: 0.9, opacity: 0 }}
-                              animate={{ scale: 1, opacity: 1 }}
-                            >
-                                <Image 
-                                  src="/unj.png" 
-                                  alt="Logo UNJ" 
-                                  width={48} 
-                                  height={48} 
-                                  className="drop-shadow-2xl" 
-                                />
-                            </motion.div>
-                            <div>
-                                <h1 className="text-xl font-black tracking-tight leading-none">Admin UNJ</h1>
-                                <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-widest mt-1">Admin 2026</p>
-                            </div>
-                        </div>
-                     </div>
-
-                     {/* Welcome Message */}
-                     <div className="text-white flex items-end justify-between">
-                         <div>
-                            <h2 className="text-lg font-bold">Selamat Datang, {adminName}!</h2>
-                            <div className="flex items-center gap-3">
-                               <p className="text-xs text-emerald-100/70">
-                                 {activeTab === 'home' ? "Panel Informasi Dashboard" : `Ada ${rooms.filter((r: any) => (r.unread_count || 0) > 0).length} chat baru.`}
-                               </p>
-                            </div>
-                         </div>
+                <header className="relative z-10 flex flex-col gap-6">
+                  <div className="flex justify-between items-center text-white">
+                    <div className="flex items-center gap-3 text-white">
+                      <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                      >
+                        <Image
+                          src="/unj.png"
+                          alt="Logo UNJ"
+                          width={48}
+                          height={48}
+                          className="drop-shadow-2xl"
+                        />
+                      </motion.div>
+                      <div>
+                        <h1 className="text-xl font-black tracking-tight leading-none">Admin UNJ</h1>
+                        {/* Warna di-update ke #38BDF8 */}
+                        <p className="text-[10px] font-bold text-[#38BDF8] uppercase tracking-widest mt-1">Admin 2026</p>
                       </div>
-                   </header>
-                </div>
+                    </div>
+                  </div>
 
-                {/* Top Actions Area */}
-                <div className="px-4 -mt-7 relative z-30 pb-3">
-                  {activeTab === 'home' ? (
-                     /* PREMIUM LARGE TOGGLE SWITCH (Replaces Quick Access) */
-                     <div className="w-full bg-white rounded-4xl p-4 shadow-xl shadow-emerald-900/10 border border-emerald-100/50 flex items-center justify-between group transition-all relative overflow-hidden">
-                       <div className="flex items-center gap-4">
-                         <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shadow-inner">
-                           <Settings size={24} className="group-hover:rotate-90 transition-transform duration-500" />
-                         </div>
-                         <div className="flex flex-col">
-                           <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-0.5">Sistem Pintar</p>
-                           <h4 className="text-sm font-bold text-slate-700 leading-tight">Auto-Response AI</h4>
-                           <p className="text-[9px] font-medium text-slate-400 mt-0.5">Fitur belum tersedia</p>
-                         </div>
-                       </div>
+                  {/* Welcome Message */}
+                  <div className="text-white flex items-end justify-between">
+                    <div>
+                      <h2 className="text-lg font-bold">Selamat Datang, {adminName}!</h2>
+                      <div className="flex items-center gap-3">
+                        <p className="text-xs text-white/80">
+                          {activeTab === 'home' ? "Panel Informasi Dashboard" : `Ada ${rooms.filter((r: any) => (r.unread_count || 0) > 0).length} chat baru.`}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </header>
+              </div>
 
-                       {/* Elegant Large Toggle */}
-                       <div 
-                         onClick={() => {
-                          // ⚠️  DISABLE: Ganti handleAIToggleRequest → setIsInfoActive(!isInfoActive)
-                          if (!isAILoading) handleAIToggleRequest(!isInfoActive);
-                        }}
-                         className={cn(
-                           "relative w-16 h-9 rounded-full p-1 transition-all duration-500 cursor-pointer",
-                           isInfoActive ? "bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]" : "bg-slate-100 shadow-inner",
-                           isAILoading && "opacity-60 cursor-wait"
-                         )}
-                       >
-                         <motion.div 
-                           animate={{ x: isInfoActive ? 28 : 0 }}
-                           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                           className="w-7 h-7 bg-white rounded-full shadow-lg flex items-center justify-center overflow-hidden"
-                         >
-                           {isAILoading ? (
-                             <div className="w-3 h-3 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
-                           ) : (
-                             <div className={cn(
-                               "w-1.5 h-1.5 rounded-full transition-all duration-300",
-                               isInfoActive ? "bg-emerald-500 scale-150" : "bg-slate-300"
-                             )} />
-                           )}
-                         </motion.div>
-                       </div>
-                     </div>
-                  ) : (
-                    /* SEARCH & DELETE MODE */
-                    <motion.div 
-                       initial={{ opacity: 0 }}
-                       animate={{ opacity: 1 }}
-                       className="flex flex-col gap-3"
+              {/* Top Actions Area */}
+              <div className="px-4 -mt-7 relative z-30 pb-3">
+                {activeTab === 'home' ? (
+                  /* PREMIUM LARGE TOGGLE SWITCH (Replaces Quick Access) */
+                  <div className="w-full bg-white rounded-4xl p-4 shadow-xl shadow-slate-200/50 border border-[#588CBC]/20 flex items-center justify-between group transition-all relative overflow-hidden">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-[#588CBC]/10 rounded-2xl flex items-center justify-center text-[#183449] shadow-inner">
+                        <Settings size={24} className="group-hover:rotate-90 transition-transform duration-500" />
+                      </div>
+                      <div className="flex flex-col">
+                        <p className="text-[10px] font-black text-[#183449] uppercase tracking-widest mb-0.5">Sistem Pintar</p>
+                        <h4 className="text-sm font-bold text-slate-700 leading-tight">Auto-Response AI</h4>
+                        <p className="text-[9px] font-medium text-slate-400 mt-0.5">Fitur belum tersedia</p>
+                      </div>
+                    </div>
+
+                    {/* Elegant Large Toggle */}
+                    <div
+                      onClick={() => {
+                        // ⚠️  DISABLE: Ganti handleAIToggleRequest → setIsInfoActive(!isInfoActive)
+                        if (!isAILoading) handleAIToggleRequest(!isInfoActive);
+                      }}
+                      className={cn(
+                        "relative w-16 h-9 rounded-full p-1 transition-all duration-500 cursor-pointer",
+                        isInfoActive ? "bg-[#588CBC] shadow-[0_0_15px_rgba(88,140,188,0.4)]" : "bg-slate-100 shadow-inner",
+                        isAILoading && "opacity-60 cursor-wait"
+                      )}
                     >
-                       <div className="bg-white rounded-full shadow-lg shadow-emerald-900/5 border-2 border-emerald-50 p-1.5 focus-within:border-emerald-400 focus-within:ring-4 focus-within:ring-emerald-50 transition-all duration-300">
-                           <div className="flex items-center gap-3 px-4 h-11 bg-white rounded-full">
-                               <Search size={18} className="text-emerald-500 shrink-0" />
-                               <input 
-                                   type="text" 
-                                   value={roomSearchQuery}
-                                   onChange={(e) => setRoomSearchQuery(e.target.value)}
-                                   placeholder="Cari user atau pesan..." 
-                                   className="bg-transparent border-none focus:ring-0 text-sm font-bold w-full text-slate-700 placeholder:text-slate-400 focus:outline-none outline-none p-0"
-                               />
-                               {roomSearchQuery.trim() && (
-                                 <button 
-                                   onClick={() => setRoomSearchQuery('')}
-                                   className="text-slate-400 hover:text-rose-500 transition-colors mr-1"
-                                 >
-                                   <X size={16} />
-                                 </button>
-                               )}
-                           </div>
-                       </div>
-                        <div className="bg-white/80 backdrop-blur-sm p-1.5 rounded-2xl border border-slate-50 min-h-11.5 items-center justify-center relative overflow-hidden shadow-xs">
-                          <AnimatePresence mode="wait">
-                            {isDeleteMode ? (
-                              <motion.div 
-                                key="delete-mode-active-mob"
-                                initial={{ opacity: 0, scale: 0.98 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.98 }}
-                                transition={{ duration: 0.2 }}
-                                className="flex w-full gap-1.5"
-                              >
-                                <button 
-                                  onClick={toggleSelectAll}
-                                  className="flex-1 py-2 px-3 rounded-xl text-[10px] font-black text-emerald-600 bg-emerald-50 border border-emerald-100 whitespace-nowrap"
-                                >
-                                  {selectedRooms.length === filteredRooms.length ? "Batal Semua" : "Pilih Semua"}
-                                </button>
-                                <button 
-                                  onClick={() => {
-                                    setIsDeleteMode(false);
-                                    setSelectedRooms([]);
-                                  }}
-                                  className="flex-1 py-2 px-3 rounded-xl text-[10px] font-black text-red-600 bg-red-50 border border-red-100"
-                                >
-                                  Batal
-                                </button>
-                                <button 
-                                  onClick={handleBulkDelete}
-                                  disabled={selectedRooms.length === 0}
-                                  className={cn(
-                                    "flex-1 py-2 px-3 rounded-xl text-[10px] font-black text-white shadow-lg transition-all active:scale-95 whitespace-nowrap",
-                                    selectedRooms.length > 0 ? "bg-red-500 shadow-red-200" : "bg-slate-300 shadow-none grayscale cursor-not-allowed"
-                                  )}
-                                >
-                                  Hapus ({selectedRooms.length})
-                                </button>
-                              </motion.div>
-                            ) : (
-                              <motion.button 
-                                key="delete-mode-off-mob"
-                                initial={{ opacity: 0, scale: 0.98 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.98 }}
-                                transition={{ duration: 0.2 }}
-                                onClick={() => setIsDeleteMode(true)}
-                                className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-white text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all"
-                              >
-                                <Trash2 size={14} />
-                                Mode Hapus
-                              </motion.button>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                    </motion.div>
-                  )}
-                </div>
+                      <motion.div
+                        animate={{ x: isInfoActive ? 28 : 0 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        className="w-7 h-7 bg-white rounded-full shadow-lg flex items-center justify-center overflow-hidden"
+                      >
+                        {isAILoading ? (
+                          <div className="w-3 h-3 border-2 border-[#588CBC] border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <div className={cn(
+                            "w-1.5 h-1.5 rounded-full transition-all duration-300",
+                            isInfoActive ? "bg-[#588CBC] scale-150" : "bg-slate-300"
+                          )} />
+                        )}
+                      </motion.div>
+                    </div>
+                  </div>
+                ) : (
+                  /* SEARCH & DELETE MODE */
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex flex-col gap-3"
+                  >
+                    <div className="bg-white rounded-full shadow-lg shadow-slate-200/50 border-2 border-slate-100 focus-within:border-[#588CBC] focus-within:ring-4 focus-within:ring-[#588CBC]/10 transition-all duration-300">
+                      <div className="flex items-center gap-3 px-4 h-11 bg-white rounded-full">
+                        <Search size={18} className="text-[#183449] shrink-0" />
+                        <input
+                          type="text"
+                          value={roomSearchQuery}
+                          onChange={(e) => setRoomSearchQuery(e.target.value)}
+                          placeholder="Cari user atau pesan..."
+                          className="bg-transparent border-none focus:ring-0 text-sm font-bold w-full text-slate-700 placeholder:text-slate-400 focus:outline-none outline-none p-0"
+                        />
+                        {roomSearchQuery.trim() && (
+                          <button
+                            onClick={() => setRoomSearchQuery('')}
+                            className="text-slate-400 hover:text-rose-500 transition-colors mr-1"
+                          >
+                            <X size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="bg-white/80 backdrop-blur-sm p-1.5 rounded-2xl border border-slate-50 min-h-11.5 items-center justify-center relative overflow-hidden shadow-xs">
+                      <AnimatePresence mode="wait">
+                        {isDeleteMode ? (
+                          <motion.div
+                            key="delete-mode-active-mob"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={{ duration: 0.2 }}
+                            className="flex w-full gap-1.5"
+                          >
+                            <button
+                              onClick={toggleSelectAll}
+                              className="flex-1 py-2 px-3 rounded-xl text-[10px] font-black text-[#183449] bg-[#588CBC]/10 border border-[#588CBC]/20 whitespace-nowrap"
+                            >
+                              {selectedRooms.length === filteredRooms.length ? "Batal Semua" : "Pilih Semua"}
+                            </button>
+                            <button
+                              onClick={() => {
+                                setIsDeleteMode(false);
+                                setSelectedRooms([]);
+                              }}
+                              className="flex-1 py-2 px-3 rounded-xl text-[10px] font-black text-red-600 bg-red-50 border border-red-100"
+                            >
+                              Batal
+                            </button>
+                            <button
+                              onClick={handleBulkDelete}
+                              disabled={selectedRooms.length === 0}
+                              className={cn(
+                                "flex-1 py-2 px-3 rounded-xl text-[10px] font-black text-white shadow-lg transition-all active:scale-95 whitespace-nowrap",
+                                selectedRooms.length > 0 ? "bg-red-500 shadow-red-200" : "bg-slate-300 shadow-none grayscale cursor-not-allowed"
+                              )}
+                            >
+                              Hapus ({selectedRooms.length})
+                            </button>
+                          </motion.div>
+                        ) : (
+                          <motion.button
+                            key="delete-mode-off-mob"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={{ duration: 0.2 }}
+                            onClick={() => setIsDeleteMode(true)}
+                            className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-white text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all"
+                          >
+                            <Trash2 size={14} />
+                            Mode Hapus
+                          </motion.button>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
             </div>
 
             {/* SCROLLABLE CONTENT AREA */}
@@ -936,7 +937,7 @@ const MobileLayout = () => {
                     {/* STATS GRID */}
                     <div className="grid grid-cols-2 gap-4">
                       {[
-                        { label: 'Total Chat', value: rooms.length, icon: MessageSquare, color: 'emerald', detail: 'Live' },
+                        { label: 'Total Chat', value: rooms.length, icon: MessageSquare, color: 'blue', detail: 'Live' },
                         { label: 'Unread', value: rooms.filter(r => (r.unread_count || 0) > 0).length, icon: Clock, color: 'rose', detail: 'Pending' },
                         { label: 'Reading', value: rooms.filter(r => (r.unread_count || 0) === 0).length, icon: CheckCheck, color: 'cyan', detail: 'Terbaca' },
                         { label: 'Sistem AI', value: isInfoActive ? 'Aktif' : 'Non-Aktif', icon: Settings, color: 'indigo', detail: 'Auto' },
@@ -948,27 +949,27 @@ const MobileLayout = () => {
                         )}>
                           <div className={cn(
                             "absolute -right-2 -top-2 w-16 h-16 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500 opacity-20",
-                            stat.color === 'emerald' ? "bg-emerald-400" :
-                            stat.color === 'rose' ? "bg-rose-400" :
-                            stat.color === 'cyan' ? "bg-cyan-400" :
-                            stat.color === 'indigo' ? "bg-indigo-400" : "bg-amber-400"
+                            stat.color === 'blue' ? "bg-[#588CBC]" :
+                              stat.color === 'rose' ? "bg-rose-400" :
+                                stat.color === 'cyan' ? "bg-cyan-400" :
+                                  stat.color === 'indigo' ? "bg-indigo-400" : "bg-amber-400"
                           )}></div>
                           <div className="flex justify-between items-start relative z-10">
                             <div className={cn(
                               "w-10 h-10 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 duration-500",
-                              stat.color === 'emerald' ? "bg-emerald-50 text-emerald-600" :
-                              stat.color === 'rose' ? "bg-rose-50 text-rose-600" :
-                              stat.color === 'cyan' ? "bg-cyan-50 text-cyan-600" :
-                              stat.color === 'indigo' ? "bg-indigo-50 text-indigo-600" : "bg-amber-50 text-amber-600"
+                              stat.color === 'blue' ? "bg-[#588CBC]/10 text-[#183449]" :
+                                stat.color === 'rose' ? "bg-rose-50 text-rose-600" :
+                                  stat.color === 'cyan' ? "bg-cyan-50 text-cyan-600" :
+                                    stat.color === 'indigo' ? "bg-indigo-50 text-indigo-600" : "bg-amber-50 text-amber-600"
                             )}>
                               <stat.icon size={20} />
                             </div>
                             <span className={cn(
                               "text-[7px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest",
-                              stat.color === 'emerald' ? "bg-emerald-50 text-emerald-600" :
-                              stat.color === 'rose' ? "bg-rose-50 text-rose-600" :
-                              stat.color === 'cyan' ? "bg-cyan-50 text-cyan-600" :
-                              stat.color === 'indigo' ? "bg-indigo-50 text-indigo-600" : "bg-amber-50 text-amber-600"
+                              stat.color === 'blue' ? "bg-[#588CBC]/10 text-[#183449]" :
+                                stat.color === 'rose' ? "bg-rose-50 text-rose-600" :
+                                  stat.color === 'cyan' ? "bg-cyan-50 text-cyan-600" :
+                                    stat.color === 'indigo' ? "bg-indigo-50 text-indigo-600" : "bg-amber-50 text-amber-600"
                             )}>{stat.detail}</span>
                           </div>
                           <div className="relative z-10">
@@ -981,16 +982,18 @@ const MobileLayout = () => {
                       ))}
                     </div>
 
-                    {/* SYSTEM STATUS CARD (Emerald Theme) */}
-                    <div className="bg-linear-to-br from-emerald-800 to-emerald-950 p-7 rounded-[40px] text-white shadow-xl shadow-emerald-200 relative overflow-hidden">
-                      <div className="absolute -right-5 -top-5 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                    {/* SYSTEM STATUS CARD (Dark Blue Theme) */}
+                    <div className="bg-gradient-to-br from-[#07111E] to-[#0F2238] p-7 rounded-[40px] text-white shadow-xl shadow-[#0B192C]/50 relative overflow-hidden">
+                      {/* Ambient Effect */}
+                      <div className="absolute -right-5 -top-5 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
+
                       <div className="flex items-center justify-between relative z-10 mb-8">
                         <div className="flex flex-col gap-1">
-                          <p className="text-[10px] font-black text-emerald-300 uppercase tracking-widest">Server Status</p>
-                          <h4 className="text-lg font-bold">Admin UNJ Gateway</h4>
+                          <p className="text-[10px] font-black text-[#38BDF8] uppercase tracking-widest">Server Status</p>
+                          <h4 className="text-lg font-bold text-white">Admin UNJ Gateway</h4>
                           <div className="flex items-center gap-2 mt-2">
-                            <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
-                            <span className="text-[10px] font-black text-emerald-400 uppercase">System Operational</span>
+                            <span className="w-2 h-2 bg-[#38BDF8] rounded-full animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.8)]"></span>
+                            <span className="text-[10px] font-black text-[#38BDF8] uppercase">System Operational</span>
                           </div>
                         </div>
                         <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/10">
@@ -1000,92 +1003,92 @@ const MobileLayout = () => {
 
                       <div className="grid grid-cols-2 gap-6 pt-6 border-t border-white/10 relative z-10">
                         <div>
-                          <p className="text-emerald-100/50 text-[10px] font-black uppercase tracking-widest mb-1">Network Latency</p>
-                          <p className="text-lg font-bold">{networkLatency}ms <span className="text-[10px] font-medium text-emerald-400">
+                          <p className="text-[#94A3B8] text-[10px] font-black uppercase tracking-widest mb-1">Network Latency</p>
+                          <p className="text-lg font-bold text-white">{networkLatency}ms <span className="text-[10px] font-medium text-[#38BDF8]">
                             {networkLatency < 50 ? 'Excellent' : 'Good'}
                           </span></p>
                         </div>
                         <div>
-                          <p className="text-emerald-100/50 text-[10px] font-black uppercase tracking-widest mb-1">Total User</p>
-                          <p className="text-lg font-bold">{formatNumber(totalUsersCount)} <span className="text-[10px] font-medium text-emerald-400">Reg.</span></p>
+                          <p className="text-[#94A3B8] text-[10px] font-black uppercase tracking-widest mb-1">Total User</p>
+                          <p className="text-lg font-bold text-white">{formatNumber(totalUsersCount)} <span className="text-[10px] font-medium text-[#38BDF8]">Reg.</span></p>
                         </div>
                       </div>
                     </div>
 
 
 
-                   {/* DENAH GEDUNG */}
-<div className="flex flex-col gap-4">
-  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-4">
-    Denah Gedung
-  </h4>
-  
-  {/* Diubah jadi grid 3 kolom untuk desktop, 1 kolom untuk mobile */}
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-    {[
-      // 1. Gedung LE
-      { href: '/denah-le', code: 'LE', label: 'Gedung L Rumpun Elektro', desc: 'Eksplorasi denah lantai Gedung LE', icon: Cpu, border: 'border-blue-100 hover:border-blue-400 active:border-blue-400', tile: 'bg-blue-50 text-blue-600', glow: 'bg-blue-400', badge: 'bg-blue-50 text-blue-600', image: '/Lantai3.png' },
-      // 2. Gedung SFD
-      { href: '/denah-sfd', code: 'SFD', label: 'Gedung SFD Tower A', desc: 'Eksplorasi denah lantai Gedung SFD', icon: Building2, border: 'border-emerald-100 hover:border-emerald-400 active:border-emerald-400', tile: 'bg-emerald-50 text-emerald-600', glow: 'bg-emerald-400', badge: 'bg-emerald-50 text-emerald-600', image: '/Lantai3.png' },
-      // 3. Gedung LS
-      { href: '/denah-ls', code: 'LS', label: 'Gedung L Rumpun Sipil', desc: 'Denah lantai Gedung LS (Segera Hadir)', icon: HardHat, border: 'border-orange-100 hover:border-orange-400 active:border-orange-400', tile: 'bg-orange-50 text-orange-600', glow: 'bg-orange-400', badge: 'bg-orange-50 text-orange-600', image: '/Lantai3.png' }
-    ].map((gedung) => (
-      <Link
-        key={gedung.href}
-        href={gedung.href}
-        className={cn(
-          // border diubah ke border-2, ditambah flex-col biar susunannya rapi ke bawah (Gambar -> Info)
-          "group relative flex flex-col gap-3 overflow-hidden rounded-[28px] border-2 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md active:scale-[0.98]",
-          gedung.border
-        )}
-      >
-        {/* Efek Glow Pojok Kanan */}
-        <div className={cn(
-          "pointer-events-none absolute -right-5 -top-5 h-24 w-24 rounded-full opacity-10 blur-2xl transition-opacity duration-300 group-hover:opacity-30",
-          gedung.glow
-        )}></div>
+                    {/* DENAH GEDUNG */}
+                    <div className="flex flex-col gap-4">
+                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-4">
+                        Denah Gedung
+                      </h4>
 
-        {/* Container Gambar (Posisi Teratas) - Tanpa zoom efek */}
-        <div className="w-full h-28 rounded-xl overflow-hidden relative flex items-center justify-center bg-slate-50 border-2 border-slate-100/60 shrink-0">
-          <img 
-            src={gedung.image} 
-            alt={gedung.label} 
-            className="w-full h-full object-cover" 
-            loading="lazy"
-          />
-        </div>
+                      {/* Diubah jadi grid 3 kolom untuk desktop, 1 kolom untuk mobile */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {[
+                          // 1. Gedung LE
+                          { href: '/denah-le', code: 'LE', label: 'Gedung L Rumpun Elektro', desc: 'Eksplorasi denah lantai Gedung LE', icon: Cpu, border: 'border-blue-100 hover:border-blue-400 active:border-blue-400', tile: 'bg-blue-50 text-blue-600', glow: 'bg-blue-400', badge: 'bg-blue-50 text-blue-600', image: '/Lantai3.png' },
+                          // 2. Gedung SFD
+                          { href: '/denah-sfd', code: 'SFD', label: 'Gedung SFD Tower A', desc: 'Eksplorasi denah lantai Gedung SFD', icon: Building2, border: 'border-[#588CBC]/30 hover:border-[#588CBC] active:border-[#588CBC]', tile: 'bg-[#588CBC]/10 text-[#183449]', glow: 'bg-[#588CBC]', badge: 'bg-[#588CBC]/10 text-[#183449]', image: '/Lantai3.png' },
+                          // 3. Gedung LS
+                          { href: '/denah-ls', code: 'LS', label: 'Gedung L Rumpun Sipil', desc: 'Denah lantai Gedung LS (Segera Hadir)', icon: HardHat, border: 'border-orange-100 hover:border-orange-400 active:border-orange-400', tile: 'bg-orange-50 text-orange-600', glow: 'bg-orange-400', badge: 'bg-orange-50 text-orange-600', image: '/Lantai3.png' }
+                        ].map((gedung) => (
+                          <Link
+                            key={gedung.href}
+                            href={gedung.href}
+                            className={cn(
+                              // border diubah ke border-2, ditambah flex-col biar susunannya rapi ke bawah (Gambar -> Info)
+                              "group relative flex flex-col gap-3 overflow-hidden rounded-[28px] border-2 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md active:scale-[0.98]",
+                              gedung.border
+                            )}
+                          >
+                            {/* Efek Glow Pojok Kanan */}
+                            <div className={cn(
+                              "pointer-events-none absolute -right-5 -top-5 h-24 w-24 rounded-full opacity-10 blur-2xl transition-opacity duration-300 group-hover:opacity-30",
+                              gedung.glow
+                            )}></div>
 
-        {/* Info Gedung (Bawah Gambar) */}
-        <div className="relative z-10 flex min-w-0 items-start gap-3 mt-1">
-          <div className={cn(
-            "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-110",
-            gedung.tile
-          )}>
-            <gedung.icon size={22} strokeWidth={1.75} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <span className={cn(
-              "mb-1 inline-block rounded-full px-2 py-0.5 text-[7px] font-black uppercase tracking-widest",
-              gedung.badge
-            )}>{gedung.code}</span>
-            <p className="text-xs font-bold leading-snug text-slate-700 truncate">{gedung.label}</p>
-            <p className="mt-0.5 text-[9px] font-medium text-slate-400 truncate">{gedung.desc}</p>
-          </div>
-        </div>
+                            {/* Container Gambar (Posisi Teratas) - Tanpa zoom efek */}
+                            <div className="w-full h-28 rounded-xl overflow-hidden relative flex items-center justify-center bg-slate-50 border-2 border-slate-100/60 shrink-0">
+                              <img
+                                src={gedung.image}
+                                alt={gedung.label}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                            </div>
 
-        {/* Panah (Icon Arrow) di Pojok Kanan Bawah */}
-        <div className="mt-auto flex justify-end w-full">
-          <ChevronRight size={16} className="relative z-10 shrink-0 text-slate-300 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-slate-500" />
-        </div>
-      </Link>
-    ))}
-  </div>
-</div>
+                            {/* Info Gedung (Bawah Gambar) */}
+                            <div className="relative z-10 flex min-w-0 items-start gap-3 mt-1">
+                              <div className={cn(
+                                "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-110",
+                                gedung.tile
+                              )}>
+                                <gedung.icon size={22} strokeWidth={1.75} />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <span className={cn(
+                                  "mb-1 inline-block rounded-full px-2 py-0.5 text-[7px] font-black uppercase tracking-widest",
+                                  gedung.badge
+                                )}>{gedung.code}</span>
+                                <p className="text-xs font-bold leading-snug text-slate-700 truncate">{gedung.label}</p>
+                                <p className="mt-0.5 text-[9px] font-medium text-slate-400 truncate">{gedung.desc}</p>
+                              </div>
+                            </div>
+
+                            {/* Panah (Icon Arrow) di Pojok Kanan Bawah */}
+                            <div className="mt-auto flex justify-end w-full">
+                              <ChevronRight size={16} className="relative z-10 shrink-0 text-slate-300 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-slate-500" />
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
 
                     {/* QUOTE / TIP */}
-                    <div className="bg-emerald-50/50 p-6 rounded-4xl border border-emerald-100/50 flex gap-4 items-start">
+                    <div className="bg-[#588CBC]/10 p-6 rounded-4xl border border-[#588CBC]/20 flex gap-4 items-start">
                       <div className="text-xl">💡</div>
-                      <p className="text-[11px] font-medium text-emerald-800 leading-relaxed">
+                      <p className="text-[11px] font-medium text-[#183449] leading-relaxed">
                         *Tips:* Pastikan selalu membalas pesan user dalam waktu kurang dari 15 menit untuk menjaga performa layanan Admin UNJ.
                       </p>
                     </div>
@@ -1100,7 +1103,7 @@ const MobileLayout = () => {
                     className="flex flex-col gap-3"
                   >
                     {filteredRooms.map((chat) => (
-                       <motion.div
+                      <motion.div
                         key={chat.id}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => isDeleteMode ? toggleSelectRoom(chat.id) : handleOpenChat(chat)}
@@ -1118,10 +1121,10 @@ const MobileLayout = () => {
                           </div>
                         )}
                         <div className="relative">
-                            <Avatar size="md" />
-                            {chat.is_online && (
-                              <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full shadow-sm animate-pulse"></span>
-                            )}
+                          <Avatar size="md" />
+                          {chat.is_online && (
+                            <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#588CBC] border-2 border-white rounded-full shadow-sm animate-pulse"></span>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-center mb-1">
@@ -1130,21 +1133,21 @@ const MobileLayout = () => {
                               {toLocalTime(chat.updated_at)}
                             </span>
                           </div>
-                           <div className="flex justify-between items-center">
-                             <p className={cn(
-                                 "text-[11px] truncate pr-2 mt-1 flex-1",
-                                 (chat.unread_count > 0 || chat.is_marked_unread) ? "text-slate-700 font-bold" : "text-slate-400 font-medium"
-                             )}>
-                               {chat.last_message}
-                             </p>
-                             {chat.unread_count > 0 ? (
-                               <div className="bg-emerald-500 text-white text-[9px] font-bold h-4 min-w-4 px-1.5 flex items-center justify-center rounded-full shadow-lg shadow-emerald-200 animate-bounce">
-                                 {chat.unread_count}
-                               </div>
-                             ) : chat.is_marked_unread ? (
-                               <div className="bg-emerald-500 w-2.5 h-2.5 rounded-full shadow-lg shadow-emerald-200 animate-pulse mr-1 mt-1"></div>
-                             ) : null}
-                           </div>
+                          <div className="flex justify-between items-center">
+                            <p className={cn(
+                              "text-[11px] truncate pr-2 mt-1 flex-1",
+                              (chat.unread_count > 0 || chat.is_marked_unread) ? "text-slate-700 font-bold" : "text-slate-400 font-medium"
+                            )}>
+                              {chat.last_message}
+                            </p>
+                            {chat.unread_count > 0 ? (
+                              <div className="bg-[#588CBC] text-white text-[9px] font-bold h-4 min-w-4 px-1.5 flex items-center justify-center rounded-full shadow-sm animate-bounce">
+                                {chat.unread_count}
+                              </div>
+                            ) : chat.is_marked_unread ? (
+                              <div className="bg-[#588CBC] w-2.5 h-2.5 rounded-full shadow-sm animate-pulse mr-1 mt-1"></div>
+                            ) : null}
+                          </div>
                         </div>
                       </motion.div>
                     ))}
@@ -1155,105 +1158,105 @@ const MobileLayout = () => {
 
             {/* OVERLAY for FAB Speed Dial */}
             <AnimatePresence>
-                {isFABOpen && (
-                    <motion.div 
-                        initial={{ opacity: 0 }} 
-                        animate={{ opacity: 1 }} 
-                        exit={{ opacity: 0 }}
-                        onClick={() => setIsFABOpen(false)}
-                        className="fixed inset-0 z-55 bg-slate-900/40 backdrop-blur-sm"
-                    />
-                )}
+              {isFABOpen && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setIsFABOpen(false)}
+                  className="fixed inset-0 z-55 bg-slate-900/40 backdrop-blur-sm"
+                />
+              )}
             </AnimatePresence>
 
             {/* BOTTOM NAV (Premium Notched Style) - Hidden when Bless Modal is active */}
             <AnimatePresence>
-                {!showBlessModal && (
-                    <motion.div 
-                        initial={{ y: 100, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: 100, opacity: 0 }}
-                        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-60 w-[92%] max-w-lg h-19 pointer-events-none"
-                    >
-                        <nav className="relative flex items-center justify-between px-6 h-full pointer-events-auto">
-                            <NotchedBackground />
-                            
-                            {navItems.map((item) => {
-                                if (item.isFAB) {
-                                    return (
-                                        <div key="fab-slot" className="relative flex flex-col items-center w-15">
-                                            <motion.button
-                                                whileTap={{ scale: 0.9 }}
-                                                onClick={() => setShowBlessModal(true)}
-                                                className="absolute -top-14 w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center shadow-[0_15px_30px_rgba(16,185,129,0.4)] z-70 border-4 border-white overflow-hidden group"
-                                            >
-                                                {/* Professional Megaphone Model */}
-                                                <div className="relative flex items-center justify-center">
-                                                  <Megaphone size={28} className="text-white relative z-10 drop-shadow-md" strokeWidth={2.5} fill="rgba(255,255,255,0.1)" />
-                                                  <div className="absolute inset-0 bg-linear-to-tr from-white/5 via-white/20 to-transparent rounded-full blur-md opacity-50 scale-150"></div>
-                                                  <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/5 to-white/20 rounded-full"></div>
-                                                </div>
-                                            </motion.button>
-                                        </div>
-                                    );
-                                }
+              {!showBlessModal && (
+                <motion.div
+                  initial={{ y: 100, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 100, opacity: 0 }}
+                  className="fixed bottom-6 left-1/2 -translate-x-1/2 z-60 w-[92%] max-w-lg h-19 pointer-events-none"
+                >
+                  <nav className="relative flex items-center justify-between px-6 h-full pointer-events-auto">
+                    <NotchedBackground />
 
-                                const ActiveIcon = item.icon!;
-                                const active = activeTab === item.id;
+                    {navItems.map((item) => {
+                      if (item.isFAB) {
+                        return (
+                          <div key="fab-slot" className="relative flex flex-col items-center w-15">
+                            <motion.button
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => setShowBlessModal(true)}
+                              className="absolute -top-14 w-16 h-16 bg-[#183449] rounded-full flex items-center justify-center shadow-[0_15px_30px_rgba(24,52,73,0.35)] z-70 border-4 border-white overflow-hidden group"
+                            >
+                              {/* Professional Megaphone Model */}
+                              <div className="relative flex items-center justify-center">
+                                <Megaphone size={28} className="text-white relative z-10 drop-shadow-md" strokeWidth={2.5} fill="rgba(255,255,255,0.1)" />
+                                <div className="absolute inset-0 bg-linear-to-tr from-white/5 via-white/20 to-transparent rounded-full blur-md opacity-50 scale-150"></div>
+                                <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/5 to-white/20 rounded-full"></div>
+                              </div>
+                            </motion.button>
+                          </div>
+                        );
+                      }
 
-                                return (
-                                    <button
-                                        key={item.id}
-                                        onClick={async () => {
-                                            setActiveTab(item.id);
-                                            if (item.id === 'unreading') setActiveFilter('unreading');
-                                            if (item.id === 'reading') setActiveFilter('reading');
-                                            
-                                            if (item.id === 'logout') {
-                                                const storedUser = localStorage.getItem('user');
-                                                if (storedUser) {
-                                                    const { token } = JSON.parse(storedUser);
-                                                    try {
-                                                        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
-                                                            method: 'POST',
-                                                            headers: { 'Authorization': token }
-                                                        });
-                                                    } catch (e) {}
-                                                }
-                                                localStorage.removeItem('user');
-                                                window.location.href = '/login';
-                                                return;
-                                            }
-                                        }}
-                                        className={cn(
-                                            "relative flex flex-col items-center justify-center w-12.5 transition-all duration-500 py-1",
-                                            active ? "scale-105" : "opacity-40 hover:opacity-100"
-                                        )}
-                                    >
-                                        <div className={cn(
-                                          "p-2 rounded-2xl transition-all duration-300 relative",
-                                          active ? "bg-emerald-50 text-emerald-600 shadow-[inset_0_2px_4px_rgba(16,185,129,0.05)]" : "text-slate-500"
-                                        )}>
-                                          <ActiveIcon size={22} strokeWidth={active ? 2.5 : 2} />
-                                          {active && (
-                                            <motion.div 
-                                              layoutId="nav-dot"
-                                              className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-sm"
-                                            />
-                                          )}
-                                        </div>
-                                        <span className={cn(
-                                            "text-[8px] font-black uppercase tracking-tighter mt-1 transition-all duration-300",
-                                            active ? "text-emerald-700 opacity-100" : "text-slate-400 opacity-0"
-                                        )}>
-                                            {item.label}
-                                        </span>
-                                    </button>
-                                );
-                            })}
-                        </nav>
-                    </motion.div>
-                )}
+                      const ActiveIcon = item.icon!;
+                      const active = activeTab === item.id;
+
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={async () => {
+                            setActiveTab(item.id);
+                            if (item.id === 'unreading') setActiveFilter('unreading');
+                            if (item.id === 'reading') setActiveFilter('reading');
+
+                            if (item.id === 'logout') {
+                              const storedUser = localStorage.getItem('user');
+                              if (storedUser) {
+                                const { token } = JSON.parse(storedUser);
+                                try {
+                                  await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
+                                    method: 'POST',
+                                    headers: { 'Authorization': token }
+                                  });
+                                } catch (e) { }
+                              }
+                              localStorage.removeItem('user');
+                              window.location.href = '/login';
+                              return;
+                            }
+                          }}
+                          className={cn(
+                            "relative flex flex-col items-center justify-center w-12.5 transition-all duration-500 py-1",
+                            active ? "scale-105" : "opacity-40 hover:opacity-100"
+                          )}
+                        >
+                          <div className={cn(
+                            "p-2 rounded-2xl transition-all duration-300 relative",
+                            active ? "bg-[#588CBC]/10 text-[#183449] shadow-[inset_0_2px_4px_rgba(24,52,73,0.05)]" : "text-slate-500"
+                          )}>
+                            <ActiveIcon size={22} strokeWidth={active ? 2.5 : 2} />
+                            {active && (
+                              <motion.div
+                                layoutId="nav-dot"
+                                className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#588CBC] rounded-full shadow-sm"
+                              />
+                            )}
+                          </div>
+                          <span className={cn(
+                            "text-[8px] font-black uppercase tracking-tighter mt-1 transition-all duration-300",
+                            active ? "text-[#183449] opacity-100" : "text-slate-400 opacity-0"
+                          )}>
+                            {item.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </nav>
+                </motion.div>
+              )}
             </AnimatePresence>
           </motion.div>
         ) : (
@@ -1264,49 +1267,52 @@ const MobileLayout = () => {
             exit={{ opacity: 0, x: 50 }}
             className="flex flex-col h-full bg-slate-50"
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20c0-11.046 8.954-20 20-20v20H20zM0 20c11.046 0 20-8.954 20-20v20H0zM0 20c11.046 0 20 8.954 20 20H0V20zm20 20c0-11.046 8.954-20 20-20v20H20z' fill='%23059669' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E")`
+              backgroundImage: `url('/Batik.png')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
             }}
           >
             {/* Room Header (Glassy & Clean) */}
             <header className="sticky top-0 bg-white/80 backdrop-blur-xl border-b border-slate-100/50 p-4 pt-12 flex items-center gap-3 z-30">
-              <button 
+              <button
                 onClick={handleBack}
-                className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 active:bg-emerald-50 active:text-emerald-600 transition-all"
+                className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 active:bg-[#588CBC]/10 active:text-[#183449] transition-all"
               >
                 <ArrowLeft size={24} />
               </button>
-              
+
               {!isLocalSearchOpen && (
                 <div className="flex items-center gap-3 flex-1">
                   <div className="relative">
-                      <Avatar size="sm" />
-                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full shadow-sm"></span>
+                    <Avatar size="sm" />
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#588CBC] border-2 border-white rounded-full shadow-sm"></span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <h2 className="font-black text-slate-800 text-sm tracking-tight truncate">
-                        {selectedChat?.user_name || selectedChat?.user_gmail}
+                      {selectedChat?.user_name || selectedChat?.user_gmail}
                     </h2>
-                      <p className={cn(
-                        "text-[9px] font-black uppercase tracking-widest",
-                        selectedChat?.is_online ? "text-emerald-600" : "text-slate-400"
-                      )}>
-                        {selectedChat?.is_online ? "Online" : "Offline"}
-                      </p>
+                    <p className={cn(
+                      "text-[9px] font-black uppercase tracking-widest",
+                      selectedChat?.is_online ? "text-[#588CBC]" : "text-slate-400"
+                    )}>
+                      {selectedChat?.is_online ? "Online" : "Offline"}
+                    </p>
                   </div>
                 </div>
               )}
 
               <div className={cn("flex gap-1 relative items-center", isLocalSearchOpen ? "flex-1 ml-2" : "")}>
                 {isLocalSearchOpen ? (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: "100%" }}
                     exit={{ opacity: 0, width: 0 }}
-                    className="flex items-center bg-slate-50 border border-slate-200 rounded-[18px] px-3 py-1 h-9 ring-4 ring-emerald-500/5 focus-within:border-emerald-200 focus-within:bg-white focus-within:ring-emerald-500/10 transition-all duration-300 gap-1.5 flex-1"
+                    className="flex items-center bg-slate-50 border border-slate-200 rounded-[18px] px-3 py-1 h-9 ring-4 ring-[#588CBC]/5 focus-within:border-[#588CBC] focus-within:bg-white focus-within:ring-[#588CBC]/10 transition-all duration-300 gap-1.5 flex-1"
                   >
-                    <Search size={14} className="text-emerald-500 shrink-0" />
-                    <input 
-                      type="text" 
+                    <Search size={14} className="text-[#588CBC] shrink-0" />
+                    <input
+                      type="text"
                       autoFocus
                       value={localSearchQuery}
                       onChange={(e) => setLocalSearchQuery(e.target.value)}
@@ -1318,31 +1324,31 @@ const MobileLayout = () => {
                         <span className="text-[9px] font-black text-slate-500 select-none">
                           {searchMatchIndex}/{searchMatches.length}
                         </span>
-                        <button 
+                        <button
                           onClick={() => {
                             if (searchMatches.length === 0) return;
                             const nextIdx = searchMatchIndex <= 1 ? searchMatches.length : searchMatchIndex - 1;
                             setSearchMatchIndex(nextIdx);
                             scrollToMatch(nextIdx);
                           }}
-                          className="text-slate-400 hover:text-emerald-600 transition-colors"
+                          className="text-slate-400 hover:text-[#588CBC] transition-colors"
                         >
                           <ChevronUp size={12} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => {
                             if (searchMatches.length === 0) return;
                             const nextIdx = searchMatchIndex >= searchMatches.length ? 1 : searchMatchIndex + 1;
                             setSearchMatchIndex(nextIdx);
                             scrollToMatch(nextIdx);
                           }}
-                          className="text-slate-400 hover:text-emerald-600 transition-colors"
+                          className="text-slate-400 hover:text-[#588CBC] transition-colors"
                         >
                           <ChevronDown size={12} />
                         </button>
                       </div>
                     )}
-                    <button 
+                    <button
                       onClick={() => {
                         setLocalSearchQuery('');
                         setIsLocalSearchOpen(false);
@@ -1353,7 +1359,7 @@ const MobileLayout = () => {
                     </button>
                   </motion.div>
                 ) : (
-                  <button 
+                  <button
                     onClick={() => setIsLocalSearchOpen(true)}
                     className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 active:bg-slate-100"
                   >
@@ -1361,7 +1367,7 @@ const MobileLayout = () => {
                   </button>
                 )}
                 <div className="relative">
-                  <button 
+                  <button
                     onClick={() => setIsRoomMenuOpen(!isRoomMenuOpen)}
                     className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 active:bg-slate-100"
                   >
@@ -1371,13 +1377,13 @@ const MobileLayout = () => {
                     {isRoomMenuOpen && (
                       <>
                         <div className="fixed inset-0 z-40" onClick={() => setIsRoomMenuOpen(false)}></div>
-                        <motion.div 
+                        <motion.div
                           initial={{ opacity: 0, scale: 0.95, y: 10 }}
                           animate={{ opacity: 1, scale: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.95, y: 10 }}
                           className="absolute right-0 top-10 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 origin-top-right"
                         >
-                          <button 
+                          <button
                             onClick={handleMarkAsUnread}
                             className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
                           >
@@ -1392,7 +1398,7 @@ const MobileLayout = () => {
             </header>
 
             {/* Messages Area */}
-            <main 
+            <main
               ref={scrollContainerRef}
               onScroll={handleScroll}
               className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 scrollbar-hide"
@@ -1406,96 +1412,96 @@ const MobileLayout = () => {
                   : messages;
 
                 return filteredMessages.map((msg, idx) => (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  key={msg.id || idx}
-                  className={cn(
-                    "max-w-[85%] px-5 py-3.5 rounded-4xl text-xs shadow-md relative",
-                    msg.sender === 'admin' 
-                      ? "bg-linear-to-br from-emerald-400 to-emerald-500 text-white self-end rounded-tr-none border border-emerald-300 shadow-emerald-100" 
-                      : "bg-white text-slate-700 self-start rounded-tl-none border border-slate-100 shadow-slate-100/50"
-                  )}
-                >
-                  {msg.type === 'image' ? (
-                    <div className="flex flex-col gap-2">
-                      {(() => {
-                        const parts = msg.text.split('|');
-                        const imgData = parts.length > 1 ? parts[1] : msg.text;
-                        const caption = parts.length > 2 ? parts[2] : null;
-                        return (
-                          <div className="flex flex-col gap-2">
-                            <img 
-                              src={imgData} 
-                              alt="Sent image" 
-                              onClick={() => setSelectedImage(imgData)}
-                              className="rounded-2xl max-w-50 h-auto shadow-sm border border-slate-100 cursor-zoom-in active:scale-95 transition-all"
-                            />
-                            {caption && (
-                              <FormattedText text={caption} className="text-[13px] font-medium leading-relaxed mt-1 px-1" />
-                            )}
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  ) : msg.type === 'file' ? (
-                    (() => {
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    key={msg.id || idx}
+                    className={cn(
+                      "max-w-[85%] px-5 py-3.5 rounded-4xl text-xs shadow-md relative",
+                      msg.sender === 'admin'
+                        ? "bg-linear-to-br from-[#183449] to-[#285577] text-white self-end rounded-tr-none border border-[#588CBC]/40 shadow-lg shadow-[#183449]/15"
+                        : "bg-white text-[#2B2B2B] self-start rounded-tl-none border border-[#B3B3B3] shadow-sm"
+                    )}
+                  >
+                    {msg.type === 'image' ? (
+                      <div className="flex flex-col gap-2">
+                        {(() => {
+                          const parts = msg.text.split('|');
+                          const imgData = parts.length > 1 ? parts[1] : msg.text;
+                          const caption = parts.length > 2 ? parts[2] : null;
+                          return (
+                            <div className="flex flex-col gap-2">
+                              <img
+                                src={imgData}
+                                alt="Sent image"
+                                onClick={() => setSelectedImage(imgData)}
+                                className="rounded-2xl max-w-50 h-auto shadow-sm border border-slate-100 cursor-zoom-in active:scale-95 transition-all"
+                              />
+                              {caption && (
+                                <FormattedText text={caption} className="text-[13px] font-medium leading-relaxed mt-1 px-1" />
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    ) : msg.type === 'file' ? (
+                      (() => {
                         const parts = msg.text.split('|');
                         const fileName = parts.length > 1 ? parts[0] : "Dokumen";
                         const fileData = parts.length > 1 ? parts[1] : msg.text;
                         return (
                           <div className="flex flex-col">
                             <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100/50 min-w-45">
-                            <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
-                              <FileText size={18} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[10px] font-bold text-slate-700 truncate">{fileName}</p>
-                              <div className="flex items-center gap-3 mt-1">
-                                <button 
-                                  onClick={() => viewFile(fileData)}
-                                  className="text-[9px] font-black text-emerald-600 hover:underline flex items-center gap-1"
-                                >
-                                  <Eye size={10} />
-                                  Lihat
-                                </button>
-                                <button 
-                                  onClick={() => downloadFile(fileData, fileName)}
-                                  className="text-[9px] font-black text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1"
-                                >
-                                  <Download size={10} />
-                                  Download
-                                </button>
+                              <div className="w-10 h-10 bg-[#588CBC]/15 rounded-xl flex items-center justify-center text-[#588CBC]">
+                                <FileText size={18} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[10px] font-bold text-slate-700 truncate">{fileName}</p>
+                                <div className="flex items-center gap-3 mt-1">
+                                  <button
+                                    onClick={() => viewFile(fileData)}
+                                    className="text-[9px] font-black text-[#588CBC] hover:underline flex items-center gap-1"
+                                  >
+                                    <Eye size={10} />
+                                    Lihat
+                                  </button>
+                                  <button
+                                    onClick={() => downloadFile(fileData, fileName)}
+                                    className="text-[9px] font-black text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1"
+                                  >
+                                    <Download size={10} />
+                                    Download
+                                  </button>
+                                </div>
                               </div>
                             </div>
+                            {(() => {
+                              const caption = msg.text.split('|')[2];
+                              return caption ? (
+                                <div className="mt-3 px-1 border-t border-slate-100 pt-3">
+                                  <FormattedText text={caption} className="text-[13px] font-medium leading-relaxed" />
+                                </div>
+                              ) : null;
+                            })()}
                           </div>
-                          {(() => {
-                            const caption = msg.text.split('|')[2];
-                            return caption ? (
-                              <div className="mt-3 px-1 border-t border-slate-100 pt-3">
-                                <FormattedText text={caption} className="text-[13px] font-medium leading-relaxed" />
-                              </div>
-                            ) : null;
-                          })()}
-                          </div>
-                      );
-                    })()
-                  ) : (
-                    renderHighlightedText(msg.text, localSearchQuery)
-                  )}
-                  <div className="flex items-center justify-end gap-1.5 mt-2">
-                    <span className={cn(
-                        "text-[9px] font-bold",
-                        msg.sender === 'admin' ? "text-emerald-50" : "text-slate-400"
-                    )}>
-                      {msg.timestamp}
-                    </span>
-                    {msg.sender === 'admin' && (
-                      <CheckCheck size={12} className="text-emerald-100" />
+                        );
+                      })()
+                    ) : (
+                      renderHighlightedText(msg.text, localSearchQuery)
                     )}
-                  </div>
-                </motion.div>
-              ));
+                    <div className="flex items-center justify-end gap-1.5 mt-2">
+                      <span className={cn(
+                        "text-[9px] font-bold",
+                        msg.sender === 'admin' ? "text-slate-300" : "text-[#848484]"
+                      )}>
+                        {msg.timestamp}
+                      </span>
+                      {msg.sender === 'admin' && (
+                        <CheckCheck size={12} className="text-[#588CBC]" />
+                      )}
+                    </div>
+                  </motion.div>
+                ));
               })()}
               <div ref={messagesEndRef} />
             </main>
@@ -1505,62 +1511,62 @@ const MobileLayout = () => {
               <div className="bg-slate-50 border border-slate-100 rounded-[28px] overflow-hidden shadow-2xl shadow-slate-200/50">
                 {/* Selected Template Preview */}
                 <AnimatePresence>
-                    {selectedResponse && (
-                        <motion.div 
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="px-4 py-3 bg-emerald-50 border-b border-emerald-100 flex items-start justify-between gap-3"
-                        >
-                            <div className="flex-1 min-w-0 flex gap-2">
-                                <Clock size={14} className="text-emerald-600 shrink-0" />
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-[9px] font-black text-emerald-800 uppercase tracking-widest">Draft:</p>
-                                    <p className="text-[11px] text-emerald-900/70 italic font-medium leading-relaxed whitespace-pre-wrap">"{selectedResponse.response}"</p>
-                                </div>
-                            </div>
-                            <button 
-                                type="button"
-                                onClick={() => setSelectedResponse(null)} 
-                                className="w-8 h-8 rounded-full flex items-center justify-center bg-white/50 text-slate-400 hover:text-red-500 shrink-0 shadow-sm"
-                            >
-                                <X size={14} />
-                            </button>
-                        </motion.div>
-                    )}
+                  {selectedResponse && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="px-4 py-3 bg-[#588CBC]/10 border-b border-[#588CBC]/20 flex items-start justify-between gap-3"
+                    >
+                      <div className="flex-1 min-w-0 flex gap-2">
+                        <Clock size={14} className="text-[#183449] shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[9px] font-black text-[#183449] uppercase tracking-widest">Draft:</p>
+                          <p className="text-[11px] text-[#2B2B2B]/80 italic font-medium leading-relaxed whitespace-pre-wrap">"{selectedResponse.response}"</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedResponse(null)}
+                        className="w-8 h-8 rounded-full flex items-center justify-center bg-white/50 text-slate-400 hover:text-red-500 shrink-0 shadow-sm"
+                      >
+                        <X size={14} />
+                      </button>
+                    </motion.div>
+                  )}
                 </AnimatePresence>
 
                 <form onSubmit={handleSendMessage} className="flex flex-col gap-2 p-3">
-                    <div className="flex items-end gap-2 bg-slate-50/50 rounded-2xl p-1">
-                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
-                        <div className="flex items-center gap-1 mb-1 ml-1">
-                            <button type="button" onClick={handleFileClick} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-white hover:shadow-sm rounded-full active:text-emerald-600 transition-all">
-                                <Paperclip size={20} />
-                            </button>
-                            <button type="button" onClick={() => setIsTemplatePopupOpen(true)} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-white hover:shadow-sm rounded-full active:text-emerald-600 transition-all">
-                                <LayoutGrid size={20} />
-                            </button>
-                        </div>
-                        <textarea 
-                            id="admin-message-input"
-                            value={manualNote}
-                            onChange={(e) => {
-                                setManualNote(e.target.value);
-                                e.target.style.height = 'auto';
-                                e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
-                            }}
-                            placeholder="Tulis pesan..."
-                            className="flex-1 py-2.5 px-2 text-[13px] font-medium text-slate-700 bg-transparent focus:outline-none resize-none max-h-30 scrollbar-hide"
-                            rows={1}
-                        />
-                        <button 
-                            type="submit"
-                            disabled={!manualNote.trim() && !selectedResponse}
-                            className="w-10 h-10 mb-0.5 mr-0.5 bg-emerald-800 text-white rounded-full flex items-center justify-center shadow-lg disabled:opacity-30 hover:scale-105 active:scale-95 transition-all shrink-0"
-                        >
-                            <Send size={18} className="ml-0.5" />
-                        </button>
+                  <div className="flex items-end gap-2 bg-slate-50/50 rounded-2xl p-1">
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+                    <div className="flex items-center gap-1 mb-1 ml-1">
+                      <button type="button" onClick={handleFileClick} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-white hover:shadow-sm rounded-full active:text-[#588CBC] transition-all">
+                        <Paperclip size={20} />
+                      </button>
+                      <button type="button" onClick={() => setIsTemplatePopupOpen(true)} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-white hover:shadow-sm rounded-full active:text-[#588CBC] transition-all">
+                        <LayoutGrid size={20} />
+                      </button>
                     </div>
+                    <textarea
+                      id="admin-message-input"
+                      value={manualNote}
+                      onChange={(e) => {
+                        setManualNote(e.target.value);
+                        e.target.style.height = 'auto';
+                        e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+                      }}
+                      placeholder="Tulis pesan..."
+                      className="flex-1 py-2.5 px-2 text-[13px] font-medium text-slate-700 bg-transparent focus:outline-none resize-none max-h-30 scrollbar-hide"
+                      rows={1}
+                    />
+                    <button
+                      type="submit"
+                      disabled={!manualNote.trim() && !selectedResponse}
+                      className="w-10 h-10 mb-0.5 mr-0.5 bg-[#183449] hover:bg-[#588CBC] text-white rounded-full flex items-center justify-center shadow-lg shadow-[#183449]/20 disabled:opacity-30 hover:scale-105 active:scale-95 transition-all shrink-0"
+                    >
+                      <Send size={18} className="ml-0.5" />
+                    </button>
+                  </div>
                 </form>
               </div>
             </div>
@@ -1574,14 +1580,14 @@ const MobileLayout = () => {
       <AnimatePresence>
         {showBlessModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 40 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 40 }}
               className="bg-white rounded-[40px] w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl border border-slate-100"
             >
               <div className="flex-1 overflow-y-auto p-8 scrollbar-hide">
-                <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mb-6">
+                <div className="w-14 h-14 bg-[#588CBC]/20 rounded-2xl flex items-center justify-center mb-6">
                   <span className="text-2xl">📢</span>
                 </div>
                 <h3 className="text-xl font-black text-slate-800 mb-2 tracking-tight">Bless Chat</h3>
@@ -1591,29 +1597,29 @@ const MobileLayout = () => {
 
                 {/* Target Selector */}
                 <div className="mb-6 bg-slate-50 p-1 rounded-2xl border border-slate-100 flex gap-1">
-                  <button 
+                  <button
                     onClick={() => setBlessTargetMode('waiting_room')}
                     className={cn(
                       "flex-1 py-2 px-2 rounded-xl text-[10px] font-black transition-all duration-300",
-                      blessTargetMode === 'waiting_room' ? "bg-white text-emerald-600 shadow-sm ring-1 ring-slate-200/50" : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
+                      blessTargetMode === 'waiting_room' ? "bg-white text-[#183449] shadow-sm ring-1 ring-slate-200/50" : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
                     )}
                   >
                     Active Room
                   </button>
-                  <button 
+                  <button
                     onClick={() => setBlessTargetMode('all_users')}
                     className={cn(
                       "flex-1 py-2 px-2 rounded-xl text-[10px] font-black transition-all duration-300",
-                      blessTargetMode === 'all_users' ? "bg-white text-emerald-600 shadow-sm ring-1 ring-slate-200/50" : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
+                      blessTargetMode === 'all_users' ? "bg-white text-[#183449] shadow-sm ring-1 ring-slate-200/50" : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
                     )}
                   >
                     Semua Akun
                   </button>
-                  <button 
+                  <button
                     onClick={() => setBlessTargetMode('specific_users')}
                     className={cn(
                       "flex-1 py-2 px-2 rounded-xl text-[10px] font-black transition-all duration-300",
-                      blessTargetMode === 'specific_users' ? "bg-white text-emerald-600 shadow-sm ring-1 ring-slate-200/50" : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
+                      blessTargetMode === 'specific_users' ? "bg-white text-[#183449] shadow-sm ring-1 ring-slate-200/50" : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
                     )}
                   >
                     Pilih User
@@ -1622,7 +1628,7 @@ const MobileLayout = () => {
 
                 <AnimatePresence mode="wait">
                   {blessTargetMode === 'specific_users' && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
@@ -1630,12 +1636,12 @@ const MobileLayout = () => {
                     >
                       <div className="relative">
                         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input 
-                          type="text" 
-                          placeholder="Cari nama atau email..." 
+                        <input
+                          type="text"
+                          placeholder="Cari nama atau email..."
                           value={userSearchQuery}
                           onChange={(e) => setUserSearchQuery(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[11px] font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                          className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-[11px] font-medium focus:ring-2 focus:ring-[#588CBC]/20 focus:border-[#588CBC] outline-none transition-all"
                         />
                       </div>
                       <div className="max-h-40 overflow-y-auto bg-slate-50 rounded-xl border border-slate-100 p-1.5 flex flex-col gap-1 scrollbar-hide">
@@ -1643,16 +1649,16 @@ const MobileLayout = () => {
                           <label key={user.gmail} className="flex items-center gap-3 p-2 hover:bg-white rounded-lg cursor-pointer transition-all border border-transparent hover:border-slate-200 hover:shadow-sm">
                             <div className={cn(
                               "w-4 h-4 rounded shadow-inner flex items-center justify-center transition-colors border shrink-0",
-                              selectedBlessUsers.includes(user.gmail) ? "bg-emerald-500 border-emerald-500 text-white" : "bg-white border-slate-300"
+                              selectedBlessUsers.includes(user.gmail) ? "bg-[#183449] border-[#183449] text-white" : "bg-white border-[#B3B3B3]"
                             )}>
                               {selectedBlessUsers.includes(user.gmail) && <CheckCheck size={10} />}
                             </div>
-                            <input 
-                              type="checkbox" 
-                              className="hidden" 
+                            <input
+                              type="checkbox"
+                              className="hidden"
                               checked={selectedBlessUsers.includes(user.gmail)}
                               onChange={() => {
-                                setSelectedBlessUsers(prev => 
+                                setSelectedBlessUsers(prev =>
                                   prev.includes(user.gmail) ? prev.filter(g => g !== user.gmail) : [...prev, user.gmail]
                                 );
                               }}
@@ -1670,7 +1676,7 @@ const MobileLayout = () => {
                     </motion.div>
                   )}
                 </AnimatePresence>
-                
+
                 <div className="mb-4">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Pilih Templat:</p>
                   <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
@@ -1678,7 +1684,7 @@ const MobileLayout = () => {
                       <button
                         key={template.id}
                         onClick={() => setBlessMessage(template.content)}
-                        className="whitespace-nowrap px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-black rounded-full border border-emerald-100 transition-all active:scale-95"
+                        className="whitespace-nowrap px-4 py-2 bg-[#588CBC]/10 hover:bg-[#588CBC]/20 text-[#183449] text-[10px] font-black rounded-full border border-[#588CBC]/20 transition-all active:scale-95"
                       >
                         {template.name}
                       </button>
@@ -1696,95 +1702,95 @@ const MobileLayout = () => {
                   value={blessMessage}
                   onChange={(e) => setBlessMessage(e.target.value)}
                   placeholder={blessFile ? "Tambahkan keterangan..." : "Tulis pesan sakti Anda..."}
-                  className="w-full h-36 p-5 bg-slate-50 border border-slate-100 rounded-3xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none font-medium"
+                  className="w-full h-36 p-5 bg-slate-50 border border-slate-100 rounded-3xl text-sm focus:outline-none focus:ring-2 focus:ring-[#588CBC]/20 focus:border-[#588CBC] transition-all resize-none font-medium"
                 />
 
                 <div className="mt-4 flex items-center justify-between px-2">
-                    <div className="flex flex-col gap-3 w-full">
-                      <div className="flex items-center gap-2">
-                        <input 
-                          type="file" 
-                          id="bless-file-mobile" 
-                          className="hidden" 
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              if (file.size > 1024 * 1024) {
-                                alert(`Waduh bro! Ukuran file lu (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB biar server tetep ngebut!`);
-                                e.target.value = '';
-                                return;
-                              }
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                setBlessFile({
-                                  name: file.name,
-                                  data: reader.result as string,
-                                  type: file.type.startsWith('image/') ? 'image' : 'file'
-                                });
-                              };
-                              reader.readAsDataURL(file);
+                  <div className="flex flex-col gap-3 w-full">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        id="bless-file-mobile"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            if (file.size > 1024 * 1024) {
+                              alert(`Waduh bro! Ukuran file lu (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB biar server tetep ngebut!`);
+                              e.target.value = '';
+                              return;
                             }
-                          }}
-                        />
-                        <label 
-                          htmlFor="bless-file-mobile"
-                          className="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 active:bg-emerald-100 text-emerald-600 rounded-2xl text-[10px] font-black cursor-pointer transition-all border border-emerald-100"
-                        >
-                          <Paperclip size={14} />
-                          {blessFile ? 'Ganti File' : 'Lampirkan File'}
-                        </label>
-                        {blessFile && (
-                          <button 
-                            onClick={() => setBlessFile(null)}
-                            className="text-rose-500 text-[10px] font-black"
-                          >
-                            Hapus
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Preview Section Mobile */}
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setBlessFile({
+                                name: file.name,
+                                data: reader.result as string,
+                                type: file.type.startsWith('image/') ? 'image' : 'file'
+                              });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="bless-file-mobile"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-[#588CBC]/10 active:bg-[#588CBC]/20 text-[#183449] rounded-2xl text-[10px] font-black cursor-pointer transition-all border border-[#588CBC]/20"
+                      >
+                        <Paperclip size={14} />
+                        {blessFile ? 'Ganti File' : 'Lampirkan File'}
+                      </label>
                       {blessFile && (
-                        <motion.div 
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="p-3 bg-slate-50 rounded-2xl border border-slate-100"
+                        <button
+                          onClick={() => setBlessFile(null)}
+                          className="text-rose-500 text-[10px] font-black"
                         >
-                          {blessFile.type === 'image' ? (
-                            <div className="flex flex-col gap-2">
-                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Preview Gambar:</p>
-                              <img 
-                                src={blessFile.data} 
-                                alt="Preview" 
-                                onClick={() => setSelectedImage(blessFile.data)}
-                                className="w-full max-h-48 object-contain rounded-xl border border-slate-200 bg-slate-100/50"
-                              />
-                            </div>
-                          ) : (
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center shrink-0">
-                                  <FileText size={16} className="text-emerald-600" />
-                                </div>
-                                <p className="text-[10px] font-bold text-slate-700 truncate">{blessFile.name}</p>
-                              </div>
-                              <button 
-                                onClick={() => viewFile(blessFile.data)}
-                                className="px-3 py-1.5 bg-white border border-slate-200 text-[9px] font-black text-slate-600 rounded-lg flex items-center gap-1"
-                              >
-                                <Eye size={12} />
-                                Lihat
-                              </button>
-                            </div>
-                          )}
-                        </motion.div>
+                          Hapus
+                        </button>
                       )}
                     </div>
+
+                    {/* Preview Section Mobile */}
+                    {blessFile && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-3 bg-slate-50 rounded-2xl border border-slate-100"
+                      >
+                        {blessFile.type === 'image' ? (
+                          <div className="flex flex-col gap-2">
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Preview Gambar:</p>
+                            <img
+                              src={blessFile.data}
+                              alt="Preview"
+                              onClick={() => setSelectedImage(blessFile.data)}
+                              className="w-full max-h-48 object-contain rounded-xl border border-slate-200 bg-slate-100/50"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="w-8 h-8 bg-[#588CBC]/15 rounded-lg flex items-center justify-center shrink-0">
+                                <FileText size={16} className="text-[#183449]" />
+                              </div>
+                              <p className="text-[10px] font-bold text-slate-700 truncate">{blessFile.name}</p>
+                            </div>
+                            <button
+                              onClick={() => viewFile(blessFile.data)}
+                              className="px-3 py-1.5 bg-white border border-slate-200 text-[9px] font-black text-slate-600 rounded-lg flex items-center gap-1"
+                            >
+                              <Eye size={12} />
+                              Lihat
+                            </button>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </div>
                 </div>
               </div>
-              
+
               <div className="p-6 bg-slate-50 flex gap-3">
-                <button 
+                <button
                   onClick={() => {
                     setShowBlessModal(false);
                     setBlessFile(null);
@@ -1795,10 +1801,10 @@ const MobileLayout = () => {
                 >
                   Batal
                 </button>
-                <button 
+                <button
                   onClick={handleBlessChat}
                   disabled={isBlasting || (!blessMessage.trim() && !blessFile)}
-                  className="flex-2 py-4 bg-emerald-500 text-white rounded-2xl text-xs font-black shadow-lg shadow-emerald-200 hover:bg-emerald-600 transition-all disabled:opacity-50"
+                  className="flex-2 py-4 bg-[#183449] text-white rounded-2xl text-xs font-black shadow-lg shadow-[#183449]/20 hover:bg-[#588CBC] transition-all disabled:opacity-50"
                 >
                   {isBlasting ? 'Mengirim...' : 'Bless Now!'}
                 </button>
@@ -1812,7 +1818,7 @@ const MobileLayout = () => {
       <AnimatePresence>
         {isTemplatePopupOpen && (
           <div className="fixed inset-0 z-999 flex items-end sm:items-center justify-center p-0 sm:p-6">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -1826,12 +1832,12 @@ const MobileLayout = () => {
               className="relative w-full max-w-xl bg-white rounded-t-[40px] sm:rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
             >
               {/* Modal Header */}
-              <div className="px-8 py-6 bg-emerald-800 text-white flex items-center justify-between shrink-0">
+              <div className="px-8 py-6 bg-[#183449] text-white flex items-center justify-between shrink-0">
                 <div>
                   <h3 className="text-lg font-black tracking-tight">Template Balasan</h3>
-                  <p className="text-emerald-100/60 text-[9px] font-bold uppercase tracking-widest mt-1">Pilih kategori bantuan</p>
+                  <p className="text-white/60 text-[9px] font-bold uppercase tracking-widest mt-1">Pilih kategori bantuan</p>
                 </div>
-                <button 
+                <button
                   onClick={() => setIsTemplatePopupOpen(false)}
                   className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center active:bg-white/20 transition-all"
                 >
@@ -1847,8 +1853,8 @@ const MobileLayout = () => {
                     onClick={() => setActiveCategory(cat)}
                     className={cn(
                       "shrink-0 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all whitespace-nowrap",
-                      activeCategory === cat 
-                        ? "bg-emerald-600 text-white shadow-lg shadow-emerald-100" 
+                      activeCategory === cat
+                        ? "bg-[#183449] text-white shadow-lg shadow-[#183449]/20"
                         : "bg-white text-slate-400 border border-slate-100"
                     )}
                   >
@@ -1868,10 +1874,10 @@ const MobileLayout = () => {
                         setSelectedResponse(resp);
                         setIsTemplatePopupOpen(false);
                       }}
-                      className="p-5 bg-white border border-slate-100 rounded-[28px] text-left active:border-emerald-200 active:bg-emerald-50/30 transition-all shadow-sm"
+                      className="p-5 bg-white border border-slate-100 rounded-[28px] text-left active:border-[#588CBC] active:bg-[#588CBC]/10 transition-all shadow-sm"
                     >
                       <div className="flex items-center gap-2 mb-2">
-                         <span className="px-2 py-0.5 bg-emerald-50 text-[7px] font-black text-emerald-600 rounded uppercase tracking-widest">{resp.keyword}</span>
+                        <span className="px-2 py-0.5 bg-[#588CBC]/10 text-[7px] font-black text-[#183449] rounded uppercase tracking-widest">{resp.keyword}</span>
                       </div>
                       <p className="text-sm font-black text-slate-800 leading-tight mb-2">{resp.question}</p>
                       <p className="text-[10px] text-slate-400 line-clamp-2 leading-relaxed">{resp.response}</p>
@@ -1881,7 +1887,7 @@ const MobileLayout = () => {
               </div>
 
               <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-center shrink-0">
-                 <div className="w-12 h-1.5 bg-slate-200 rounded-full"></div>
+                <div className="w-12 h-1.5 bg-slate-200 rounded-full"></div>
               </div>
             </motion.div>
           </div>
@@ -1890,14 +1896,14 @@ const MobileLayout = () => {
 
       <AnimatePresence>
         {selectedImage && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSelectedImage(null)}
             className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/95 backdrop-blur-lg"
           >
-            <motion.img 
+            <motion.img
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -1905,7 +1911,7 @@ const MobileLayout = () => {
               alt="Enlarged"
               className="max-w-full max-h-[80vh] rounded-3xl shadow-2xl object-contain border-4 border-white/10"
             />
-            <button 
+            <button
               className="absolute bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 bg-white/10 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest rounded-full border border-white/20"
               onClick={() => setSelectedImage(null)}
             >
@@ -1934,7 +1940,7 @@ const MobileLayout = () => {
               className="w-full max-w-sm bg-white rounded-4xl overflow-hidden shadow-2xl"
             >
               {/* Header Gradient */}
-              <div className={`p-6 ${pendingAIState ? 'bg-linear-to-br from-emerald-500 to-emerald-700' : 'bg-linear-to-br from-slate-600 to-slate-800'} relative overflow-hidden`}>
+              <div className={`p-6 ${pendingAIState ? 'bg-linear-to-br from-[#183449] to-[#285577]' : 'bg-linear-to-br from-[#2B2B2B] to-[#565656]'} relative overflow-hidden`}>
                 <div className="absolute -top-5 -right-5 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
                 <div className="relative z-10 flex items-center gap-4">
                   <div className="w-14 h-14 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20 shadow-lg">
@@ -1954,9 +1960,9 @@ const MobileLayout = () => {
                 {pendingAIState ? (
                   <div className="flex flex-col gap-3">
                     <p className="text-sm font-bold text-slate-700 leading-relaxed">
-                      Fitur <span className="text-emerald-600">Auto-Response AI</span> akan diaktifkan untuk semua chat yang masuk.
+                      Fitur <span className="text-[#183449]">Auto-Response AI</span> akan diaktifkan untuk semua chat yang masuk.
                     </p>
-                    <div className="bg-emerald-50 rounded-2xl p-4 flex flex-col gap-2 border border-emerald-100">
+                    <div className="bg-[#588CBC]/10 rounded-2xl p-4 flex flex-col gap-2 border border-[#588CBC]/20">
                       <div className="flex items-start gap-2.5">
                         <span className="text-sm mt-0.5">✅</span>
                         <p className="text-xs font-semibold text-slate-600">AI akan otomatis menjawab pertanyaan user berdasarkan template yang sudah dilatih</p>
@@ -1999,11 +2005,10 @@ const MobileLayout = () => {
                   </button>
                   <button
                     onClick={() => handleToggleAI(pendingAIState)}
-                    className={`flex-1 py-3.5 rounded-2xl text-xs font-black text-white shadow-lg transition-all active:scale-95 ${
-                      pendingAIState
-                        ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-200'
-                        : 'bg-slate-700 hover:bg-slate-800 shadow-slate-200'
-                    }`}
+                    className={`flex-1 py-3.5 rounded-2xl text-xs font-black text-white shadow-lg transition-all active:scale-95 ${pendingAIState
+                        ? 'bg-[#183449] hover:bg-[#588CBC] shadow-[#183449]/20'
+                        : 'bg-[#565656] hover:bg-[#2B2B2B] shadow-slate-200'
+                      }`}
                   >
                     {pendingAIState ? '🚀 Ya, Aktifkan!' : '🔕 Ya, Matikan'}
                   </button>
@@ -2013,7 +2018,7 @@ const MobileLayout = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      <CustomAlert config={alertConfig} onClose={() => setAlertConfig({...alertConfig, show: false})} />
+      <CustomAlert config={alertConfig} onClose={() => setAlertConfig({ ...alertConfig, show: false })} />
       {/* ──────────────────────────────────────────────────────────────────── */}
     </div>
   );

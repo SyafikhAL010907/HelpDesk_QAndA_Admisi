@@ -3,9 +3,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, MotionConfig } from 'framer-motion';
 import { Plus_Jakarta_Sans, Fasthand } from 'next/font/google';
-import { FLOOR_MAPS_REGISTRY, DotIndicator } from '../Web&Tab/WebTabLayout';
+import {
+  FLOOR_MAPS_REGISTRY,
+  DotIndicator,
+  FiturUtamaCards,
+  CaraKerjaSection,
+  Reveal,
+  EASE_OUT,
+} from '../Web&Tab/WebTabLayout';
+import Navbar from '@/components/LandingPage/Navbar';
+import Footer from '@/components/LandingPage/Footer';
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -231,24 +240,22 @@ export default function MobileLayout() {
   };
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className={`${jakarta.className} w-full overflow-x-hidden bg-white text-black`}>
       {/* ---------------- NAVBAR ---------------- */}
-      <header className="flex items-center justify-end px-4 pt-5">
-        <Link
-          href={LOGIN_HREF}
-          className="flex h-[44px] w-[120px] items-center justify-center rounded-[12px] bg-[#333333] text-[16px] font-semibold text-white active:opacity-80"
-        >
-          Masuk
-        </Link>
-      </header>
+      <Navbar variant="mobile" />
 
       {/* ---------------- HERO ---------------- */}
       <section className="mt-[72px] px-4">
-        <div
+        <Reveal
+          mode="load"
+          y={28}
+          scale={0.985}
+          duration={0.9}
           className="relative rounded-[28px] px-6 pb-8 pt-[230px]"
           style={{ background: 'linear-gradient(90deg, #183449 0%, #588CBC 100%)' }}
         >
-          <div className="absolute right-0 top-[-64px] aspect-[617/745] w-[62%]">
+          <Reveal mode="load" x={36} y={0} delay={0.4} duration={0.95} className="absolute right-0 top-[-64px] aspect-[617/745] w-[62%]">
             <Image
               src="/Landing/GedungSFD.png"
               alt="Gedung SFD"
@@ -257,37 +264,38 @@ export default function MobileLayout() {
               priority
               className="h-full w-full rounded-br-[28px] object-cover"
             />
-          </div>
+          </Reveal>
 
-          <div className="leading-[34px] text-[#FCFCFC]">
-            <span className="text-[28px] font-bold">LOREM IPSUM&nbsp; </span>
-            <span className={`${fasthand.className} text-[44px] font-normal`}>Dolor</span>
-          </div>
+          <Reveal mode="load" y={20} delay={0.35} className="leading-[34px] text-[#FCFCFC]">
+            <span className="text-[28px] font-bold">Dashboard&nbsp; </span>
+            <span className={`${fasthand.className} text-[44px] font-normal`}>SiRuang</span>
+          </Reveal>
 
-          <p className="mt-4 text-[15px] leading-[24px] text-[#FCFCFC]">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          </p>
+          <Reveal as="p" mode="load" y={20} delay={0.47} className="mt-4 text-[15px] leading-[24px] text-[#FCFCFC]">
+           Butuh ruangan sekarang? Cek slot kosong dan langsung booking sementara tanpa takut nabrak jadwal akademik kampus.
+          </Reveal>
 
+          <Reveal mode="load" y={20} delay={0.58}>
           <Link
             href={LOGIN_HREF}
             className="mt-6 flex h-[48px] w-[160px] items-center justify-center rounded-[12px] bg-white text-[16px] font-semibold text-[#333333] active:opacity-80"
           >
             Masuk
           </Link>
-        </div>
+          </Reveal>
+        </Reveal>
       </section>
 
       {/* ---------------- DATA REAL-TIME ---------------- */}
-      <section className="mt-[64px] px-4">
-        <h2 className="text-center text-[30px] font-semibold leading-[40px]">Data Real-Time</h2>
-        <p className="mt-3 text-center text-[15px] leading-[24px]">
+      <section id="data-real-time" className="mt-[64px] px-4">
+        <Reveal as="h2" y={20} className="text-center text-[30px] font-semibold leading-[40px]">Data Real-Time</Reveal>
+        <Reveal as="p" y={20} delay={0.08} className="mt-3 text-center text-[15px] leading-[24px]">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
           incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-        </p>
+        </Reveal>
 
         {/* tombol gedung (geser ke samping kalau layar sempit) */}
-        <div className="-mx-4 mt-6 flex gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <Reveal y={20} delay={0.14} className="-mx-4 mt-6 flex gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {gedungList.map((g) => {
             const isActive = g.key === activeKey;
             return (
@@ -306,14 +314,15 @@ export default function MobileLayout() {
               </button>
             );
           })}
-        </div>
+        </Reveal>
 
         {/* slider kartu denah lantai: 1 kartu per slide di mobile, swipe horizontal */}
         <motion.div
           key={activeGedung.key}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 'some' }}
+          transition={{ duration: 0.5, ease: EASE_OUT }}
           className="mt-6 w-full"
         >
           <div
@@ -367,7 +376,7 @@ export default function MobileLayout() {
 
       {/* ---------------- RESPONSIVE WEBSITE ---------------- */}
       <section className="mt-[64px] px-4">
-        <div className="relative z-0 mx-auto aspect-[474/558] w-full max-w-[300px] flex items-center justify-center bg-white">
+        <Reveal y={28} duration={0.9} className="relative z-0 mx-auto aspect-[474/558] w-full max-w-[300px] flex items-center justify-center bg-white">
           <video
             src="/Landing/Responsive.mp4"
             autoPlay
@@ -384,9 +393,9 @@ export default function MobileLayout() {
             }}
             className="pointer-events-none h-full w-full select-none object-contain scale-[1.14] [clip-path:inset(3px_3px_3px_3px)]"
           />
-        </div>
+        </Reveal>
 
-        <div className="relative z-10 mt-6">
+        <Reveal delay={0.1} className="relative z-10 mt-6">
           <p className="text-[15px] font-semibold leading-[28px] text-[#B8B8B8]">
             Lorem Ipsum dolor sit
           </p>
@@ -402,36 +411,48 @@ export default function MobileLayout() {
           >
             Lorem ipsum
           </Link>
-        </div>
+        </Reveal>
       </section>
 
       {/* ---------------- MASALAH YANG DISELESAIKAN ---------------- */}
       <section className="mt-[64px] bg-[#333333] px-4 pb-[64px] pt-[56px]">
-        <p className="text-center text-[14px] leading-[24px] text-[#E3E3E3]">
+        <Reveal as="p" y={16} className="text-center text-[14px] leading-[24px] text-[#E3E3E3]">
           Lorem Ipsum dolor sit
-        </p>
-        <h2 className="mt-1 text-center text-[28px] font-semibold leading-[36px] text-white">
+        </Reveal>
+        <Reveal as="h2" y={20} delay={0.08} className="mt-1 text-center text-[28px] font-semibold leading-[36px] text-white">
           Masalah yang Diselesaikan
-        </h2>
+        </Reveal>
 
-        <div className="mx-auto mt-8 max-w-[430px]">
+        <Reveal y={32} delay={0.12} duration={0.9} className="mx-auto mt-8 max-w-[430px]">
           <TestimonialCarousel />
+        </Reveal>
+      </section>
+
+      {/* ---------------- FITUR UTAMA ---------------- */}
+      <section className="px-4 pb-[80px] pt-[56px]">
+        {/* ---------------- FITUR UTAMA ---------------- */}
+        <div id="fitur">
+          <Reveal as="p" y={14} className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#B8B8B8]">
+            Semua info ruangan, satu tempat
+          </Reveal>
+          <Reveal as="h2" y={18} delay={0.07} className="mt-2 text-[28px] font-semibold leading-[36px]">Fitur Utama SiRuang</Reveal>
+          <Reveal as="p" y={18} delay={0.14} className="mt-3 text-[15px] leading-[24px]">
+            SiRuang membantu PJ kelas, dosen, dan mahasiswa melihat status ruangan, mengajukan
+            booking, dan berkomunikasi dalam satu website.
+          </Reveal>
+
+          <div className="mt-6">
+            <FiturUtamaCards variant="mobile" />
+          </div>
         </div>
       </section>
 
-      {/* ---------------- HOW WE WORKS ---------------- */}
-      <section className="px-4 pb-[80px] pt-[72px]">
-        <div className="flex items-center gap-4">
-          <span className="h-[6px] w-[48px] rounded-[2px] bg-[#C2AC72]" />
-          <span className="text-[18px] font-medium">How We Works</span>
-        </div>
+      {/* ---------------- CARA KERJA ---------------- */}
+      <CaraKerjaSection variant="mobile" />
 
-        <h2 className="mt-4 text-[30px] font-bold leading-[40px]">
-          How We <span className="text-[#C2AC72]">Get It Done</span>
-        </h2>
-
-        <h2 className="mt-[64px] text-[30px] font-semibold">Fitur</h2>
-      </section>
+      {/* ---------------- FOOTER ---------------- */}
+      <Footer variant="mobile" />
     </div>
+    </MotionConfig>
   );
 }
