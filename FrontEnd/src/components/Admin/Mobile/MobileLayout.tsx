@@ -38,6 +38,7 @@ import { blastTemplates } from '@/constants/blastTemplates';
 import Avatar from '@/components/Shared/Avatar';
 import FormattedText from '@/components/Shared/FormattedText';
 import CustomAlert from '@/components/Shared/CustomAlert';
+import ExcelPreviewModal from '@/components/Shared/ExcelPreviewModal';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import Image from 'next/image';
@@ -123,6 +124,8 @@ const MobileLayout = () => {
   const [showBlessModal, setShowBlessModal] = useState(false);
   const [blessMessage, setBlessMessage] = useState('');
   const [blessFile, setBlessFile] = useState<{ name: string, data: string, type: string } | null>(null);
+  const [pendingFiles, setPendingFiles] = useState<Array<{ name: string, data: string, type: 'image' | 'file', sizeStr?: string }>>([]);
+  const [selectedExcelFile, setSelectedExcelFile] = useState<{ data: string; name: string } | null>(null);
   const [blessTargetMode, setBlessTargetMode] = useState<'waiting_room' | 'all_users' | 'specific_users'>('waiting_room');
   const [allUsers, setAllUsers] = useState<{ username: string, gmail: string }[]>([]);
   const [selectedBlessUsers, setSelectedBlessUsers] = useState<string[]>([]);
@@ -225,8 +228,13 @@ const MobileLayout = () => {
     }
   };
 
-  const viewFile = (dataUrl: string) => {
+  const viewFile = (dataUrl: string, fileName?: string) => {
     try {
+      const ext = (fileName || '').toLowerCase().split('.').pop() || '';
+      if (['xlsx', 'xls', 'csv'].includes(ext)) {
+        setSelectedExcelFile({ data: dataUrl, name: fileName || 'File_Excel.xlsx' });
+        return;
+      }
       const parts = dataUrl.split(',');
       if (parts.length < 2) throw new Error("Format base64 tidak valid");
       const mime = parts[0].match(/:(.*?);/)?.[1] || 'application/octet-stream';
@@ -421,6 +429,7 @@ const MobileLayout = () => {
 
   const handleOpenChat = (chat: any) => {
     setSelectedChat(chat);
+    setPendingFiles([]);
     setView('ROOM');
     setIsFABOpen(false);
     markAsRead(chat.id);
@@ -617,35 +626,58 @@ const MobileLayout = () => {
       ? `${selectedResponse.response}\n\nCatatan Tambahan:\n${manualNote}`
       : manualNote;
 
-    if (!combinedText.trim()) return;
+    if (!combinedText.trim() && pendingFiles.length === 0) return;
 
     const storedUser = localStorage.getItem('user');
     if (!storedUser) return;
     const { token, gmail } = JSON.parse(storedUser);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-        body: JSON.stringify({
-          room_id: selectedChat.id,
-          sender_gmail: gmail,
-          message: combinedText,
-          message_type: 'text'
-        })
-      });
+      if (pendingFiles.length > 0) {
+        for (let i = 0; i < pendingFiles.length; i++) {
+          const pf = pendingFiles[i];
+          const fileMsg = (i === 0 && combinedText.trim())
+            ? `${pf.name}|${pf.data}|${combinedText.trim()}`
+            : `${pf.name}|${pf.data}`;
 
-      if (res.ok) {
-        setManualNote('');
-        setSelectedResponse(null);
-        const el = document.getElementById('admin-message-input');
-        if (el) el.style.height = 'auto';
-        fetchMessages(selectedChat.id, token);
-        scrollToBottom();
+          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({
+              room_id: selectedChat.id,
+              sender_gmail: gmail,
+              message: fileMsg,
+              message_type: pf.type
+            })
+          });
+        }
+      } else {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+          },
+          body: JSON.stringify({
+            room_id: selectedChat.id,
+            sender_gmail: gmail,
+            message: combinedText.trim(),
+            message_type: 'text'
+          })
+        });
       }
+
+      setManualNote('');
+      setSelectedResponse(null);
+      setPendingFiles([]);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      const el = document.getElementById('admin-message-input');
+      if (el) el.style.height = 'auto';
+      fetchMessages(selectedChat.id, token);
+      scrollToBottom();
     } catch (err) {
       console.error("Gagal kirim pesan:", err);
     }
@@ -655,51 +687,59 @@ const MobileLayout = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !selectedChat) return;
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawFiles = e.target.files ? Array.from(e.target.files) : [];
+    if (!rawFiles.length || !selectedChat) return;
 
-    if (file.size > 1024 * 1024) {
-      showAlert(`Waduh bro! Ukuran file lu (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB biar server tetep ngebut!`, 'Ukuran File Kegedean');
+    const totalFiles = pendingFiles.length + rawFiles.length;
+    if (totalFiles > 5) {
+      showAlert(`Maksimal hanya boleh melampirkan 5 file sekaligus, bro! Kamu sudah melampirkan ${pendingFiles.length} file.`, 'Batas Maksimal File');
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
-    const storedUser = localStorage.getItem('user');
-    if (!storedUser) return;
-    const { token, gmail } = JSON.parse(storedUser);
-
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64Data = reader.result as string;
-      const fileType = file.type.startsWith('image/') ? 'image' : 'file';
-      const combinedData = `${file.name}|${base64Data}`;
-
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token
-          },
-          body: JSON.stringify({
-            room_id: selectedChat.id,
-            sender_gmail: gmail,
-            message: combinedData,
-            message_type: fileType
-          })
-        });
-
-        if (res.ok) {
-          fetchMessages(selectedChat.id, token);
-          scrollToBottom();
-        }
-      } catch (err) {
-        console.error("Gagal kirim file:", err);
+    const validFiles: File[] = [];
+    for (const file of rawFiles) {
+      if (file.size > 1024 * 1024) {
+        showAlert(`Waduh bro! File "${file.name}" ukurannya (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB per file biar server tetep ngebut!`, 'Ukuran File Kegedean');
+        continue;
       }
-    };
-    reader.readAsDataURL(file);
+      validFiles.push(file);
+    }
 
+    if (validFiles.length === 0) {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    let loadedCount = 0;
+    const newItems: Array<{ name: string; data: string; type: 'image' | 'file'; sizeStr?: string }> = [];
+
+    validFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Data = reader.result as string;
+        const fileType = file.type.startsWith('image/') ? 'image' : 'file';
+        const sizeStr = (file.size / 1024).toFixed(0) + ' KB';
+        newItems.push({
+          name: file.name,
+          data: base64Data,
+          type: fileType,
+          sizeStr: sizeStr
+        });
+        loadedCount++;
+        if (loadedCount === validFiles.length) {
+          setPendingFiles(prev => [...prev, ...newItems]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleRemovePendingFile = (index: number) => {
+    setPendingFiles(prev => prev.filter((_, i) => i !== index));
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -1428,7 +1468,7 @@ const MobileLayout = () => {
                         {(() => {
                           const parts = msg.text.split('|');
                           const imgData = parts.length > 1 ? parts[1] : msg.text;
-                          const caption = parts.length > 2 ? parts[2] : null;
+                          const caption = parts.length > 2 ? parts.slice(2).join('|') : null;
                           return (
                             <div className="flex flex-col gap-2">
                               <img
@@ -1459,7 +1499,7 @@ const MobileLayout = () => {
                                 <p className="text-[10px] font-bold text-slate-700 truncate">{fileName}</p>
                                 <div className="flex items-center gap-3 mt-1">
                                   <button
-                                    onClick={() => viewFile(fileData)}
+                                    onClick={() => viewFile(fileData, fileName)}
                                     className="text-[9px] font-black text-[#588CBC] hover:underline flex items-center gap-1"
                                   >
                                     <Eye size={10} />
@@ -1476,7 +1516,8 @@ const MobileLayout = () => {
                               </div>
                             </div>
                             {(() => {
-                              const caption = msg.text.split('|')[2];
+                              const parts = msg.text.split('|');
+                              const caption = parts.length > 2 ? parts.slice(2).join('|') : null;
                               return caption ? (
                                 <div className="mt-3 px-1 border-t border-slate-100 pt-3">
                                   <FormattedText text={caption} className="text-[13px] font-medium leading-relaxed" />
@@ -1537,11 +1578,88 @@ const MobileLayout = () => {
                 </AnimatePresence>
 
                 <form onSubmit={handleSendMessage} className="flex flex-col gap-2 p-3">
+                  {/* MULTI-ATTACHMENT PREVIEW TRAY */}
+                  <AnimatePresence>
+                    {pendingFiles.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="p-2 bg-slate-50/95 border border-slate-200/90 rounded-2xl mx-1 shadow-xs"
+                      >
+                        <div className="flex items-center justify-between mb-1.5 px-1">
+                          <span className="text-[10px] font-bold text-slate-500">
+                            Lampiran ({pendingFiles.length}/5 file):
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPendingFiles([]);
+                              if (fileInputRef.current) fileInputRef.current.value = '';
+                            }}
+                            className="text-[10px] text-rose-500 font-bold hover:underline"
+                          >
+                            Hapus Semua
+                          </button>
+                        </div>
+                        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                          {pendingFiles.map((file, idx) => (
+                            <div
+                              key={idx}
+                              className="relative shrink-0 flex items-center gap-1.5 p-1.5 bg-white border border-slate-200 rounded-xl max-w-[170px]"
+                            >
+                              {file.type === 'image' ? (
+                                <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-100">
+                                  <img src={file.data} alt="thumb" className="w-full h-full object-cover" />
+                                </div>
+                              ) : (
+                                <div className="w-8 h-8 rounded-lg bg-[#588CBC]/15 flex items-center justify-center text-[#588CBC] shrink-0 border border-[#588CBC]/20">
+                                  <FileText size={14} />
+                                </div>
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <p className="text-[10px] font-bold text-slate-700 truncate leading-tight">
+                                  {file.name}
+                                </p>
+                                <p className="text-[8px] text-slate-400 font-medium">
+                                  {file.sizeStr || ''}
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleRemovePendingFile(idx)}
+                                className="w-5 h-5 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-600 flex items-center justify-center shrink-0 transition-colors"
+                                title="Hapus file ini"
+                              >
+                                <X size={11} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <div className="flex items-end gap-2 bg-slate-50/50 rounded-2xl p-1">
-                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} multiple className="hidden" />
                     <div className="flex items-center gap-1 mb-1 ml-1">
-                      <button type="button" onClick={handleFileClick} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-white hover:shadow-sm rounded-full active:text-[#588CBC] transition-all">
+                      <button 
+                        type="button" 
+                        onClick={handleFileClick} 
+                        className={cn(
+                          "w-8 h-8 flex items-center justify-center rounded-full transition-all relative",
+                          pendingFiles.length > 0
+                            ? "bg-[#588CBC] text-white shadow-sm"
+                            : "text-slate-400 hover:bg-white hover:shadow-sm active:text-[#588CBC]"
+                        )}
+                        title={pendingFiles.length > 0 ? `${pendingFiles.length} file terlampir (Maks 5)` : "Lampirkan file (Maks 5)"}
+                      >
                         <Paperclip size={20} />
+                        {pendingFiles.length > 0 && (
+                          <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white rounded-full text-[9px] font-black flex items-center justify-center border-2 border-white">
+                            {pendingFiles.length}
+                          </span>
+                        )}
                       </button>
                       <button type="button" onClick={() => setIsTemplatePopupOpen(true)} className="w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-white hover:shadow-sm rounded-full active:text-[#588CBC] transition-all">
                         <LayoutGrid size={20} />
@@ -1555,13 +1673,13 @@ const MobileLayout = () => {
                         e.target.style.height = 'auto';
                         e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
                       }}
-                      placeholder="Tulis pesan..."
+                      placeholder={pendingFiles.length > 0 ? "Tambahkan catatan file..." : "Tulis pesan..."}
                       className="flex-1 py-2.5 px-2 text-[13px] font-medium text-slate-700 bg-transparent focus:outline-none resize-none max-h-30 scrollbar-hide"
                       rows={1}
                     />
                     <button
                       type="submit"
-                      disabled={!manualNote.trim() && !selectedResponse}
+                      disabled={!manualNote.trim() && !selectedResponse && pendingFiles.length === 0}
                       className="w-10 h-10 mb-0.5 mr-0.5 bg-[#183449] hover:bg-[#588CBC] text-white rounded-full flex items-center justify-center shadow-lg shadow-[#183449]/20 disabled:opacity-30 hover:scale-105 active:scale-95 transition-all shrink-0"
                     >
                       <Send size={18} className="ml-0.5" />
@@ -1775,7 +1893,7 @@ const MobileLayout = () => {
                               <p className="text-[10px] font-bold text-slate-700 truncate">{blessFile.name}</p>
                             </div>
                             <button
-                              onClick={() => viewFile(blessFile.data)}
+                              onClick={() => viewFile(blessFile.data, blessFile.name)}
                               className="px-3 py-1.5 bg-white border border-slate-200 text-[9px] font-black text-slate-600 rounded-lg flex items-center gap-1"
                             >
                               <Eye size={12} />
@@ -2018,6 +2136,17 @@ const MobileLayout = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Excel Preview Modal */}
+      {selectedExcelFile && (
+        <ExcelPreviewModal
+          isOpen={!!selectedExcelFile}
+          onClose={() => setSelectedExcelFile(null)}
+          fileData={selectedExcelFile.data}
+          fileName={selectedExcelFile.name}
+          onDownload={() => downloadFile(selectedExcelFile.data, selectedExcelFile.name)}
+        />
+      )}
+
       <CustomAlert config={alertConfig} onClose={() => setAlertConfig({ ...alertConfig, show: false })} />
       {/* ──────────────────────────────────────────────────────────────────── */}
     </div>

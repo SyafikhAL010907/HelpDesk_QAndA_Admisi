@@ -918,10 +918,7 @@ export default function WebTabLayout() {
               Responsive Website
             </h2>
             <p className="mt-[30px] text-[20px] leading-[34px] lg:text-[25px] lg:leading-[40px]">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-              exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-              dolor in reprehenderit in voluptate velit esse cillum dolore eu
+              SiRuang dirancang responsif sehingga nyaman diakses dari ponsel maupun laptop. PJ kelas bisa mengecek status ruangan dari rumah atau saat di perjalanan, tanpa harus datang ke kampus hanya untuk memastikan ruangan kosong. Tidak perlu instal aplikasi tambahan, cukup buka lewat browser.
             </p>
             <Link
               href="#"

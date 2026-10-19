@@ -126,13 +126,23 @@ func SendMessage(c *gin.Context) {
 	switch msg.MessageType {
 	case "image":
 		if strings.Contains(msg.Message, "|") {
-			lastMsg = "🖼️ " + strings.Split(msg.Message, "|")[0]
+			parts := strings.Split(msg.Message, "|")
+			if len(parts) > 2 && strings.TrimSpace(parts[2]) != "" {
+				lastMsg = "🖼️ " + strings.TrimSpace(parts[2])
+			} else {
+				lastMsg = "🖼️ " + parts[0]
+			}
 		} else {
 			lastMsg = "🖼️ Gambar"
 		}
 	case "file":
 		if strings.Contains(msg.Message, "|") {
-			lastMsg = "📄 " + strings.Split(msg.Message, "|")[0]
+			parts := strings.Split(msg.Message, "|")
+			if len(parts) > 2 && strings.TrimSpace(parts[2]) != "" {
+				lastMsg = "📄 " + strings.TrimSpace(parts[2])
+			} else {
+				lastMsg = "📄 " + parts[0]
+			}
 		} else {
 			lastMsg = "📄 Dokumen"
 		}

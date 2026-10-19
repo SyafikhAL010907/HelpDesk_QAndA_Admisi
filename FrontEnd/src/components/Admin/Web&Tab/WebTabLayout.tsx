@@ -36,6 +36,7 @@ import { blastTemplates } from '@/constants/blastTemplates';
 import Avatar from '@/components/Shared/Avatar';
 import FormattedText from '@/components/Shared/FormattedText';
 import CustomAlert from '@/components/Shared/CustomAlert';
+import ExcelPreviewModal from '@/components/Shared/ExcelPreviewModal';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
@@ -79,6 +80,8 @@ const WebTabLayout = () => {
   const [showBlessModal, setShowBlessModal] = useState(false);
   const [blessMessage, setBlessMessage] = useState('');
   const [blessFile, setBlessFile] = useState<{ name: string, data: string, type: string } | null>(null);
+  const [pendingFiles, setPendingFiles] = useState<Array<{ name: string, data: string, type: 'image' | 'file', sizeStr?: string }>>([]);
+  const [selectedExcelFile, setSelectedExcelFile] = useState<{ data: string; name: string } | null>(null);
   const [blessTargetMode, setBlessTargetMode] = useState<'waiting_room' | 'all_users' | 'specific_users'>('waiting_room');
   const [allUsers, setAllUsers] = useState<{ username: string, gmail: string }[]>([]);
   const [selectedBlessUsers, setSelectedBlessUsers] = useState<string[]>([]);
@@ -133,7 +136,11 @@ const WebTabLayout = () => {
     }
   };
 
-  const viewFile = (dataUrl: string) => {
+  const viewFile = (dataUrl: string, fileName?: string) => {
+    if (fileName && (fileName.toLowerCase().endsWith('.xlsx') || fileName.toLowerCase().endsWith('.xls') || fileName.toLowerCase().endsWith('.csv'))) {
+      setSelectedExcelFile({ data: dataUrl, name: fileName });
+      return;
+    }
     try {
       const parts = dataUrl.split(',');
       if (parts.length < 2) throw new Error("Format base64 tidak valid");
@@ -384,36 +391,59 @@ const WebTabLayout = () => {
       ? `${selectedResponse.response}\n\nCatatan Tambahan:\n${manualNote}`
       : manualNote;
 
-    if (!combinedText.trim()) return;
+    if (!combinedText.trim() && pendingFiles.length === 0) return;
 
     const storedUser = localStorage.getItem('user');
     if (!storedUser) return;
     const { token, gmail } = JSON.parse(storedUser);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-        body: JSON.stringify({
-          room_id: selectedChat.id,
-          sender_gmail: gmail,
-          message: combinedText,
-          message_type: 'text'
-        })
-      });
-
-      if (res.ok) {
-        setManualNote('');
-        setSelectedResponse(null);
-        const el = document.getElementById('admin-web-message-input');
-        if (el) el.style.height = 'auto';
-        fetchMessages(selectedChat.id, token);
-        fetchRooms(token);
-        scrollToBottom();
+      if (pendingFiles.length > 0) {
+        for (let i = 0; i < pendingFiles.length; i++) {
+          const pf = pendingFiles[i];
+          let msgText = `${pf.name}|${pf.data}`;
+          if (i === 0 && combinedText.trim()) {
+            msgText = `${pf.name}|${pf.data}|${combinedText.trim()}`;
+          }
+          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({
+              room_id: selectedChat.id,
+              sender_gmail: gmail,
+              message: msgText,
+              message_type: pf.type
+            })
+          });
+        }
+      } else {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+          },
+          body: JSON.stringify({
+            room_id: selectedChat.id,
+            sender_gmail: gmail,
+            message: combinedText.trim(),
+            message_type: 'text'
+          })
+        });
       }
+
+      setManualNote('');
+      setSelectedResponse(null);
+      setPendingFiles([]);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      const el = document.getElementById('admin-web-message-input');
+      if (el) el.style.height = 'auto';
+      fetchMessages(selectedChat.id, token);
+      fetchRooms(token);
+      scrollToBottom();
     } catch (err) {
       console.error("Gagal kirim pesan:", err);
     }
@@ -421,6 +451,7 @@ const WebTabLayout = () => {
 
   const handleSelectRoom = (room: any) => {
     setSelectedChat(room);
+    setPendingFiles([]);
     markAsRead(room.id);
   };
 
@@ -619,55 +650,51 @@ const WebTabLayout = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !selectedChat) return;
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const chosenFiles = Array.from(e.target.files || []);
+    if (chosenFiles.length === 0 || !selectedChat) return;
 
-    // Cek ukuran file (Max 1MB)
-    if (file.size > 1024 * 1024) {
-      showAlert(`Waduh bro! Ukuran file lu (${(file.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB biar server tetep ngebut!`, 'Ukuran File Kegedean');
+    if (pendingFiles.length + chosenFiles.length > 5) {
+      showAlert(`Waduh bro! Maksimal cuma boleh lampirkan 5 file sekaligus (sekarang sudah ada ${pendingFiles.length} file).`, 'Batas Maksimal File');
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
-    const storedUser = localStorage.getItem('user');
-    if (!storedUser) return;
-    const { token, gmail } = JSON.parse(storedUser);
-
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64Data = reader.result as string;
-      const fileType = file.type.startsWith('image/') ? 'image' : 'file';
-      const combinedData = `${file.name}|${base64Data}`;
-
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token
-          },
-          body: JSON.stringify({
-            room_id: selectedChat.id,
-            sender_gmail: gmail,
-            message: combinedData,
-            message_type: fileType
-          })
-        });
-
-        if (res.ok) {
-          fetchMessages(selectedChat.id, token);
-          fetchRooms(token);
-          scrollToBottom();
-        }
-      } catch (err) {
-        console.error("Gagal kirim file:", err);
+    for (const f of chosenFiles) {
+      if (f.size > 1024 * 1024) {
+        showAlert(`Waduh bro! File "${f.name}" (${(f.size / (1024 * 1024)).toFixed(2)} MB) kegedean. Maksimal cuma boleh 1 MB per file biar server tetep ngebut!`, 'Ukuran File Kegedean');
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
       }
-    };
-    reader.readAsDataURL(file);
+    }
 
-    // Clear input
+    const readers = chosenFiles.map(f => {
+      return new Promise<{ name: string; data: string; type: 'image' | 'file'; sizeStr: string }>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64Data = reader.result as string;
+          const fileType = f.type.startsWith('image/') ? 'image' : 'file';
+          const sizeStr = (f.size / 1024).toFixed(0) + ' KB';
+          resolve({
+            name: f.name,
+            data: base64Data,
+            type: fileType,
+            sizeStr
+          });
+        };
+        reader.readAsDataURL(f);
+      });
+    });
+
+    Promise.all(readers).then(newFiles => {
+      setPendingFiles(prev => [...prev, ...newFiles]);
+    });
+
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleRemovePendingFile = (index: number) => {
+    setPendingFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -1377,7 +1404,7 @@ const WebTabLayout = () => {
                               {(() => {
                                 const parts = msg.text.split('|');
                                 const imgData = parts.length > 1 ? parts[1] : msg.text;
-                                const caption = parts.length > 2 ? parts[2] : null;
+                                const caption = parts.length > 2 ? parts.slice(2).join('|') : null;
                                 return (
                                   <>
                                     <img
@@ -1408,7 +1435,7 @@ const WebTabLayout = () => {
                                       <p className="text-xs font-bold text-slate-700 truncate">{fileName}</p>
                                       <div className="flex items-center gap-3 mt-1">
                                         <button
-                                          onClick={() => viewFile(fileData)}
+                                          onClick={() => viewFile(fileData, fileName)}
                                           className="text-[10px] font-black text-[#588CBC] hover:underline flex items-center gap-1"
                                         >
                                           <Eye size={10} />
@@ -1425,7 +1452,8 @@ const WebTabLayout = () => {
                                     </div>
                                   </div>
                                   {(() => {
-                                    const caption = msg.text.split('|')[2];
+                                    const parts = msg.text.split('|');
+                                    const caption = parts.length > 2 ? parts.slice(2).join('|') : null;
                                     return caption ? (
                                       <div className="mt-3 px-1 border-t border-slate-100 pt-3">
                                         <FormattedText text={caption} className="text-sm font-medium leading-relaxed" />
@@ -1510,21 +1538,92 @@ const WebTabLayout = () => {
                     </AnimatePresence>
                   </div>
 
-                  <form onSubmit={handleSendMessage} className="flex flex-col gap-4">
+                  <form onSubmit={handleSendMessage} className="flex flex-col gap-3">
+                    {/* MULTI-ATTACHMENT TRAY (Up to 5 files) */}
+                    <AnimatePresence>
+                      {pendingFiles.length > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                          className="p-3 bg-slate-50/95 border border-slate-200/90 rounded-2xl flex flex-col gap-2.5 shadow-xs"
+                        >
+                          <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+                            <span className="flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                              Lampiran ({pendingFiles.length}/5 File)
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPendingFiles([]);
+                                if (fileInputRef.current) fileInputRef.current.value = '';
+                              }}
+                              className="text-[10px] font-black text-rose-500 hover:underline uppercase tracking-wider"
+                            >
+                              Hapus Semua
+                            </button>
+                          </div>
+
+                          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                            {pendingFiles.map((file, idx) => (
+                              <div
+                                key={idx}
+                                className="flex items-center gap-2.5 p-2 bg-white rounded-xl border border-slate-200 shadow-2xs shrink-0 max-w-60"
+                              >
+                                {file.type === 'image' ? (
+                                  <img
+                                    src={file.data}
+                                    alt="Preview"
+                                    className="w-9 h-9 rounded-lg object-cover shrink-0 border border-slate-100"
+                                  />
+                                ) : (
+                                  <div className="w-9 h-9 rounded-lg bg-[#588CBC]/15 flex items-center justify-center text-[#588CBC] shrink-0 border border-[#588CBC]/20">
+                                    <FileText size={18} />
+                                  </div>
+                                )}
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-[11px] font-bold text-slate-800 truncate">
+                                    {file.name}
+                                  </p>
+                                  <p className="text-[9px] text-slate-400 font-semibold">{file.sizeStr}</p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemovePendingFile(idx)}
+                                  className="w-6 h-6 rounded-full flex items-center justify-center text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all shrink-0"
+                                  title="Hapus file ini"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
                     <div className="flex items-end gap-3">
                       {/* Attachment Button */}
                       <input
                         type="file"
                         ref={fileInputRef}
                         onChange={handleFileChange}
-                        accept="image/*,application/pdf,video/*"
+                        accept="image/*,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,video/*"
+                        multiple
                         className="hidden"
                       />
                       <motion.button
                         type="button"
                         whileTap={{ scale: 0.95 }}
                         onClick={handleFileClick}
-                        className="w-12 h-12 mb-1 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-[#588CBC]/10 hover:text-[#183449] transition-all shrink-0"
+                        className={cn(
+                          "w-12 h-12 mb-1 rounded-2xl flex items-center justify-center transition-all shrink-0",
+                          pendingFiles.length > 0
+                            ? "bg-[#588CBC] text-white shadow-md shadow-[#588CBC]/30"
+                            : "text-slate-400 hover:bg-[#588CBC]/10 hover:text-[#183449]"
+                        )}
+                        title={pendingFiles.length > 0 ? `${pendingFiles.length} file terlampir (klik untuk tambah)` : "Lampirkan file (Maks 5)"}
                       >
                         <Paperclip size={24} />
                       </motion.button>
@@ -1538,7 +1637,13 @@ const WebTabLayout = () => {
                             e.target.style.height = 'auto';
                             e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
                           }}
-                          placeholder={selectedResponse ? "Add personal notes..." : "Type your message or select template..."}
+                          placeholder={
+                            pendingFiles.length > 0
+                              ? "Tambahkan catatan/keterangan file (opsional)..."
+                              : selectedResponse
+                              ? "Add personal notes..."
+                              : "Type your message or select template..."
+                          }
                           className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#588CBC]/20 focus:border-[#588CBC] transition-all resize-none font-medium max-h-37.5 scrollbar-hide"
                           rows={1}
                           onKeyDown={(e) => {
@@ -1551,7 +1656,7 @@ const WebTabLayout = () => {
                       </div>
                       <button
                         type="submit"
-                        disabled={!manualNote.trim() && !selectedResponse}
+                        disabled={!manualNote.trim() && !selectedResponse && pendingFiles.length === 0}
                         className="w-14 h-14 bg-[#183449] text-white rounded-3xl flex items-center justify-center shadow-xl shadow-[#183449]/20 hover:bg-[#588CBC] hover:scale-105 active:scale-95 transition-all disabled:opacity-30 disabled:scale-100 disabled:shadow-none shrink-0"
                       >
                         <Send size={24} className="ml-1" />
@@ -1953,6 +2058,12 @@ const WebTabLayout = () => {
         )}
       </AnimatePresence>
       <CustomAlert config={alertConfig} onClose={() => setAlertConfig({ ...alertConfig, show: false })} />
+      <ExcelPreviewModal
+        isOpen={!!selectedExcelFile}
+        onClose={() => setSelectedExcelFile(null)}
+        fileData={selectedExcelFile?.data || ''}
+        fileName={selectedExcelFile?.name || ''}
+      />
       {/* ──────────────────────────────────────────────────────────────────── */}
     </div>
   );

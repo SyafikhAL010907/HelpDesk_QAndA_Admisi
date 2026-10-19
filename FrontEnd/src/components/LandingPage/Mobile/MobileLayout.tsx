@@ -401,9 +401,7 @@ export default function MobileLayout() {
           </p>
           <h2 className="mt-1 text-[30px] font-semibold leading-[40px]">Responsive Website</h2>
           <p className="mt-3 text-[15px] leading-[24px]">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            SiRuang dirancang responsif sehingga nyaman diakses dari ponsel maupun laptop. PJ kelas bisa mengecek status ruangan dari rumah atau saat di perjalanan, tanpa harus datang ke kampus hanya untuk memastikan ruangan kosong. Tidak perlu instal aplikasi tambahan, cukup buka lewat browser.
           </p>
           <Link
             href="#"

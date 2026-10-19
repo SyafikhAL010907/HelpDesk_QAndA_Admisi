@@ -22,7 +22,7 @@ const fasthand = Fasthand({ subsets: ['latin'], weight: '400' });
 export const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
 /** jeda tambahan supaya hero baru muncul ketika tirai loader mulai membuka */
-const AFTER_LOADER_OFFSET = 0.4;
+const AFTER_LOADER_OFFSET = 0.65;
 
 /**
  * true saat loader (AppLoader) sudah selesai.
@@ -41,14 +41,19 @@ export function useAppReady() {
       return;
     }
 
+    let timer: ReturnType<typeof setTimeout>;
+
     // Tunggu event saat tirai loader mulai membuka
-    const onLoaded = () => setState({ ready: true, offset: AFTER_LOADER_OFFSET });
+    const onLoaded = () => {
+      clearTimeout(timer);
+      setState({ ready: true, offset: AFTER_LOADER_OFFSET });
+    };
     window.addEventListener('app:loaded', onLoaded, { once: true });
 
-    // Fallback keamanan jika event terlewat: tunggu sedikit setelah loader selesai (~4.2s)
-    const timer = setTimeout(() => {
+    // Fallback keamanan jika event terlewat: tunggu aman (~8s)
+    timer = setTimeout(() => {
       setState({ ready: true, offset: 0 });
-    }, 4200);
+    }, 8000);
 
     return () => {
       window.removeEventListener('app:loaded', onLoaded);
@@ -1060,10 +1065,7 @@ export default function WebTabLayout() {
               Responsive Website
             </h2>
             <p className="mt-[30px] text-[20px] leading-[34px] lg:text-[25px] lg:leading-[40px]">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-              exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-              dolor in reprehenderit in voluptate velit esse cillum dolore eu
+              SiRuang dirancang responsif sehingga nyaman diakses dari ponsel maupun laptop. PJ kelas bisa mengecek status ruangan dari rumah atau saat di perjalanan, tanpa harus datang ke kampus hanya untuk memastikan ruangan kosong. Tidak perlu instal aplikasi tambahan, cukup buka lewat browser.
             </p>
             <Link
               href="#"

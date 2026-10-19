@@ -1,5 +1,5 @@
 import MainLanding from '@/components/LandingPage/MainLanding';
-import AppLoader from '@/components/LandingPage/Apploader';
+import AppLoader from '@/components/LandingPage/AppLoader';
 
 export default function Home() {
   return (
