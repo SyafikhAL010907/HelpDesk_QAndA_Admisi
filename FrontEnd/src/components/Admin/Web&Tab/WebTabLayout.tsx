@@ -18,6 +18,7 @@ import {
   Trash2,
   Plus,
   FileText,
+  FileSpreadsheet,
   Download,
   Eye,
   Clock,
@@ -36,7 +37,8 @@ import { blastTemplates } from '@/constants/blastTemplates';
 import Avatar from '@/components/Shared/Avatar';
 import FormattedText from '@/components/Shared/FormattedText';
 import CustomAlert from '@/components/Shared/CustomAlert';
-import ExcelPreviewModal from '@/components/Shared/ExcelPreviewModal';
+import FilePreviewModal from '@/components/Shared/FilePreviewModal';
+import FileChatBubble, { isFileMessage } from '@/components/Shared/FileChatBubble';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
@@ -137,27 +139,7 @@ const WebTabLayout = () => {
   };
 
   const viewFile = (dataUrl: string, fileName?: string) => {
-    if (fileName && (fileName.toLowerCase().endsWith('.xlsx') || fileName.toLowerCase().endsWith('.xls') || fileName.toLowerCase().endsWith('.csv'))) {
-      setSelectedExcelFile({ data: dataUrl, name: fileName });
-      return;
-    }
-    try {
-      const parts = dataUrl.split(',');
-      if (parts.length < 2) throw new Error("Format base64 tidak valid");
-      const mime = parts[0].match(/:(.*?);/)?.[1] || 'application/octet-stream';
-      const bstr = atob(parts[1]);
-      let n = bstr.length;
-      const u8arr = new Uint8Array(n);
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-      }
-      const blob = new Blob([u8arr], { type: mime });
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
-    } catch (e) {
-      console.error("Gagal melihat file:", e);
-      window.open(dataUrl, '_blank');
-    }
+    setSelectedExcelFile({ data: dataUrl, name: fileName || 'Dokumen' });
   };
   const [selectedResponse, setSelectedResponse] = useState<CannedResponse | null>(null);
   const [manualNote, setManualNote] = useState('');
@@ -398,27 +380,44 @@ const WebTabLayout = () => {
     const { token, gmail } = JSON.parse(storedUser);
 
     try {
-      if (pendingFiles.length > 0) {
-        for (let i = 0; i < pendingFiles.length; i++) {
-          const pf = pendingFiles[i];
-          let msgText = `${pf.name}|${pf.data}`;
-          if (i === 0 && combinedText.trim()) {
-            msgText = `${pf.name}|${pf.data}|${combinedText.trim()}`;
-          }
-          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': token
-            },
-            body: JSON.stringify({
-              room_id: selectedChat.id,
-              sender_gmail: gmail,
-              message: msgText,
-              message_type: pf.type
-            })
-          });
+      if (pendingFiles.length === 1) {
+        const pf = pendingFiles[0];
+        let msgText = `${pf.name}|${pf.data}`;
+        if (combinedText.trim()) {
+          msgText = `${pf.name}|${pf.data}|${combinedText.trim()}`;
         }
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+          },
+          body: JSON.stringify({
+            room_id: selectedChat.id,
+            sender_gmail: gmail,
+            message: msgText,
+            message_type: pf.type
+          })
+        });
+      } else if (pendingFiles.length > 1) {
+        // Multi-file: Kirim sekaligus dalam 1 bubble tunggal
+        const payload = {
+          files: pendingFiles.map(pf => ({ name: pf.name, data: pf.data, type: pf.type })),
+          caption: combinedText.trim() || undefined
+        };
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+          },
+          body: JSON.stringify({
+            room_id: selectedChat.id,
+            sender_gmail: gmail,
+            message: JSON.stringify(payload),
+            message_type: 'multi_file'
+          })
+        });
       } else {
         await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
           method: 'POST',
@@ -1078,7 +1077,7 @@ const WebTabLayout = () => {
                               <img
                                 src={blessFile.data}
                                 alt="Preview"
-                                onClick={() => setSelectedImage(blessFile.data)}
+                                onClick={() => viewFile(blessFile.data, blessFile.name || "Gambar_Preview.png")}
                                 className="w-full max-h-48 object-contain rounded-xl cursor-zoom-in hover:opacity-90 transition-all border border-slate-200 bg-slate-100/50"
                               />
                             </div>
@@ -1091,7 +1090,7 @@ const WebTabLayout = () => {
                                 <p className="text-xs font-bold text-slate-700 truncate">{blessFile.name}</p>
                               </div>
                               <button
-                                onClick={() => viewFile(blessFile.data)}
+                                onClick={() => viewFile(blessFile.data, blessFile.name)}
                                 className="px-3 py-1.5 bg-white border border-slate-200 text-[10px] font-black text-slate-600 rounded-lg hover:bg-slate-50 transition-all flex items-center gap-1"
                               >
                                 <Eye size={12} />
@@ -1399,7 +1398,15 @@ const WebTabLayout = () => {
                             ? "bg-linear-to-br from-[#183449] to-[#285577] text-white rounded-tr-none border border-[#588CBC]/40 shadow-lg shadow-[#183449]/15"
                             : "bg-white text-[#2B2B2B] rounded-tl-none border border-[#B3B3B3] shadow-sm"
                         )}>
-                          {msg.type === 'image' ? (
+                          {isFileMessage(msg) ? (
+                            <FileChatBubble
+                              messageText={msg.text}
+                              messageType={msg.type}
+                              isMe={isMe}
+                              onViewFile={viewFile}
+                              onDownloadFile={downloadFile}
+                            />
+                          ) : msg.type === 'image' ? (
                             <div className="flex flex-col gap-2">
                               {(() => {
                                 const parts = msg.text.split('|');
@@ -1410,7 +1417,7 @@ const WebTabLayout = () => {
                                     <img
                                       src={imgData}
                                       alt="Sent image"
-                                      onClick={() => setSelectedImage(imgData)}
+                                      onClick={() => viewFile(imgData, "Gambar_Lampiran.png")}
                                       className="rounded-2xl max-w-60 h-auto shadow-sm border border-slate-100 cursor-zoom-in hover:opacity-90 transition-all"
                                     />
                                     {caption && (
@@ -1420,49 +1427,6 @@ const WebTabLayout = () => {
                                 );
                               })()}
                             </div>
-                          ) : msg.type === 'file' ? (
-                            (() => {
-                              const parts = msg.text.split('|');
-                              const fileName = parts.length > 1 ? parts[0] : "Dokumen";
-                              const fileData = parts.length > 1 ? parts[1] : msg.text;
-                              return (
-                                <>
-                                  <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100/50 min-w-50">
-                                    <div className="w-10 h-10 bg-[#588CBC]/15 rounded-xl flex items-center justify-center text-[#588CBC]">
-                                      <FileText size={20} />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-xs font-bold text-slate-700 truncate">{fileName}</p>
-                                      <div className="flex items-center gap-3 mt-1">
-                                        <button
-                                          onClick={() => viewFile(fileData, fileName)}
-                                          className="text-[10px] font-black text-[#588CBC] hover:underline flex items-center gap-1"
-                                        >
-                                          <Eye size={10} />
-                                          Lihat
-                                        </button>
-                                        <button
-                                          onClick={() => downloadFile(fileData, fileName)}
-                                          className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1"
-                                        >
-                                          <Download size={10} />
-                                          Download
-                                        </button>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  {(() => {
-                                    const parts = msg.text.split('|');
-                                    const caption = parts.length > 2 ? parts.slice(2).join('|') : null;
-                                    return caption ? (
-                                      <div className="mt-3 px-1 border-t border-slate-100 pt-3">
-                                        <FormattedText text={caption} className="text-sm font-medium leading-relaxed" />
-                                      </div>
-                                    ) : null;
-                                  })()}
-                                </>
-                              );
-                            })()
                           ) : (
                             renderHighlightedText(msg.text, localSearchQuery)
                           )}
@@ -2058,7 +2022,7 @@ const WebTabLayout = () => {
         )}
       </AnimatePresence>
       <CustomAlert config={alertConfig} onClose={() => setAlertConfig({ ...alertConfig, show: false })} />
-      <ExcelPreviewModal
+      <FilePreviewModal
         isOpen={!!selectedExcelFile}
         onClose={() => setSelectedExcelFile(null)}
         fileData={selectedExcelFile?.data || ''}

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"helpdesk-backend/internal/database"
 	"helpdesk-backend/internal/models"
@@ -113,6 +114,12 @@ func SendMessage(c *gin.Context) {
 		return
 	}
 
+	// Jika pesan diawali {"files", otomatis deteksi sebagai multi_file
+	trimmedMsg := strings.TrimSpace(msg.Message)
+	if strings.HasPrefix(trimmedMsg, "{\"files\"") || strings.HasPrefix(trimmedMsg, "{\"files\":") {
+		msg.MessageType = "multi_file"
+	}
+
 	// 1. Simpan pesan ke DB
 	result, err := database.DB.Exec("INSERT INTO chat_messages (room_id, sender_gmail, message, message_type) VALUES (?, ?, ?, ?)",
 		msg.RoomID, msg.SenderGmail, msg.Message, msg.MessageType)
@@ -145,6 +152,26 @@ func SendMessage(c *gin.Context) {
 			}
 		} else {
 			lastMsg = "📄 Dokumen"
+		}
+	case "multi_file":
+		if strings.HasPrefix(strings.TrimSpace(msg.Message), "{") {
+			var payload struct {
+				Files []struct {
+					Name string `json:"name"`
+				} `json:"files"`
+				Caption string `json:"caption"`
+			}
+			if err := json.Unmarshal([]byte(msg.Message), &payload); err == nil && len(payload.Files) > 0 {
+				if strings.TrimSpace(payload.Caption) != "" {
+					lastMsg = fmt.Sprintf("📎 %d File: %s", len(payload.Files), strings.TrimSpace(payload.Caption))
+				} else {
+					lastMsg = fmt.Sprintf("📎 %d Lampiran File", len(payload.Files))
+				}
+			} else {
+				lastMsg = "📎 Lampiran File"
+			}
+		} else {
+			lastMsg = "📎 Lampiran File"
 		}
 	}
 	_, _ = database.DB.Exec("UPDATE chat_rooms SET last_message = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", lastMsg, msg.RoomID)

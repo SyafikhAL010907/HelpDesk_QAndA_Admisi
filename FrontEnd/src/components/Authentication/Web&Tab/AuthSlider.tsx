@@ -319,19 +319,23 @@ const AuthSlider = ({
     const formPane = 'absolute left-0 top-0 h-full w-1/2 overflow-y-auto px-8 py-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:px-14';
 
     return (
-        <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-white p-6 font-sans selection:bg-[#588CBC]/20 selection:text-[#183449]">
+        <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#07111E] p-6 font-sans selection:bg-[#588CBC]/20 selection:text-[#183449]">
             {/* BACKGROUND (statis) */}
             <div
                 className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-                style={{ backgroundImage: `url('/BackgroundLogSign.png')` }}
+                style={{
+                    backgroundImage: `url('/BackgroundLogSign.png')`,
+                    filter: 'brightness(0.6) contrast(1.15)',
+                }}
             />
+            {/* Dark Overlay Layer - Clean Deep Dark */}
+            <div className="pointer-events-none absolute inset-0 z-0 bg-slate-950/75" />
+            {/* Ambient Soft Glow (Clean tanpa dot grid pattern) */}
             <div
                 className="pointer-events-none absolute inset-0 z-0"
                 style={{
                     backgroundImage:
-                        'radial-gradient(circle at 90% 0%, rgba(88,140,188,0.15), transparent 40%), radial-gradient(circle at 0% 100%, rgba(24,52,73,0.10), transparent 40%), radial-gradient(#588CBC 1px, transparent 1px)',
-                    backgroundSize: '100% 100%, 100% 100%, 40px 40px',
-                    opacity: 0.9,
+                        'radial-gradient(circle at 90% 0%, rgba(88,140,188,0.12), transparent 45%), radial-gradient(circle at 0% 100%, rgba(24,52,73,0.15), transparent 45%)',
                 }}
             />
 

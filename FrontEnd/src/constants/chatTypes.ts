@@ -3,7 +3,7 @@ export interface Message {
   sender: 'admin' | 'user';
   text: string;
   timestamp: string;
-  type: 'text' | 'image' | 'file';
+  type: 'text' | 'image' | 'file' | 'multi_file';
   attachmentUrl?: string;
 }
 

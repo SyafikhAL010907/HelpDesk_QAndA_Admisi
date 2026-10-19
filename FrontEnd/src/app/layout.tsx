@@ -19,9 +19,15 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "Admin  UNJ",
-  description: "Panel Bantuan dan Layanan Informasi UNJ",
+  title: "𝓢𝓲𝓡𝓾𝓪𝓷𝓰",
+  description: "Sistem Pengajuan Ruang Dan Visualisai Denah",
+  icons: {
+    icon: "/LogoSiRuangPolos.png",
+    shortcut: "/LogoSiRuangPolos.png",
+    apple: "/LogoSiRuangPolos.png",
+  },
 };
+
 
 export default function RootLayout({
   children,

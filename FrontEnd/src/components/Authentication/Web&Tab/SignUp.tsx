@@ -22,22 +22,23 @@ const WebSignUp = ({ onNavigate, onSignUp, loading }: SignUpProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-6 relative overflow-hidden font-sans selection:bg-[#588CBC]/20 selection:text-[#183449]">
+    <div className="min-h-screen bg-[#07111E] flex items-center justify-center p-6 relative overflow-hidden font-sans selection:bg-[#588CBC]/20 selection:text-[#183449]">
       {/* FULL BACKGROUND IMAGE */}
       <div
         className="absolute inset-0 z-0 pointer-events-none bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: `url('/BackgroundLogSign.png')`,
+          filter: 'brightness(0.6) contrast(1.15)',
         }}
       />
+
+      {/* Dark Overlay Layer - Clean Deep Dark */}
+      <div className="absolute inset-0 z-0 pointer-events-none bg-slate-950/75" />
 
       {/* SOPHISTICATED BACKGROUND ELEMENTS */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-[#588CBC]/15 rounded-full blur-[150px]" />
         <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#183449]/10 rounded-full blur-[150px]" />
-
-        {/* Subtle Grid Pattern */}
-        <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#588CBC 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
       </div>
 
       <div className="w-full max-w-5xl flex bg-white/60 backdrop-blur-3xl rounded-[48px] shadow-[0_32px_80px_rgba(24,52,73,0.12)] border border-white relative z-10 overflow-hidden">

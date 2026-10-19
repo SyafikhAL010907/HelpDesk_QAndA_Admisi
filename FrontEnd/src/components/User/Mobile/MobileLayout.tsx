@@ -18,6 +18,7 @@ import {
   Search,
   LogOut,
   FileText,
+  FileSpreadsheet,
   Download,
   Eye,
   Clock,
@@ -38,7 +39,8 @@ import Image from 'next/image';
 import Avatar from '@/components/Shared/Avatar';
 import FormattedText from '@/components/Shared/FormattedText';
 import CustomAlert from '@/components/Shared/CustomAlert';
-import ExcelPreviewModal from '@/components/Shared/ExcelPreviewModal';
+import FilePreviewModal from '@/components/Shared/FilePreviewModal';
+import FileChatBubble, { isFileMessage } from '@/components/Shared/FileChatBubble';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
@@ -199,28 +201,7 @@ const MobileLayout = () => {
   };
 
   const viewFile = (dataUrl: string, fileName?: string) => {
-    try {
-      const ext = (fileName || '').toLowerCase().split('.').pop() || '';
-      if (['xlsx', 'xls', 'csv'].includes(ext)) {
-        setSelectedExcelFile({ data: dataUrl, name: fileName || 'File_Excel.xlsx' });
-        return;
-      }
-      const parts = dataUrl.split(',');
-      if (parts.length < 2) throw new Error("Format base64 tidak valid");
-      const mime = parts[0].match(/:(.*?);/)?.[1] || 'application/octet-stream';
-      const bstr = atob(parts[1]);
-      let n = bstr.length;
-      const u8arr = new Uint8Array(n);
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-      }
-      const blob = new Blob([u8arr], { type: mime });
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
-    } catch (e) {
-      console.error("Gagal melihat file:", e);
-      window.open(dataUrl, '_blank');
-    }
+    setSelectedExcelFile({ data: dataUrl, name: fileName || 'Dokumen' });
   };
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -348,27 +329,44 @@ const MobileLayout = () => {
     const { token, gmail } = JSON.parse(storedUser);
 
     try {
-      if (pendingFiles.length > 0) {
-        for (let i = 0; i < pendingFiles.length; i++) {
-          const pf = pendingFiles[i];
-          const fileMsg = (i === 0 && combinedText.trim())
-            ? `${pf.name}|${pf.data}|${combinedText.trim()}`
-            : `${pf.name}|${pf.data}`;
+      if (pendingFiles.length === 1) {
+        const pf = pendingFiles[0];
+        const fileMsg = (combinedText.trim())
+          ? `${pf.name}|${pf.data}|${combinedText.trim()}`
+          : `${pf.name}|${pf.data}`;
 
-          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': token
-            },
-            body: JSON.stringify({
-              room_id: roomId,
-              sender_gmail: gmail,
-              message: fileMsg,
-              message_type: pf.type
-            })
-          });
-        }
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': token
+          },
+          body: JSON.stringify({
+            room_id: roomId,
+            sender_gmail: gmail,
+            message: fileMsg,
+            message_type: pf.type
+          })
+        });
+      } else if (pendingFiles.length > 1) {
+        // Multi-file: Kirim sekaligus dalam 1 bubble tunggal
+        const payload = {
+          files: pendingFiles.map(pf => ({ name: pf.name, data: pf.data, type: pf.type })),
+          caption: combinedText.trim() || undefined
+        };
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': token
+          },
+          body: JSON.stringify({
+            room_id: roomId,
+            sender_gmail: gmail,
+            message: JSON.stringify(payload),
+            message_type: 'multi_file'
+          })
+        });
       } else {
         await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/send`, {
           method: 'POST',
@@ -688,7 +686,16 @@ const MobileLayout = () => {
                               : "bg-white text-[#2B2B2B] self-start rounded-tl-none border border-[#B3B3B3] shadow-sm"
                           )}
                         >
-                          {msg.type === 'image' ? (
+                          {isFileMessage(msg) ? (
+                            <FileChatBubble
+                              messageText={msg.text}
+                              messageType={msg.type}
+                              isMe={isMe}
+                              onViewFile={viewFile}
+                              onDownloadFile={downloadFile}
+                              isMobile
+                            />
+                          ) : msg.type === 'image' ? (
                             <div className="flex flex-col gap-2">
                               {(() => {
                                 const parts = msg.text.split('|');
@@ -699,7 +706,7 @@ const MobileLayout = () => {
                                     <img 
                                       src={imgData} 
                                       alt="Sent image" 
-                                      onClick={() => setSelectedImage(imgData)}
+                                      onClick={() => viewFile(imgData, "Gambar_Lampiran.png")}
                                       className="rounded-2xl max-w-50 h-auto shadow-sm border border-slate-100 cursor-zoom-in active:scale-95 transition-all"
                                     />
                                     {caption && (
@@ -709,46 +716,6 @@ const MobileLayout = () => {
                                 );
                               })()}
                             </div>
-                          ) : msg.type === 'file' ? (
-                            (() => {
-                              const parts = msg.text.split('|');
-                              const fileName = parts.length > 1 ? parts[0] : "Dokumen";
-                              const fileData = parts.length > 1 ? parts[1] : msg.text;
-                              const caption = parts.length > 2 ? parts.slice(2).join('|') : null;
-                              return (
-                                <>
-                                  <div className="flex items-center gap-3 p-3 bg-slate-50/50 rounded-2xl border border-slate-100/50 min-w-45">
-                                    <div className="w-10 h-10 bg-[#588CBC]/15 rounded-xl flex items-center justify-center text-[#588CBC]">
-                                      <FileText size={18} />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-[10px] font-bold text-slate-700 truncate">{fileName}</p>
-                                      <div className="flex items-center gap-3 mt-1">
-                                        <button 
-                                          onClick={() => viewFile(fileData, fileName)}
-                                          className="text-[9px] font-black text-[#588CBC] hover:underline flex items-center gap-1"
-                                        >
-                                          <Eye size={10} />
-                                          Lihat
-                                        </button>
-                                        <button 
-                                          onClick={() => downloadFile(fileData, fileName)}
-                                          className="text-[9px] font-black text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1"
-                                        >
-                                          <Download size={10} />
-                                          Download
-                                        </button>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  {caption && (
-                                    <div className="mt-3 px-1 border-t border-slate-100 pt-3">
-                                      <FormattedText text={caption} className="text-[13px] font-medium leading-relaxed" />
-                                    </div>
-                                  )}
-                                </>
-                              );
-                            })()
                           ) : (
                             renderHighlightedText(msg.text, localSearchQuery)
                           )}
@@ -1424,7 +1391,7 @@ const MobileLayout = () => {
 
       {/* Excel Preview Modal */}
       {selectedExcelFile && (
-        <ExcelPreviewModal
+        <FilePreviewModal
           isOpen={!!selectedExcelFile}
           onClose={() => setSelectedExcelFile(null)}
           fileData={selectedExcelFile.data}
