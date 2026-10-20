@@ -332,31 +332,36 @@ export default function MobileLayout() {
           >
             {floorItems.map((item) => (
               <div key={item.lantai} className="w-full shrink-0 snap-start px-0.5">
-                <figure className="flex flex-col items-center">
-                  <div className="w-full rounded-[20px] bg-[#D9D9D9] p-3 shadow-xs">
-                    <div
-                      className="flex w-full items-center justify-center overflow-hidden rounded-xl bg-white p-2"
-                      style={{ aspectRatio: item.ratio }}
-                    >
-                      <div className="h-full w-full pointer-events-none select-none" aria-hidden="true">
-                        <item.Map
-                          className="h-full w-full object-contain"
-                          selectedCode={null}
-                          onSelectRoom={() => {}}
-                        />
+                <Link
+                  href={`${activeGedung.base}/lantai${item.lantai}`}
+                  className="block rounded-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C2AC72]"
+                >
+                  <figure className="flex flex-col items-center">
+                    <div className="w-full rounded-[20px] bg-[#D9D9D9] p-3 shadow-xs transition-transform active:scale-[0.99]">
+                      <div
+                        className="flex w-full items-center justify-center overflow-hidden rounded-xl bg-white p-2"
+                        style={{ aspectRatio: item.ratio }}
+                      >
+                        <div className="h-full w-full pointer-events-none select-none" aria-hidden="true">
+                          <item.Map
+                            className="h-full w-full object-contain"
+                            selectedCode={null}
+                            onSelectRoom={() => {}}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <figcaption className="mt-4 flex flex-col items-center text-center">
-                    <span className="text-[18px] font-semibold text-[#333333]">
-                      Lantai {item.lantai}
-                    </span>
-                    <span className="my-1.5 h-1 w-8 rounded-full bg-[#C2AC72]" />
-                    <span className="text-[14px] font-medium text-[#B8B8B8]">
-                      {activeGedung.label}
-                    </span>
-                  </figcaption>
-                </figure>
+                    <figcaption className="mt-4 flex flex-col items-center text-center">
+                      <span className="text-[18px] font-semibold text-[#333333]">
+                        Lantai {item.lantai}
+                      </span>
+                      <span className="my-1.5 h-1 w-8 rounded-full bg-[#C2AC72]" />
+                      <span className="text-[14px] font-medium text-[#B8B8B8]">
+                        {activeGedung.label}
+                      </span>
+                    </figcaption>
+                  </figure>
+                </Link>
               </div>
             ))}
           </div>

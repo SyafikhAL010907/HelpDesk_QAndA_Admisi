@@ -8,8 +8,8 @@
 import React, { useState } from 'react';
 
 // 🔥 Vasya AI Note: Kita IMPORT Data, SVG, & Modal Premium dari WebTabLayout!
+import { DenahL3SFD as DenahSvgSfd } from '../DenahL3SFD/DenahL3SFD';
 import { 
-  DenahSvgSfd, 
   Legenda, 
   RoomPopupSfd, 
   DaftarRuangan, 

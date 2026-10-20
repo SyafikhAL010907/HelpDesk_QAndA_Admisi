@@ -8,8 +8,8 @@
 import React, { useState } from 'react';
 
 // Data, SVG denah, legenda, daftar ruangan & popup di-import dari Web&TabLayout (Lantai 1)
+import { DenahL1LE as FloorPlanSvg } from '../DenahL1LE/DenahL1LE';
 import {
-  FloorPlanSvg,
   FloorPlanLegend,
   RoomPopup,
   DaftarRuangan,

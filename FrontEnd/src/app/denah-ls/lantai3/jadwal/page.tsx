@@ -1,5 +1,5 @@
-import MainJadwal from '@/components/DenahVisual/DenahGedungLS/Lantai3/Jadwal/MainJadwal';
+import Jadwal from '@/components/DenahVisual/DenahGedungLS/Lantai3/Jadwal/Jadwal';
 
 export default function JadwalPage() {
-  return <MainJadwal />;
+  return <Jadwal />;
 }

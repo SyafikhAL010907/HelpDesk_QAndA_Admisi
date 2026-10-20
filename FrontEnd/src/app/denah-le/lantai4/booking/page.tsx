@@ -1,5 +1,5 @@
-import MainBooking from '@/components/DenahVisual/DenahGedungLE/Lantai4/Booking/MainBooking';
+import Booking from '@/components/DenahVisual/DenahGedungLE/Lantai4/Booking/Booking';
 
 export default function BookingPage() {
-  return <MainBooking />;
+  return <Booking />;
 }

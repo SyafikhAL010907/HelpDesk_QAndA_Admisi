@@ -172,7 +172,7 @@ export function DotIndicator({
             aria-selected={isActive}
             aria-current={isActive ? 'true' : undefined}
             onClick={() => onSelect(i)}
-            className={`h-[8px] rounded-full transition-all duration-500 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C2AC72] motion-reduce:transition-none cursor-pointer ${sizeClass} ${colorClass}`}
+            className={`h-2 rounded-full transition-all duration-500 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C2AC72] motion-reduce:transition-none cursor-pointer ${sizeClass} ${colorClass}`}
           />
         );
       })}
@@ -205,45 +205,45 @@ function MapSkeleton() {
 
 // Dynamic imports per floor
 const SFDLantai3Map = dynamic(
-  () => import('@/components/DenahVisual/DenahGedungSFD/Lantai3/Web&Tab/Web&TabLayout').then((m) => m.DenahSvgSfd),
+  () => import('@/components/DenahVisual/DenahGedungSFD/Lantai3/DenahL3SFD/DenahL3SFD').then((m) => m.DenahL3SFD),
   { ssr: false, loading: () => <MapSkeleton /> }
 );
 const SFDLantai8Map = dynamic(
-  () => import('@/components/DenahVisual/DenahGedungSFD/Lantai8/Web&Tab/Web&TabLayout').then((m) => m.DenahSvgSfd),
+  () => import('@/components/DenahVisual/DenahGedungSFD/Lantai8/DenahL8SFD/DenahL8SFD').then((m) => m.DenahL8SFD),
   { ssr: false, loading: () => <MapSkeleton /> }
 );
 
 const LSLantai1Map = dynamic(
-  () => import('@/components/DenahVisual/DenahGedungLS/Lantai1/Web&Tab/Web&TabLayout').then((m) => m.FloorPlanSvg),
+  () => import('@/components/DenahVisual/DenahGedungLS/Lantai1/DenahL1LS/DenahL1LS').then((m) => m.DenahL1LS),
   { ssr: false, loading: () => <MapSkeleton /> }
 );
 const LSLantai2Map = dynamic(
-  () => import('@/components/DenahVisual/DenahGedungLS/Lantai2/Web&Tab/Web&TabLayout').then((m) => m.FloorPlanSvg),
+  () => import('@/components/DenahVisual/DenahGedungLS/Lantai2/DenahL2LS/DenahL2LS').then((m) => m.DenahL2LS),
   { ssr: false, loading: () => <MapSkeleton /> }
 );
 const LSLantai3Map = dynamic(
-  () => import('@/components/DenahVisual/DenahGedungLS/Lantai3/Web&Tab/Web&TabLayout').then((m) => m.FloorPlanSvg),
+  () => import('@/components/DenahVisual/DenahGedungLS/Lantai3/DenahL3LS/DenahL3LS').then((m) => m.DenahL3LS),
   { ssr: false, loading: () => <MapSkeleton /> }
 );
 const LSLantai4Map = dynamic(
-  () => import('@/components/DenahVisual/DenahGedungLS/Lantai4/Web&Tab/Web&TabLayout').then((m) => m.FloorPlanSvg),
+  () => import('@/components/DenahVisual/DenahGedungLS/Lantai4/DenahL4LS/DenahL4LS').then((m) => m.DenahL4LS),
   { ssr: false, loading: () => <MapSkeleton /> }
 );
 
 const LELantai1Map = dynamic(
-  () => import('@/components/DenahVisual/DenahGedungLE/Lantai1/Web&Tab/Web&TabLayout').then((m) => m.FloorPlanSvg),
+  () => import('@/components/DenahVisual/DenahGedungLE/Lantai1/DenahL1LE/DenahL1LE').then((m) => m.DenahL1LE),
   { ssr: false, loading: () => <MapSkeleton /> }
 );
 const LELantai2Map = dynamic(
-  () => import('@/components/DenahVisual/DenahGedungLE/Lantai2/Web&Tab/Web&TabLayout').then((m) => m.FloorPlanSvg),
+  () => import('@/components/DenahVisual/DenahGedungLE/Lantai2/DenahL2LE/DenahL2LE').then((m) => m.DenahL2LE),
   { ssr: false, loading: () => <MapSkeleton /> }
 );
 const LELantai3Map = dynamic(
-  () => import('@/components/DenahVisual/DenahGedungLE/Lantai3/Web&Tab/Web&TabLayout').then((m) => m.FloorPlanSvg),
+  () => import('@/components/DenahVisual/DenahGedungLE/Lantai3/DenahL3LE/DenahL3LE').then((m) => m.DenahL3LE),
   { ssr: false, loading: () => <MapSkeleton /> }
 );
 const LELantai4Map = dynamic(
-  () => import('@/components/DenahVisual/DenahGedungLE/Lantai4/Web&Tab/Web&TabLayout').then((m) => m.FloorPlanSvg),
+  () => import('@/components/DenahVisual/DenahGedungLE/Lantai4/DenahL4LE/DenahL4LE').then((m) => m.DenahL4LE),
   { ssr: false, loading: () => <MapSkeleton /> }
 );
 
@@ -413,7 +413,7 @@ function TestimonialCarousel() {
                 </div>
 
                 <p
-                  className={`absolute text-[20px] font-medium leading-[40px] text-black transition-opacity ease-in-out ${isActive
+                  className={`absolute text-[20px] font-medium leading-10 text-black transition-opacity ease-in-out ${isActive
                       ? 'opacity-100 duration-500 delay-500'
                       : 'pointer-events-none opacity-0 duration-200'
                     }`}
@@ -549,7 +549,7 @@ export function FiturUtamaCards({ variant }: { variant: 'web' | 'mobile' }) {
   return (
     <div
       className={
-        m ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-[24px]'
+        m ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6'
       }
     >
       {FITUR_UTAMA.map((item, i) => (
@@ -558,17 +558,17 @@ export function FiturUtamaCards({ variant }: { variant: 'web' | 'mobile' }) {
           tabIndex={0}
           y={28}
           delay={m ? 0 : i * 0.08}
-          className={`group flex cursor-pointer flex-col justify-between rounded-[16px] border border-[#EFEFEF] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] outline-none transition-colors duration-300 ease-in-out hover:bg-[#333333] focus-visible:bg-[#333333] ${m ? 'min-h-[190px] p-4' : 'min-h-[220px] p-5 lg:min-h-[260px] lg:p-6'
+          className={`group flex cursor-pointer flex-col justify-between rounded-2xl border border-[#EFEFEF] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] outline-none transition-colors duration-300 ease-in-out hover:bg-[#333333] focus-visible:bg-[#333333] ${m ? 'min-h-47.5 p-4' : 'min-h-55 p-5 lg:min-h-65 lg:p-6'
             }`}
         >
           <span
-            className={`flex items-center justify-center rounded-full ${item.tint} ${m ? 'h-[36px] w-[36px]' : 'h-[44px] w-[44px]'
+            className={`flex items-center justify-center rounded-full ${item.tint} ${m ? 'h-9 w-9' : 'h-11 w-11'
               }`}
           >
             {item.icon}
           </span>
           <p
-            className={`font-medium text-[#333333] transition-colors duration-300 ease-in-out group-hover:text-white group-focus-visible:text-white ${m ? 'text-[13px] leading-[20px]' : 'text-[15px] leading-[24px] lg:text-[17px]'
+            className={`font-medium text-[#333333] transition-colors duration-300 ease-in-out group-hover:text-white group-focus-visible:text-white ${m ? 'text-[13px] leading-5' : 'text-[15px] leading-6 lg:text-[17px]'
               }`}
           >
             {item.text}
@@ -583,7 +583,7 @@ export function CaraKerjaSteps({ variant }: { variant: 'web' | 'mobile' }) {
   const m = variant === 'mobile';
 
   return (
-    <div className={m ? 'grid grid-cols-1 gap-12 max-w-[360px] mx-auto' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'}>
+    <div className={m ? 'grid grid-cols-1 gap-12 max-w-90 mx-auto' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'}>
       {CARA_KERJA.map((step, i) => (
         <div
           key={i}
@@ -643,7 +643,7 @@ export function CaraKerjaSection({ variant }: { variant: 'web' | 'mobile' }) {
     <section id="cara-kerja" className="relative w-full overflow-hidden bg-white">
       {/* ================= TOP SECTION (GELAP) ================= */}
       {/* pb harus >= nilai -mt di bawah supaya gelapnya turun sampai tengah kartu */}
-      <div className={`bg-[#333333] px-4 text-center ${m ? 'pt-16 pb-[210px]' : 'pt-24 pb-[200px]'}`}>
+      <div className={`bg-[#333333] px-4 text-center ${m ? 'pt-16 pb-52.5' : 'pt-24 pb-50'}`}>
         <div className="max-w-4xl mx-auto">
           <Reveal as="p" y={16} className="text-gray-400 text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase mb-4">
             Semua Info Ruangan, Satu Tempat
@@ -659,7 +659,7 @@ export function CaraKerjaSection({ variant }: { variant: 'web' | 'mobile' }) {
           Sebelumnya wrapper putih ini ikut tertarik naik oleh -mt dan menutupi area gelap. */}
       <div className={m ? 'pb-16' : 'pb-24 lg:pb-32'}>
         <div
-          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full ${m ? '-mt-[200px]' : '-mt-[190px]'
+          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full ${m ? '-mt-50' : '-mt-47.5'
             }`}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 pt-8">
@@ -702,7 +702,7 @@ export function CaraKerjaSection({ variant }: { variant: 'web' | 'mobile' }) {
 /*  PAGE                                                               */
 /* ------------------------------------------------------------------ */
 
-const container = 'mx-auto w-full max-w-[1440px] px-6 lg:px-[84px]';
+const container = 'mx-auto w-full max-w-360 px-6 lg:px-21';
 
 export default function WebTabLayout() {
   const [activeKey, setActiveKey] = useState<'sfd' | 'ls' | 'le'>('sfd');
@@ -823,38 +823,38 @@ export default function WebTabLayout() {
       <Navbar variant="web" />
 
       {/* ---------------- HERO ---------------- */}
-      <section className={`${container} mt-[120px] lg:mt-[243px]`}>
+      <section className={`${container} mt-30 lg:mt-60.75`}>
         <Reveal
           mode="load"
           y={32}
           scale={0.985}
           duration={0.9}
-          className="relative min-h-[380px] rounded-[40px] lg:h-[561px]"
+          className="relative min-h-95 rounded-[40px] lg:h-140.25"
           style={{ background: 'linear-gradient(90deg, #183449 0%, #588CBC 100%)' }}
         >
-          <div className="relative z-10 flex h-full w-[52%] flex-col justify-center py-10 pl-8 lg:w-[568px] lg:justify-start lg:py-0 lg:pl-[47px] lg:pt-[115px]">
-            <Reveal mode="load" y={22} delay={0.35} className="whitespace-nowrap leading-[40px] text-[#FCFCFC]">
+          <div className="relative z-10 flex h-full w-[52%] flex-col justify-center py-10 pl-8 lg:w-142 lg:justify-start lg:py-0 lg:pl-11.75 lg:pt-28.75">
+            <Reveal mode="load" y={22} delay={0.35} className="whitespace-nowrap leading-10 text-[#FCFCFC]">
               <span className="text-[32px] font-bold lg:text-[45px]">Dashboard&nbsp; </span>
               <span className={`${fasthand.className} text-[50px] font-normal lg:text-[70px]`}>
                 SiRuang
               </span>
             </Reveal>
 
-            <Reveal as="p" mode="load" y={22} delay={0.48} className="mt-[28px] max-w-[521px] text-[17px] leading-[28px] text-[#FCFCFC] lg:mt-[38px] lg:text-[25px] lg:leading-[40px]">
+            <Reveal as="p" mode="load" y={22} delay={0.48} className="mt-7 max-w-130.25 text-[17px] leading-7 text-[#FCFCFC] lg:mt-9.5 lg:text-[25px] lg:leading-10">
              Butuh ruangan sekarang? Cek slot kosong dan langsung booking sementara tanpa takut nabrak jadwal akademik kampus.
             </Reveal>
 
             <Reveal mode="load" y={22} delay={0.6}>
             <Link
               href={LOGIN_HREF}
-              className="mt-[28px] flex h-[56px] w-[226px] items-center justify-center rounded-[15px] bg-white text-[20px] font-semibold text-[#333333] transition-opacity hover:opacity-90 lg:mt-[37px]"
+              className="mt-7 flex h-14 w-56.5 items-center justify-center rounded-[15px] bg-white text-[20px] font-semibold text-[#333333] transition-opacity hover:opacity-90 lg:mt-9.25"
             >
               Masuk
             </Link>
             </Reveal>
           </div>
 
-          <Reveal mode="load" x={56} y={0} delay={0.4} duration={0.95} className="absolute bottom-0 right-0 aspect-[617/745] w-[50%] lg:w-[617px]">
+          <Reveal mode="load" x={56} y={0} delay={0.4} duration={0.95} className="absolute bottom-0 right-0 aspect-617/745 w-[50%] lg:w-154.25">
             <Image
               src="/Landing/GedungSFD.png"
               alt="Gedung SFD"
@@ -868,19 +868,19 @@ export default function WebTabLayout() {
       </section>
 
       {/* ---------------- DATA REAL-TIME ---------------- */}
-      <section id="data-real-time" className={`${container} mt-[100px] lg:mt-[188px]`}>
-        <Reveal as="h2" className="text-center text-[40px] font-semibold leading-[63px] lg:text-[50px]">
+      <section id="data-real-time" className={`${container} mt-25 lg:mt-47`}>
+        <Reveal as="h2" className="text-center text-[40px] font-semibold leading-15.75 lg:text-[50px]">
           Data Real-Time
         </Reveal>
 
-        <Reveal as="p" delay={0.08} className="mx-auto mt-[28px] max-w-[860px] text-center text-[20px] leading-[34px] lg:mt-[38px] lg:text-[25px] lg:leading-[40px]">
+        <Reveal as="p" delay={0.08} className="mx-auto mt-7 max-w-215 text-center text-[20px] leading-8.5 lg:mt-9.5 lg:text-[25px] lg:leading-10">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
           <br className="hidden lg:block" /> tempor incididunt ut labore et dolore magna aliqua. Ut
           enim ad minim veniam,
         </Reveal>
 
         {/* tombol gedung */}
-        <Reveal delay={0.16} className="mt-[30px] flex flex-wrap items-center justify-center gap-4 lg:mt-[37px] lg:gap-[80px]">
+        <Reveal delay={0.16} className="mt-7.5 flex flex-wrap items-center justify-center gap-4 lg:mt-9.25 lg:gap-20">
           {gedungList.map((g) => {
             const isActive = g.key === activeKey;
             return (
@@ -889,7 +889,7 @@ export default function WebTabLayout() {
                 type="button"
                 onClick={() => handleSelectGedung(g.key as 'sfd' | 'ls' | 'le')}
                 aria-pressed={isActive}
-                className={`flex h-[65px] min-w-[204px] cursor-pointer items-center justify-center rounded-[15px] px-10 text-[20px] font-semibold transition-colors duration-300 ${isActive
+                className={`flex h-16.25 min-w-51 cursor-pointer items-center justify-center rounded-[15px] px-10 text-[20px] font-semibold transition-colors duration-300 ${isActive
                     ? 'bg-[#333333] text-white'
                     : 'border border-[#333333] bg-transparent text-black hover:bg-[#333333]/5'
                   }`}
@@ -907,40 +907,45 @@ export default function WebTabLayout() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 'some' }}
           transition={{ duration: 0.55, ease: EASE_OUT }}
-          className="mt-[40px] w-full lg:mt-[66px]"
+          className="mt-10 w-full lg:mt-16.5"
         >
           {totalPages <= 1 ? (
-            <div className="flex w-full justify-center gap-[30px]">
+            <div className="flex w-full justify-center gap-7.5">
               {floorItems.map((item) => (
                 <div
                   key={item.lantai}
                   className={cardsPerPage === 2 ? 'w-[calc((100%-30px)/2)]' : 'w-full'}
                 >
-                  <figure className="flex flex-col">
-                    <div className="w-full rounded-[20px] bg-[#D9D9D9] p-3 shadow-xs">
-                      <div
-                        className="flex w-full items-center justify-center overflow-hidden rounded-[12px] bg-white p-2"
-                        style={{ aspectRatio: item.ratio }}
-                      >
-                        <div className="h-full w-full pointer-events-none select-none" aria-hidden="true">
-                          <item.Map
-                            className="h-full w-full object-contain"
-                            selectedCode={null}
-                            onSelectRoom={() => { }}
-                          />
+                  <Link
+                    href={`${activeGedung.base}/lantai${item.lantai}`}
+                    className="group block rounded-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C2AC72]"
+                  >
+                    <figure className="flex flex-col">
+                      <div className="w-full rounded-[20px] bg-[#D9D9D9] p-3 shadow-xs transition-transform duration-300 group-hover:scale-[1.01]">
+                        <div
+                          className="flex w-full items-center justify-center overflow-hidden rounded-xl bg-white p-2"
+                          style={{ aspectRatio: item.ratio }}
+                        >
+                          <div className="h-full w-full pointer-events-none select-none" aria-hidden="true">
+                            <item.Map
+                              className="h-full w-full object-contain"
+                              selectedCode={null}
+                              onSelectRoom={() => { }}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <figcaption className="mt-4 flex flex-col items-center text-center">
-                      <span className="text-[18px] font-semibold text-[#333333] lg:text-[22px]">
-                        Lantai {item.lantai}
-                      </span>
-                      <span className="my-1.5 h-[4px] w-[32px] rounded-full bg-[#C2AC72]" />
-                      <span className="text-[14px] font-medium text-[#B8B8B8]">
-                        {activeGedung.label}
-                      </span>
-                    </figcaption>
-                  </figure>
+                      <figcaption className="mt-4 flex flex-col items-center text-center">
+                        <span className="text-[18px] font-semibold text-[#333333] transition-colors group-hover:text-sky-700 lg:text-[22px]">
+                          Lantai {item.lantai}
+                        </span>
+                        <span className="my-1.5 h-1 w-8 rounded-full bg-[#C2AC72]" />
+                        <span className="text-[14px] font-medium text-[#B8B8B8]">
+                          {activeGedung.label}
+                        </span>
+                      </figcaption>
+                    </figure>
+                  </Link>
                 </div>
               ))}
             </div>
@@ -959,38 +964,46 @@ export default function WebTabLayout() {
                 {pages.map((pageCards, pageIdx) => (
                   <div
                     key={pageIdx}
-                    className="flex w-full shrink-0 snap-start gap-[30px]"
+                    className="flex w-full shrink-0 snap-start gap-7.5"
                   >
                     {pageCards.map((item) => (
                       <div
                         key={item.lantai}
                         className={cardsPerPage === 2 ? 'w-[calc((100%-30px)/2)] shrink-0' : 'w-full shrink-0'}
                       >
-                        <figure className="flex flex-col">
-                          <div className="w-full rounded-[20px] bg-[#D9D9D9] p-3 shadow-xs">
-                            <div
-                              className="flex w-full items-center justify-center overflow-hidden rounded-[12px] bg-white p-2"
-                              style={{ aspectRatio: item.ratio }}
-                            >
-                              <div className="h-full w-full pointer-events-none select-none" aria-hidden="true">
-                                <item.Map
-                                  className="h-full w-full object-contain"
-                                  selectedCode={null}
-                                  onSelectRoom={() => { }}
-                                />
+                        <Link
+                          href={`${activeGedung.base}/lantai${item.lantai}`}
+                          onClick={(e) => {
+                            if (isDragging) e.preventDefault();
+                          }}
+                          className="group block rounded-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C2AC72]"
+                        >
+                          <figure className="flex flex-col">
+                            <div className="w-full rounded-[20px] bg-[#D9D9D9] p-3 shadow-xs transition-transform duration-300 group-hover:scale-[1.01]">
+                              <div
+                                className="flex w-full items-center justify-center overflow-hidden rounded-xl bg-white p-2"
+                                style={{ aspectRatio: item.ratio }}
+                              >
+                                <div className="h-full w-full pointer-events-none select-none" aria-hidden="true">
+                                  <item.Map
+                                    className="h-full w-full object-contain"
+                                    selectedCode={null}
+                                    onSelectRoom={() => { }}
+                                  />
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <figcaption className="mt-4 flex flex-col items-center text-center">
-                            <span className="text-[18px] font-semibold text-[#333333] lg:text-[22px]">
-                              Lantai {item.lantai}
-                            </span>
-                            <span className="my-1.5 h-[4px] w-[32px] rounded-full bg-[#C2AC72]" />
-                            <span className="text-[14px] font-medium text-[#B8B8B8]">
-                              {activeGedung.label}
-                            </span>
-                          </figcaption>
-                        </figure>
+                            <figcaption className="mt-4 flex flex-col items-center text-center">
+                              <span className="text-[18px] font-semibold text-[#333333] transition-colors group-hover:text-sky-700 lg:text-[22px]">
+                                Lantai {item.lantai}
+                              </span>
+                              <span className="my-1.5 h-1 w-8 rounded-full bg-[#C2AC72]" />
+                              <span className="text-[14px] font-medium text-[#B8B8B8]">
+                                {activeGedung.label}
+                              </span>
+                            </figcaption>
+                          </figure>
+                        </Link>
                       </div>
                     ))}
                   </div>
@@ -1036,9 +1049,9 @@ export default function WebTabLayout() {
       </section>
 
       {/* ---------------- RESPONSIVE WEBSITE ---------------- */}
-      <section className={`${container} mt-[100px] lg:mt-[158px]`}>
+      <section className={`${container} mt-25 lg:mt-39.5`}>
         <div className="flex flex-col items-center gap-10 lg:flex-row lg:items-start lg:gap-0">
-          <Reveal y={32} duration={0.9} className="relative z-0 flex h-[420px] w-[357px] shrink-0 items-center justify-center bg-white lg:ml-[24px] lg:h-[558px] lg:w-[474px]">
+          <Reveal y={32} duration={0.9} className="relative z-0 flex h-105 w-89.25 shrink-0 items-center justify-center bg-white lg:ml-6 lg:h-139.5 lg:w-118.5">
             <video
               src="/Landing/Responsive.mp4"
               autoPlay
@@ -1057,19 +1070,19 @@ export default function WebTabLayout() {
             />
           </Reveal>
 
-          <Reveal delay={0.12} className="relative z-10 w-full max-w-[712px] lg:ml-[63px] lg:mt-[9px]">
-            <p className="text-[20px] font-semibold leading-[40px] text-[#B8B8B8] lg:text-[23px]">
+          <Reveal delay={0.12} className="relative z-10 w-full max-w-178 lg:ml-15.75 lg:mt-2.25">
+            <p className="text-[20px] font-semibold leading-10 text-[#B8B8B8] lg:text-[23px]">
               Lorem Ipsum dolor sit
             </p>
-            <h2 className="mt-[12px] text-[40px] font-semibold leading-[63px] lg:text-[50px]">
+            <h2 className="mt-3 text-[40px] font-semibold leading-15.75 lg:text-[50px]">
               Responsive Website
             </h2>
-            <p className="mt-[30px] text-[20px] leading-[34px] lg:text-[25px] lg:leading-[40px]">
+            <p className="mt-7.5 text-[20px] leading-8.5 lg:text-[25px] lg:leading-10">
               SiRuang dirancang responsif sehingga nyaman diakses dari ponsel maupun laptop. PJ kelas bisa mengecek status ruangan dari rumah atau saat di perjalanan, tanpa harus datang ke kampus hanya untuk memastikan ruangan kosong. Tidak perlu instal aplikasi tambahan, cukup buka lewat browser.
             </p>
             <Link
               href="#"
-              className="mt-[30px] flex h-[65px] w-[204px] items-center justify-center rounded-[15px] bg-[#333333] text-[20px] font-semibold text-white transition-opacity hover:opacity-85"
+              className="mt-7.5 flex h-16.25 w-51 items-center justify-center rounded-[15px] bg-[#333333] text-[20px] font-semibold text-white transition-opacity hover:opacity-85"
             >
               Lorem ipsum
             </Link>
@@ -1078,35 +1091,35 @@ export default function WebTabLayout() {
       </section>
 
       {/* ---------------- MASALAH YANG DISELESAIKAN ---------------- */}
-      <section className="mt-[100px] bg-[#333333] px-4 pb-[100px] pt-[80px] lg:mt-[192px] lg:pb-[160px] lg:pt-[119px]">
-        <Reveal as="p" y={16} className="text-center text-[20px] leading-[40px] text-[#E3E3E3] lg:text-[23px]">
+      <section className="mt-25 bg-[#333333] px-4 pb-25 pt-20 lg:mt-48 lg:pb-40 lg:pt-29.75">
+        <Reveal as="p" y={16} className="text-center text-[20px] leading-10 text-[#E3E3E3] lg:text-[23px]">
           Lorem Ipsum dolor sit
         </Reveal>
-        <Reveal as="h2" y={20} delay={0.08} className="mt-[0px] text-center text-[36px] font-semibold leading-[63px] text-white lg:text-[50px]">
+        <Reveal as="h2" y={20} delay={0.08} className="mt-0 text-center text-[36px] font-semibold leading-15.75 text-white lg:text-[50px]">
           Masalah yang Diselesaikan
         </Reveal>
 
-        <Reveal y={40} delay={0.12} duration={0.9} className="mx-auto mt-[40px] max-w-[1161px] lg:mt-[83px]">
+        <Reveal y={40} delay={0.12} duration={0.9} className="mx-auto mt-10 max-w-290.25 lg:mt-20.75">
           <TestimonialCarousel />
         </Reveal>
       </section>
 
       {/* ---------------- FITUR UTAMA ---------------- */}
-      <section className="mx-auto w-full max-w-[1440px] px-6 pb-[120px] pt-[80px] lg:px-[84px] lg:pt-[120px]">
+      <section className="mx-auto w-full max-w-360 px-6 pb-30 pt-20 lg:px-21 lg:pt-30">
         {/* ---------------- FITUR UTAMA ---------------- */}
         <div id="fitur">
-          <Reveal as="p" y={16} className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#B8B8B8]">
+          <Reveal as="p" y={16} className="text-[13px] font-semibold uppercase tracking-widest text-[#B8B8B8]">
             Semua info ruangan, satu tempat
           </Reveal>
-          <Reveal as="h2" y={20} delay={0.08} className="mt-3 text-[40px] font-semibold leading-[56px] lg:text-[50px]">
+          <Reveal as="h2" y={20} delay={0.08} className="mt-3 text-[40px] font-semibold leading-14 lg:text-[50px]">
             Fitur Utama SiRuang
           </Reveal>
-          <Reveal as="p" y={20} delay={0.16} className="mt-5 max-w-[760px] text-[20px] leading-[34px] lg:text-[22px] lg:leading-[36px]">
+          <Reveal as="p" y={20} delay={0.16} className="mt-5 max-w-190 text-[20px] leading-8.5 lg:text-[22px] lg:leading-9">
             SiRuang membantu PJ kelas, dosen, dan mahasiswa melihat status ruangan, mengajukan
             booking, dan berkomunikasi dalam satu website.
           </Reveal>
 
-          <div className="mt-10 lg:mt-[56px]">
+          <div className="mt-10 lg:mt-14">
             <FiturUtamaCards variant="web" />
           </div>
         </div>

@@ -1,5 +1,5 @@
-import MainFasilitas from '@/components/DenahVisual/DenahGedungLS/Lantai2/Fasilitas/MainFasilitas';
+import Fasilitas from '@/components/DenahVisual/DenahGedungLS/Lantai2/Fasilitas/Fasilitas';
 
 export default function FasilitasPage() {
-  return <MainFasilitas />;
+  return <Fasilitas />;
 }
