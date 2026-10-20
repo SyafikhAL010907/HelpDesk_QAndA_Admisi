@@ -78,7 +78,7 @@ export const FileChatBubble: React.FC<FileChatBubbleProps> = ({
   return (
     <div className={cn(
       "flex flex-col w-full",
-      isMobile ? "max-w-[260px]" : "max-w-[280px] sm:max-w-[320px]"
+      isMobile ? "max-w-65" : "max-w-70 sm:max-w-80"
     )}>
       {/* 1. CONTAINER FILE (List / Stack Vertikal Bertingkat) */}
       <div className="flex flex-col gap-2 w-full">
@@ -140,7 +140,7 @@ export const FileChatBubble: React.FC<FileChatBubbleProps> = ({
                 <p
                   className={cn(
                     "font-bold truncate",
-                    isMobile ? "text-[11px] max-w-[150px]" : "text-xs max-w-[170px] sm:max-w-[200px]",
+                    isMobile ? "text-[11px] max-w-37.5" : "text-xs max-w-42.5 sm:max-w-50",
                     isMe ? "text-white" : "text-slate-800"
                   )}
                   title={file.name}

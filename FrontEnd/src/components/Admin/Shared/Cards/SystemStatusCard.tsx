@@ -20,7 +20,7 @@ export const SystemStatusCard: React.FC<SystemStatusCardProps> = ({
 
   if (isMobile) {
     return (
-      <div className="bg-gradient-to-br from-[#07111E] to-[#0F2238] p-7 rounded-[40px] text-white shadow-xl shadow-[#0B192C]/50 relative overflow-hidden">
+      <div className="bg-linear-to-br from-[#07111E] to-[#0F2238] p-7 rounded-[40px] text-white shadow-xl shadow-[#0B192C]/50 relative overflow-hidden">
         {/* Ambient Effect */}
         <div className="absolute -right-5 -top-5 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
 
@@ -61,7 +61,7 @@ export const SystemStatusCard: React.FC<SystemStatusCardProps> = ({
   }
 
   return (
-    <div className="lg:col-span-2 bg-gradient-to-br from-[#07111E] to-[#0F2238] p-10 rounded-[48px] text-white shadow-2xl shadow-[#0B192C]/50 relative overflow-hidden group">
+    <div className="lg:col-span-2 bg-linear-to-br from-[#07111E] to-[#0F2238] p-10 rounded-[48px] text-white shadow-2xl shadow-[#0B192C]/50 relative overflow-hidden group">
       {/* Ambient Glow Effects */}
       <div className="absolute -right-10 -top-10 w-80 h-80 bg-white/5 rounded-full blur-[80px] group-hover:scale-110 transition-transform duration-1000"></div>
       <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-[#38BDF8]/15 rounded-full blur-[60px]"></div>

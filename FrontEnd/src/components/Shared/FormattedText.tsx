@@ -17,7 +17,7 @@ const FormattedText: React.FC<FormattedTextProps> = ({ text, className }) => {
     // Quote (>)
     if (line.startsWith('> ')) {
       return (
-        <blockquote className="border-l-4 border-[#588CBC] pl-4 py-1 my-1 italic text-slate-500 bg-slate-50/50 rounded-r-lg break-words [overflow-wrap:anywhere] [word-break:break-word]">
+        <blockquote className="border-l-4 border-[#588CBC] pl-4 py-1 my-1 italic text-slate-500 bg-slate-50/50 rounded-r-lg wrap-anywhere">
           {parseInline(line.substring(2))}
         </blockquote>
       );
@@ -28,7 +28,7 @@ const FormattedText: React.FC<FormattedTextProps> = ({ text, className }) => {
       return (
         <div className="flex gap-2 ml-2 my-0.5 min-w-0">
           <span className="text-current opacity-80 text-lg leading-none shrink-0">•</span>
-          <span className="flex-1 min-w-0 break-words [overflow-wrap:anywhere] [word-break:break-word]">{parseInline(line.substring(2))}</span>
+          <span className="flex-1 min-w-0 wrap-anywhere">{parseInline(line.substring(2))}</span>
         </div>
       );
     }
@@ -39,7 +39,7 @@ const FormattedText: React.FC<FormattedTextProps> = ({ text, className }) => {
       return (
         <div className="flex gap-2 ml-2 my-0.5 min-w-0">
           <span className="text-current opacity-90 font-bold min-w-[1.2em] shrink-0">{numListMatch[1]}.</span>
-          <span className="flex-1 min-w-0 break-words [overflow-wrap:anywhere] [word-break:break-word]">{parseInline(numListMatch[2])}</span>
+          <span className="flex-1 min-w-0 wrap-anywhere">{parseInline(numListMatch[2])}</span>
         </div>
       );
     }
@@ -94,9 +94,9 @@ const FormattedText: React.FC<FormattedTextProps> = ({ text, className }) => {
   const lines = text.split('\n');
 
   return (
-    <div className={cn("break-words [overflow-wrap:anywhere] [word-break:break-word] whitespace-pre-wrap min-w-0", className)}>
+    <div className={cn("wrap-anywhere whitespace-pre-wrap min-w-0", className)}>
       {lines.map((line, idx) => (
-        <div key={idx} className={cn("break-words [overflow-wrap:anywhere] [word-break:break-word]", line === '' ? 'h-3' : 'min-h-[1.25em]')}>
+        <div key={idx} className={cn("wrap-anywhere", line === '' ? 'h-3' : 'min-h-[1.25em]')}>
           {parseLine(line)}
         </div>
       ))}

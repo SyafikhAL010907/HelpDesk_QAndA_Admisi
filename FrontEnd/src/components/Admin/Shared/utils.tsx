@@ -50,18 +50,18 @@ export const formatNumber = (num: number) => {
 };
 
 export const renderHighlightedText = (text: string, query: string) => {
-  if (!query.trim()) return <FormattedText text={text} className="break-words [overflow-wrap:anywhere] [word-break:break-word] leading-relaxed" />;
+  if (!query.trim()) return <FormattedText text={text} className="wrap-anywhere leading-relaxed" />;
   const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
   const parts = text.split(regex);
   return (
-    <span className="whitespace-pre-wrap leading-relaxed break-words [overflow-wrap:anywhere] [word-break:break-word]">
+    <span className="whitespace-pre-wrap leading-relaxed wrap-anywhere">
       {parts.map((part, i) =>
         part.toLowerCase() === query.toLowerCase() ? (
           <span key={i} className="bg-amber-300 text-slate-900 font-extrabold px-1 rounded-sm shadow-sm border border-amber-400 mx-0.5 select-all">
             {part}
           </span>
         ) : (
-          <FormattedText key={i} text={part} className="break-words [overflow-wrap:anywhere] [word-break:break-word] inline" />
+          <FormattedText key={i} text={part} className="wrap-anywhere inline" />
         )
       )}
     </span>

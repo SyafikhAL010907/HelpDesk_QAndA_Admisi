@@ -37,8 +37,8 @@ const WebSignUp = ({ onNavigate, onSignUp, loading }: SignUpProps) => {
 
       {/* SOPHISTICATED BACKGROUND ELEMENTS */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-[#588CBC]/15 rounded-full blur-[150px]" />
-        <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#183449]/10 rounded-full blur-[150px]" />
+        <div className="absolute top-[-20%] right-[-10%] w-150 h-150 bg-[#588CBC]/15 rounded-full blur-[150px]" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-150 h-150 bg-[#183449]/10 rounded-full blur-[150px]" />
       </div>
 
       <div className="w-full max-w-5xl flex bg-white/60 backdrop-blur-3xl rounded-[48px] shadow-[0_32px_80px_rgba(24,52,73,0.12)] border border-white relative z-10 overflow-hidden">
@@ -46,7 +46,7 @@ const WebSignUp = ({ onNavigate, onSignUp, loading }: SignUpProps) => {
 
         {/* LEFT PANEL - DARK NAVY BRANDING */}
         <div
-          className="hidden lg:flex flex-1 bg-gradient-to-br from-[#07111E] to-[#0F2238] p-16 flex-col justify-center items-center relative overflow-hidden"
+          className="hidden lg:flex flex-1 bg-linear-to-br from-[#07111E] to-[#0F2238] p-16 flex-col justify-center items-center relative overflow-hidden"
           style={{ background: 'linear-gradient(135deg, #0F2238 0%, #07111E 100%)' }}
         >
           {/* Decorative Circles - Soft blue glow */}
@@ -112,7 +112,7 @@ const WebSignUp = ({ onNavigate, onSignUp, loading }: SignUpProps) => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="syafikh_unj"
-                    className="w-full pl-14 pr-6 py-4 bg-white border border-slate-100 rounded-[24px] text-sm font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-[#588CBC]/15 focus:border-[#588CBC] transition-all shadow-sm"
+                    className="w-full pl-14 pr-6 py-4 bg-white border border-slate-100 rounded-3xl text-sm font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-[#588CBC]/15 focus:border-[#588CBC] transition-all shadow-sm"
                   />
                 </div>
               </div>
@@ -127,7 +127,7 @@ const WebSignUp = ({ onNavigate, onSignUp, loading }: SignUpProps) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="syafikh@gmail.com"
-                    className="w-full pl-14 pr-6 py-4 bg-white border border-slate-100 rounded-[24px] text-sm font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-[#588CBC]/15 focus:border-[#588CBC] transition-all shadow-sm"
+                    className="w-full pl-14 pr-6 py-4 bg-white border border-slate-100 rounded-3xl text-sm font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-[#588CBC]/15 focus:border-[#588CBC] transition-all shadow-sm"
                   />
                 </div>
               </div>
@@ -142,7 +142,7 @@ const WebSignUp = ({ onNavigate, onSignUp, loading }: SignUpProps) => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full pl-14 pr-6 py-4 bg-white border border-slate-100 rounded-[24px] text-sm font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-[#588CBC]/15 focus:border-[#588CBC] transition-all shadow-sm"
+                    className="w-full pl-14 pr-6 py-4 bg-white border border-slate-100 rounded-3xl text-sm font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-[#588CBC]/15 focus:border-[#588CBC] transition-all shadow-sm"
                   />
                 </div>
               </div>
@@ -150,7 +150,7 @@ const WebSignUp = ({ onNavigate, onSignUp, loading }: SignUpProps) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-2 bg-linear-to-br from-[#07111E] to-[#0F2238] text-white py-4.5 rounded-[24px] font-black text-sm shadow-xl shadow-[#183449]/20 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
+                className="w-full mt-2 bg-linear-to-br from-[#07111E] to-[#0F2238] text-white py-4.5 rounded-3xl font-black text-sm shadow-xl shadow-[#183449]/20 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
               >
                 <span>{loading ? 'MEMPROSES...' : 'DAFTAR SEKARANG'}</span>
                 {!loading && <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />}

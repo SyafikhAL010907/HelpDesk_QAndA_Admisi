@@ -49,7 +49,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   return (
     <div className="sticky top-0 z-40 bg-slate-50 flex flex-col shrink-0 border-b border-slate-100/40">
       {/* Premium Header (Logo & Welcome) */}
-      <div className="bg-gradient-to-br from-[#07111E] to-[#0F2238] rounded-b-[40px] px-6 pt-12 pb-14 relative overflow-hidden shadow-lg shadow-slate-200/50">
+      <div className="bg-linear-to-br from-[#07111E] to-[#0F2238] rounded-b-[40px] px-6 pt-12 pb-14 relative overflow-hidden shadow-lg shadow-slate-200/50">
         {/* Decorative Circles */}
         <div className="absolute -top-5 -right-5 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute -bottom-5 -left-5 w-32 h-32 bg-[#588CBC]/20 rounded-full blur-2xl"></div>

@@ -32,11 +32,11 @@ const CustomAlert: React.FC<CustomAlertProps> = ({ config, onClose }) => {
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 300, damping: 28 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm bg-white rounded-[32px] overflow-hidden shadow-2xl"
+            className="w-full max-w-sm bg-white rounded-4xl overflow-hidden shadow-2xl"
           >
             {/* Header Gradient */}
             <div className={`p-6 ${isConfirm ? 'bg-linear-to-br from-amber-500 to-amber-700' : 'bg-linear-to-br from-[#183449] to-[#2B5474]'} relative overflow-hidden`}>
-              <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+              <div className="absolute -top-5 -right-5 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
               <div className="relative z-10 flex items-center gap-4">
                 <div className="w-14 h-14 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20 shadow-lg">
                   <span className="text-2xl">{isConfirm ? '⚠️' : '🔔'}</span>

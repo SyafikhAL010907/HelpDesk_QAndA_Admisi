@@ -340,7 +340,7 @@ export default function Navbar({ variant }: NavbarProps) {
                 ref={headerRef}
                 className={`${montserrat.className} fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,box-shadow] duration-500 ${headerH} ${glass}`}
             >
-                <div className="relative mx-auto flex h-full w-full max-w-[1440px] items-center justify-between px-4 lg:px-[84px]">
+                <div className="relative mx-auto flex h-full w-full max-w-360 items-center justify-between px-4 lg:px-21">
                     {/* kiri: MENU + garis tiga (warna ikut `currentColor`) */}
                     <button
                         type="button"
@@ -352,10 +352,10 @@ export default function Navbar({ variant }: NavbarProps) {
                             }`}
                     >
                         <span className="text-[15px] font-bold tracking-[0.35em] lg:text-[18px]">MENU</span>
-                        <span className="flex flex-col items-start gap-[6px]">
-                            <span className="block h-[2px] w-[30px] rounded-full bg-current" />
-                            <span className="block h-[2px] w-[22px] rounded-full bg-current transition-[width] duration-300 group-hover:w-[30px]" />
-                            <span className="block h-[2px] w-[14px] rounded-full bg-current transition-[width] duration-300 group-hover:w-[30px]" />
+                        <span className="flex flex-col items-start gap-1.5">
+                            <span className="block h-0.5 w-7.5 rounded-full bg-current" />
+                            <span className="block h-0.5 w-5.5 rounded-full bg-current transition-[width] duration-300 group-hover:w-7.5" />
+                            <span className="block h-0.5 w-3.5 rounded-full bg-current transition-[width] duration-300 group-hover:w-7.5" />
                         </span>
                     </button>
 
@@ -372,7 +372,7 @@ export default function Navbar({ variant }: NavbarProps) {
                     {/* kanan: Masuk (di layar sempit cukup lewat menu) */}
                     <Link
                         href={LOGIN_HREF}
-                        className={`hidden h-[46px] w-[140px] items-center justify-center rounded-[15px] text-[16px] font-semibold transition-[background-color,color,opacity] duration-300 hover:opacity-85 sm:flex lg:h-[52px] lg:w-[170px] lg:text-[18px] ${dark ? 'bg-white text-[#333333]' : 'bg-[#333333] text-white'
+                        className={`hidden h-11.5 w-35 items-center justify-center rounded-[15px] text-[16px] font-semibold transition-[background-color,color,opacity] duration-300 hover:opacity-85 sm:flex lg:h-13 lg:w-42.5 lg:text-[18px] ${dark ? 'bg-white text-[#333333]' : 'bg-[#333333] text-white'
                             }`}
                     >
                         Masuk
@@ -382,7 +382,7 @@ export default function Navbar({ variant }: NavbarProps) {
 
             {/* ---------------- DRAWER ---------------- */}
             <div
-                className={`${montserrat.className} fixed inset-0 z-[60] ${open ? 'pointer-events-auto' : 'pointer-events-none'
+                className={`${montserrat.className} fixed inset-0 z-60 ${open ? 'pointer-events-auto' : 'pointer-events-none'
                     }`}
                 aria-hidden={!open}
             >
@@ -429,7 +429,7 @@ export default function Navbar({ variant }: NavbarProps) {
                                 className={`flex items-start gap-4 text-[26px] font-semibold text-white/60 transition-all duration-500 hover:text-white ${open ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'
                                     }`}
                             >
-                                <span className="mt-[6px] w-[22px] text-[11px] font-medium text-white/40">
+                                <span className="mt-1.5 w-5.5 text-[11px] font-medium text-white/40">
                                     {String(i + 1).padStart(2, '0')}
                                 </span>
                                 {l.label}
@@ -440,7 +440,7 @@ export default function Navbar({ variant }: NavbarProps) {
                     <Link
                         href={LOGIN_HREF}
                         tabIndex={open ? 0 : -1}
-                        className="mt-auto flex h-[52px] w-full items-center justify-center rounded-[15px] bg-white text-[18px] font-semibold text-[#333333] transition-opacity hover:opacity-90"
+                        className="mt-auto flex h-13 w-full items-center justify-center rounded-[15px] bg-white text-[18px] font-semibold text-[#333333] transition-opacity hover:opacity-90"
                     >
                         Masuk
                     </Link>

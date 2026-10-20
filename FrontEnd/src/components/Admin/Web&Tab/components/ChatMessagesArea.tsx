@@ -60,7 +60,7 @@ export const ChatMessagesArea: React.FC<ChatMessagesAreaProps> = ({
                 )}
               >
                 <div className={cn(
-                  "w-fit max-w-full px-6 py-4 rounded-3xl md:rounded-4xl shadow-md text-sm font-medium leading-relaxed relative break-words [overflow-wrap:anywhere] [word-break:break-word] min-w-0",
+                  "w-fit max-w-full px-6 py-4 rounded-3xl md:rounded-4xl shadow-md text-sm font-medium leading-relaxed relative wrap-anywhere min-w-0",
                   isMe
                     ? "bg-linear-to-br from-[#183449] to-[#285577] text-white rounded-tr-none border border-[#588CBC]/40 shadow-lg shadow-[#183449]/15"
                     : "bg-white text-[#2B2B2B] rounded-tl-none border border-[#B3B3B3] shadow-sm"

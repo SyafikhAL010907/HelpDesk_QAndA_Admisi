@@ -29,7 +29,7 @@ export interface AuthSliderProps {
 
 // transition-colors / box-shadow saja (bukan transition-all) biar ringan
 const inputCls =
-    'w-full pl-14 pr-6 py-4 bg-white border border-slate-100 rounded-[24px] text-sm font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-[#588CBC]/15 focus:border-[#588CBC] transition-[border-color,box-shadow] shadow-sm';
+    'w-full pl-14 pr-6 py-4 bg-white border border-slate-100 rounded-3xl text-sm font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-[#588CBC]/15 focus:border-[#588CBC] transition-[border-color,box-shadow] shadow-sm';
 const labelCls = 'text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1';
 const iconCls =
     'absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#588CBC] transition-colors';
@@ -101,7 +101,7 @@ function LoginForm({
 
                 {/* CAPTCHA */}
                 <div className="pt-2">
-                    <div className="relative overflow-hidden rounded-[32px] border border-[#B3B3B3] bg-linear-to-br from-slate-50 to-[#588CBC]/10 p-5 shadow-lg shadow-slate-200/50">
+                    <div className="relative overflow-hidden rounded-4xl border border-[#B3B3B3] bg-linear-to-br from-slate-50 to-[#588CBC]/10 p-5 shadow-lg shadow-slate-200/50">
                         <div className="relative z-10 mb-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white shadow-sm">
@@ -155,7 +155,7 @@ function LoginForm({
                     type="submit"
                     disabled={!isCaptchaSolved || loading}
                     className={cn(
-                        'mt-4 flex w-full items-center justify-center gap-3 rounded-[24px] py-4 text-sm font-black tracking-widest transition-transform',
+                        'mt-4 flex w-full items-center justify-center gap-3 rounded-3xl py-4 text-sm font-black tracking-widest transition-transform',
                         isCaptchaSolved && !loading
                             ? 'bg-linear-to-br from-[#183449] to-[#2B5474] text-white shadow-xl shadow-[#183449]/20 hover:scale-[1.02] active:scale-[0.98]'
                             : 'cursor-not-allowed bg-slate-100 text-slate-400'
@@ -244,7 +244,7 @@ function SignUpForm({
                 <button
                     type="submit"
                     disabled={loading}
-                    className="group mt-2 flex w-full items-center justify-center gap-2 rounded-[24px] bg-linear-to-br from-[#07111E] to-[#0F2238] py-4 text-sm font-black text-white shadow-xl shadow-[#183449]/20 transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                    className="group mt-2 flex w-full items-center justify-center gap-2 rounded-3xl bg-linear-to-br from-[#07111E] to-[#0F2238] py-4 text-sm font-black text-white shadow-xl shadow-[#183449]/20 transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
                 >
                     <span>{loading ? 'MEMPROSES...' : 'DAFTAR SEKARANG'}</span>
                     {!loading && <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />}
@@ -340,7 +340,7 @@ const AuthSlider = ({
             />
 
             {/* KARTU UTAMA. Tanpa backdrop-blur karena bikin lag saat anak-anaknya bergerak */}
-            <div className="relative z-10 h-[720px] w-full max-w-5xl overflow-hidden rounded-[48px] border border-white bg-white/90 shadow-[0_32px_80px_rgba(24,52,73,0.12)]">
+            <div className="relative z-10 h-180 w-full max-w-5xl overflow-hidden rounded-[48px] border border-white bg-white/90 shadow-[0_32px_80px_rgba(24,52,73,0.12)]">
                 {/* batik watermark statis di bawah semua form */}
                 <div
                     className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-80"
@@ -404,7 +404,7 @@ const AuthSlider = ({
                     >
                         {/* panel kiri overlay: kelihatan saat Register aktif */}
                         <OverlayPanel
-                            className={cn('left-0', isRightPanelActive ? 'translate-x-0' : '-translate-x-[20%]')}
+                            className={cn('left-0', isRightPanelActive ? 'translate-x-0' : 'translate-x-[-20%]')}
                             question="Sudah memiliki akun?"
                             cta="Masuk ke Akun"
                             onClick={handleSignIn}

@@ -93,7 +93,7 @@ const MobileLogin = ({ onNavigate, onLogin, loading, captcha, onRefreshCaptcha }
             </div>
 
             {/* NAVY & LIGHT BLUE CAPTCHA */}
-            <div className="bg-linear-to-br from-[#183449] to-[#2B5474] rounded-[32px] p-5 shadow-xl shadow-[#183449]/20 relative overflow-hidden">
+            <div className="bg-linear-to-br from-[#183449] to-[#2B5474] rounded-4xl p-5 shadow-xl shadow-[#183449]/20 relative overflow-hidden">
               {/* Decorative Shine */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#588CBC]/15 rounded-full blur-2xl -mr-16 -mt-16" />
 

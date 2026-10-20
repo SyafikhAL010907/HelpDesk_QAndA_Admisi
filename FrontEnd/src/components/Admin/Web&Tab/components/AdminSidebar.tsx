@@ -97,7 +97,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     <aside className="w-75 lg:w-95 bg-white border-r border-slate-100 flex flex-col z-20 relative shadow-[10px_0_30px_-15px_rgba(0,0,0,0.05)] transition-all duration-500">
       {/* TOP PREMIUM CARD (Floating Style) */}
       <div className="p-5 pt-8">
-        <div className="bg-gradient-to-br from-[#07111E] to-[#0F2238] rounded-[40px] p-8 text-white shadow-2xl shadow-[#0B192C]/50 relative overflow-hidden group">
+        <div className="bg-linear-to-br from-[#07111E] to-[#0F2238] rounded-[40px] p-8 text-white shadow-2xl shadow-[#0B192C]/50 relative overflow-hidden group">
           {/* Decorative Elements */}
           <div className="absolute -top-7.5 -right-7.5 w-48 h-48 bg-white/5 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
           <div className="absolute -bottom-7.5 -left-7.5 w-32 h-32 bg-[#38BDF8]/20 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700"></div>

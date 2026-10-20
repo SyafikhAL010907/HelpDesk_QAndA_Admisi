@@ -43,8 +43,8 @@ const WebLogin = ({ onNavigate, onLogin, loading, captcha, onRefreshCaptcha }: L
 
       {/* SOPHISTICATED BACKGROUND ELEMENTS */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-[#588CBC]/15 rounded-full blur-[150px]" />
-        <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#183449]/10 rounded-full blur-[150px]" />
+        <div className="absolute top-[-20%] right-[-10%] w-150 h-150 bg-[#588CBC]/15 rounded-full blur-[150px]" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-150 h-150 bg-[#183449]/10 rounded-full blur-[150px]" />
       </div>
 
       <div className="w-full max-w-5xl flex bg-white/60 backdrop-blur-3xl rounded-[48px] shadow-[0_32px_80px_rgba(24,52,73,0.12)] border border-white relative z-10 overflow-hidden">
@@ -84,7 +84,7 @@ const WebLogin = ({ onNavigate, onLogin, loading, captcha, onRefreshCaptcha }: L
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@unj.ac.id"
-                    className="w-full pl-14 pr-6 py-5 bg-white border border-slate-100 rounded-[24px] text-sm font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-[#588CBC]/15 focus:border-[#588CBC] transition-all shadow-sm"
+                    className="w-full pl-14 pr-6 py-5 bg-white border border-slate-100 rounded-3xl text-sm font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-[#588CBC]/15 focus:border-[#588CBC] transition-all shadow-sm"
                   />
                 </div>
               </div>
@@ -102,14 +102,14 @@ const WebLogin = ({ onNavigate, onLogin, loading, captcha, onRefreshCaptcha }: L
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full pl-14 pr-6 py-5 bg-white border border-slate-100 rounded-[24px] text-sm font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-[#588CBC]/15 focus:border-[#588CBC] transition-all shadow-sm"
+                    className="w-full pl-14 pr-6 py-5 bg-white border border-slate-100 rounded-3xl text-sm font-bold text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-[#588CBC]/15 focus:border-[#588CBC] transition-all shadow-sm"
                   />
                 </div>
               </div>
 
               {/* NAVY & LIGHT BLUE CAPTCHA */}
               <div className="pt-4">
-                <div className="p-6 bg-linear-to-br from-slate-50 to-[#588CBC]/10 border border-[#B3B3B3] rounded-[32px] shadow-xl shadow-slate-200/50 relative overflow-hidden">
+                <div className="p-6 bg-linear-to-br from-slate-50 to-[#588CBC]/10 border border-[#B3B3B3] rounded-4xl shadow-xl shadow-slate-200/50 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-white/40 rounded-full blur-3xl -mr-16 -mt-16" />
 
                   <div className="flex items-center justify-between mb-5 relative z-10">
@@ -170,7 +170,7 @@ const WebLogin = ({ onNavigate, onLogin, loading, captcha, onRefreshCaptcha }: L
                 type="submit"
                 disabled={!isCaptchaSolved || loading}
                 className={cn(
-                  "w-full py-5 rounded-[24px] font-black text-sm shadow-xl transition-all mt-6 flex items-center justify-center gap-3 tracking-widest",
+                  "w-full py-5 rounded-3xl font-black text-sm shadow-xl transition-all mt-6 flex items-center justify-center gap-3 tracking-widest",
                   isCaptchaSolved && !loading
                     ? "bg-linear-to-br from-[#183449] to-[#2B5474] hover:from-[#204561] hover:to-[#588CBC] text-white shadow-xl shadow-[#183449]/20"
                     : "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
@@ -191,7 +191,7 @@ const WebLogin = ({ onNavigate, onLogin, loading, captcha, onRefreshCaptcha }: L
 
         {/* RIGHT PANEL - LIGHT BLUE/GREYISH TO DARK NAVY BRANDING */}
         <div
-          className="hidden lg:flex flex-1 bg-gradient-to-br from-[#07111E] to-[#0F2238] p-16 flex-col justify-center items-center relative overflow-hidden"
+          className="hidden lg:flex flex-1 bg-linear-to-br from-[#07111E] to-[#0F2238] p-16 flex-col justify-center items-center relative overflow-hidden"
           style={{ background: 'linear-gradient(135deg, #0F2238 0%, #07111E 100%)' }}
         >
           {/* Decorative Circles - Soft blue glow */}

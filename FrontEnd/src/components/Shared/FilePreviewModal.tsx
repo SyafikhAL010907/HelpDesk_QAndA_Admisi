@@ -271,7 +271,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ type: 'spring', stiffness: 320, damping: 28 }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-5xl h-[90vh] max-h-[850px] bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-slate-200"
+          className="w-full max-w-5xl h-[90vh] max-h-212.5 bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-slate-200"
         >
           {/* Header Modal */}
           <div className="p-3.5 sm:px-6 sm:py-4 bg-linear-to-r from-[#183449] to-[#2B5474] text-white flex items-center justify-between shrink-0 shadow-md">
@@ -513,11 +513,11 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
               )
             ) : fileType === 'pdf' ? (
               // ===== PREVIEW PDF DOCUMENT =====
-              <div className="w-full h-full min-h-[450px] flex-1 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 shadow-inner relative">
+              <div className="w-full h-full min-h-112.5 flex-1 rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 shadow-inner relative">
                 {blobUrl ? (
                   <iframe
                     src={`${blobUrl}#toolbar=1`}
-                    className="w-full h-full min-h-[500px] border-0 rounded-2xl"
+                    className="w-full h-full min-h-125 border-0 rounded-2xl"
                     title={fileName}
                   />
                 ) : (
@@ -535,7 +535,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
               </div>
             ) : fileType === 'image' ? (
               // ===== PREVIEW IMAGE =====
-              <div className="w-full h-full min-h-[450px] flex-1 flex items-center justify-center overflow-auto rounded-2xl bg-slate-900/90 p-4 border border-slate-200">
+              <div className="w-full h-full min-h-112.5 flex-1 flex items-center justify-center overflow-auto rounded-2xl bg-slate-900/90 p-4 border border-slate-200">
                 <div
                   className="transition-all duration-200 flex items-center justify-center"
                   style={{
@@ -593,7 +593,7 @@ export const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
               </div>
             ) : fileType === 'text' ? (
               // ===== PREVIEW TEXT DOCUMENT =====
-              <div className="w-full h-full min-h-[450px] flex-1 bg-slate-900 rounded-2xl p-4 overflow-auto border border-slate-800 font-mono text-xs text-slate-200">
+              <div className="w-full h-full min-h-112.5 flex-1 bg-slate-900 rounded-2xl p-4 overflow-auto border border-slate-800 font-mono text-xs text-slate-200">
                 <pre className="whitespace-pre-wrap leading-relaxed select-text">
                   {textContent || 'Dokumen teks kosong.'}
                 </pre>

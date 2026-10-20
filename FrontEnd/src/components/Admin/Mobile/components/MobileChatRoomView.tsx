@@ -248,7 +248,7 @@ export const MobileChatRoomView: React.FC<MobileChatRoomViewProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 key={msg.id || idx}
                 className={cn(
-                  "w-fit max-w-[85%] min-w-0 px-5 py-3.5 rounded-3xl text-xs shadow-md relative break-words [overflow-wrap:anywhere] [word-break:break-word]",
+                  "w-fit max-w-[85%] min-w-0 px-5 py-3.5 rounded-3xl text-xs shadow-md relative wrap-anywhere",
                   isMe
                     ? "bg-linear-to-br from-[#183449] to-[#285577] text-white self-end rounded-tr-none border border-[#588CBC]/40 shadow-lg shadow-[#183449]/15"
                     : "bg-white text-[#2B2B2B] self-start rounded-tl-none border border-[#B3B3B3] shadow-sm"
@@ -364,7 +364,7 @@ export const MobileChatRoomView: React.FC<MobileChatRoomViewProps> = ({
                     {pendingFiles.map((file, idx) => (
                       <div
                         key={idx}
-                        className="relative shrink-0 flex items-center gap-1.5 p-1.5 bg-white border border-slate-200 rounded-xl max-w-[170px]"
+                        className="relative shrink-0 flex items-center gap-1.5 p-1.5 bg-white border border-slate-200 rounded-xl max-w-42.5"
                       >
                         {file.type === 'image' ? (
                           <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-100">
@@ -432,7 +432,7 @@ export const MobileChatRoomView: React.FC<MobileChatRoomViewProps> = ({
                   e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
                 }}
                 placeholder={pendingFiles.length > 0 ? "Tambahkan catatan file..." : "Tulis pesan..."}
-                className="flex-1 min-w-0 py-2.5 px-2 text-[13px] font-medium text-slate-700 bg-transparent focus:outline-none resize-none max-h-30 scrollbar-hide break-words [overflow-wrap:anywhere]"
+                className="flex-1 min-w-0 py-2.5 px-2 text-[13px] font-medium text-slate-700 bg-transparent focus:outline-none resize-none max-h-30 scrollbar-hide wrap-anywhere"
                 rows={1}
               />
               <button
