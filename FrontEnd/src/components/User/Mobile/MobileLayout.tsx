@@ -145,18 +145,18 @@ const MobileLayout = () => {
   };
 
   const renderHighlightedText = (text: string, query: string) => {
-    if (!query.trim()) return <FormattedText text={text} />;
+    if (!query.trim()) return <FormattedText text={text} className="break-words [overflow-wrap:anywhere] [word-break:break-word] leading-relaxed" />;
     const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     const parts = text.split(regex);
     return (
-      <span className="whitespace-pre-wrap leading-relaxed">
+      <span className="whitespace-pre-wrap leading-relaxed break-words [overflow-wrap:anywhere] [word-break:break-word]">
         {parts.map((part, i) => 
           part.toLowerCase() === query.toLowerCase() ? (
             <span key={i} className="bg-amber-300 text-slate-900 font-extrabold px-1 rounded-sm shadow-sm border border-amber-400 mx-0.5 select-all">
               {part}
             </span>
           ) : (
-            <FormattedText key={i} text={part} />
+            <FormattedText key={i} text={part} className="break-words [overflow-wrap:anywhere] [word-break:break-word] inline" />
           )
         )}
       </span>
@@ -656,7 +656,7 @@ const MobileLayout = () => {
                   <main 
                     ref={scrollContainerRef}
                     onScroll={handleScroll}
-                    className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 scrollbar-hide pb-32"
+                    className="flex-1 overflow-y-auto overflow-x-hidden p-6 flex flex-col gap-6 scrollbar-hide pb-32"
                   >
                     <div className="flex justify-center mb-2">
                       <span className="bg-white border border-slate-100 shadow-sm text-[10px] font-black text-slate-400 px-4 py-1.5 rounded-full uppercase tracking-widest">
@@ -680,7 +680,7 @@ const MobileLayout = () => {
                           animate={{ opacity: 1, y: 0 }}
                           key={msg.id || idx}
                           className={cn(
-                            "max-w-[85%] px-5 py-3.5 rounded-4xl text-xs shadow-md relative",
+                            "w-fit max-w-[85%] min-w-0 px-5 py-3.5 rounded-3xl text-xs shadow-md relative break-words [overflow-wrap:anywhere] [word-break:break-word]",
                             isMe 
                               ? "bg-linear-to-br from-[#183449] to-[#285577] text-white self-end rounded-tr-none border border-[#588CBC]/40 shadow-lg shadow-[#183449]/15" 
                               : "bg-white text-[#2B2B2B] self-start rounded-tl-none border border-[#B3B3B3] shadow-sm"
@@ -859,7 +859,7 @@ const MobileLayout = () => {
                                          e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
                                      }}
                                      placeholder={pendingFiles.length > 0 ? "Tambahkan catatan file..." : "Tulis pesan..."}
-                                     className="flex-1 py-2.5 px-2 text-[13px] font-medium text-slate-700 bg-transparent focus:outline-none resize-none max-h-30 scrollbar-hide"
+                                     className="flex-1 min-w-0 py-2.5 px-2 text-[13px] font-medium text-slate-700 bg-transparent focus:outline-none resize-none max-h-30 scrollbar-hide break-words [overflow-wrap:anywhere]"
                                      rows={1}
                                  />
                                  <button 

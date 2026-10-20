@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 interface FormattedTextProps {
   text: string;
@@ -16,7 +17,7 @@ const FormattedText: React.FC<FormattedTextProps> = ({ text, className }) => {
     // Quote (>)
     if (line.startsWith('> ')) {
       return (
-        <blockquote className="border-l-4 border-[#588CBC] pl-4 py-1 my-1 italic text-slate-500 bg-slate-50/50 rounded-r-lg">
+        <blockquote className="border-l-4 border-[#588CBC] pl-4 py-1 my-1 italic text-slate-500 bg-slate-50/50 rounded-r-lg break-words [overflow-wrap:anywhere] [word-break:break-word]">
           {parseInline(line.substring(2))}
         </blockquote>
       );
@@ -25,9 +26,9 @@ const FormattedText: React.FC<FormattedTextProps> = ({ text, className }) => {
     // Bullet List (* or -)
     if (line.startsWith('* ') || line.startsWith('- ')) {
       return (
-        <div className="flex gap-2 ml-2 my-0.5">
-          <span className="text-current opacity-80 text-lg leading-none">•</span>
-          <span className="flex-1">{parseInline(line.substring(2))}</span>
+        <div className="flex gap-2 ml-2 my-0.5 min-w-0">
+          <span className="text-current opacity-80 text-lg leading-none shrink-0">•</span>
+          <span className="flex-1 min-w-0 break-words [overflow-wrap:anywhere] [word-break:break-word]">{parseInline(line.substring(2))}</span>
         </div>
       );
     }
@@ -36,9 +37,9 @@ const FormattedText: React.FC<FormattedTextProps> = ({ text, className }) => {
     const numListMatch = line.match(/^(\d+)\.\s(.*)/);
     if (numListMatch) {
       return (
-        <div className="flex gap-2 ml-2 my-0.5">
-          <span className="text-current opacity-90 font-bold min-w-[1.2em]">{numListMatch[1]}.</span>
-          <span className="flex-1">{parseInline(numListMatch[2])}</span>
+        <div className="flex gap-2 ml-2 my-0.5 min-w-0">
+          <span className="text-current opacity-90 font-bold min-w-[1.2em] shrink-0">{numListMatch[1]}.</span>
+          <span className="flex-1 min-w-0 break-words [overflow-wrap:anywhere] [word-break:break-word]">{parseInline(numListMatch[2])}</span>
         </div>
       );
     }
@@ -67,7 +68,7 @@ const FormattedText: React.FC<FormattedTextProps> = ({ text, className }) => {
       if (match[1]) { // Monospace
         const codeText = match[2] || match[3];
         parts.push(
-          <code key={match.index} className="px-1.5 py-0.5 bg-slate-100 text-rose-500 rounded font-mono text-[0.9em] border border-slate-200">
+          <code key={match.index} className="px-1.5 py-0.5 bg-slate-100 text-rose-500 rounded font-mono text-[0.9em] border border-slate-200 break-all whitespace-pre-wrap">
             {codeText}
           </code>
         );
@@ -93,9 +94,9 @@ const FormattedText: React.FC<FormattedTextProps> = ({ text, className }) => {
   const lines = text.split('\n');
 
   return (
-    <div className={className}>
+    <div className={cn("break-words [overflow-wrap:anywhere] [word-break:break-word] whitespace-pre-wrap min-w-0", className)}>
       {lines.map((line, idx) => (
-        <div key={idx} className={line === '' ? 'h-3' : 'min-h-[1.25em]'}>
+        <div key={idx} className={cn("break-words [overflow-wrap:anywhere] [word-break:break-word]", line === '' ? 'h-3' : 'min-h-[1.25em]')}>
           {parseLine(line)}
         </div>
       ))}

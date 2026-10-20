@@ -88,18 +88,18 @@ const WebTabLayout = () => {
   };
 
   const renderHighlightedText = (text: string, query: string) => {
-    if (!query.trim()) return <FormattedText text={text} />;
+    if (!query.trim()) return <FormattedText text={text} className="break-words [overflow-wrap:anywhere] [word-break:break-word] leading-relaxed" />;
     const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     const parts = text.split(regex);
     return (
-      <span className="whitespace-pre-wrap leading-relaxed">
+      <span className="whitespace-pre-wrap leading-relaxed break-words [overflow-wrap:anywhere] [word-break:break-word]">
         {parts.map((part, i) => 
           part.toLowerCase() === query.toLowerCase() ? (
             <span key={i} className="bg-amber-300 text-slate-900 font-extrabold px-1 rounded-sm shadow-sm border border-amber-400 mx-0.5 select-all">
               {part}
             </span>
           ) : (
-            <FormattedText key={i} text={part} />
+            <FormattedText key={i} text={part} className="break-words [overflow-wrap:anywhere] [word-break:break-word] inline" />
           )
         )}
       </span>
@@ -666,12 +666,12 @@ const WebTabLayout = () => {
                   initial={{ opacity: 0, y: 10, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   className={cn(
-                    "flex flex-col gap-1.5 max-w-[80%]",
+                    "flex flex-col gap-1.5 max-w-[85%] md:max-w-[75%] min-w-0 w-fit",
                     isMe ? "self-end items-end" : "self-start items-start"
                   )}
                 >
                   <div className={cn(
-                    "px-6 py-4 rounded-4xl shadow-md text-sm font-medium leading-relaxed relative",
+                    "w-fit max-w-full px-6 py-4 rounded-3xl md:rounded-4xl shadow-md text-sm font-medium leading-relaxed relative break-words [overflow-wrap:anywhere] [word-break:break-word] min-w-0",
                     isMe
                       ? "bg-linear-to-br from-[#183449] to-[#285577] text-white rounded-tr-none border border-[#588CBC]/40 shadow-lg shadow-[#183449]/15"
                       : "bg-white text-[#2B2B2B] rounded-tl-none border border-[#B3B3B3] shadow-sm"
@@ -859,7 +859,7 @@ const WebTabLayout = () => {
                             e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
                         }}
                         placeholder={pendingFiles.length > 0 ? "Tambahkan catatan/keterangan file (opsional)..." : "Tulis pertanyaanmu di sini..."}
-                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#588CBC]/20 focus:border-[#588CBC] transition-all resize-none font-medium max-h-37.5 scrollbar-hide"
+                        className="w-full min-w-0 px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#588CBC]/20 focus:border-[#588CBC] transition-all resize-none font-medium max-h-37.5 scrollbar-hide break-words [overflow-wrap:anywhere]"
                         rows={1}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {

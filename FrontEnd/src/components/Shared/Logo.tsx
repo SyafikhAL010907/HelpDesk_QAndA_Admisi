@@ -18,6 +18,7 @@ const Logo = ({ onlyLogo = false, width = 48, height = 48, className = '' }: Log
         height={height}
         priority
         className={`object-contain drop-shadow-md ${className}`}
+     
       />
     );
   }
@@ -32,6 +33,7 @@ const Logo = ({ onlyLogo = false, width = 48, height = 48, className = '' }: Log
           height={height}
           priority
           className="object-contain"
+          
         />
       </div>
       <div className="flex flex-col items-center">

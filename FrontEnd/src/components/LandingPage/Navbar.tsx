@@ -176,14 +176,21 @@ type Tone = 'light' | 'dark'; // light = background terang (teks gelap), dark = 
 
 let colorCtx: CanvasRenderingContext2D | null = null;
 
-// Ubah warna CSS apa pun (hex, rgb, oklch, dll) jadi [r, g, b, a]
-function toRGBA(color: string): [number, number, number, number] {
+// Ubah warna CSS apa pun (hex, rgb, oklch, dll) jadi [r, g, b, a].
+// Return null kalau warnanya tidak bisa dibaca browser (supaya tidak salah dianggap hitam).
+function toRGBA(color: string): [number, number, number, number] | null {
     if (!colorCtx) {
         colorCtx = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
     }
-    if (!colorCtx) return [255, 255, 255, 1];
-    colorCtx.clearRect(0, 0, 1, 1);
+    if (!colorCtx) return null;
+
+    // fillStyle yang tidak valid TIDAK mengubah nilai sebelumnya, jadi pakai penanda dulu
+    const SENTINEL = '#010203';
+    colorCtx.fillStyle = SENTINEL;
     colorCtx.fillStyle = color;
+    if (colorCtx.fillStyle === SENTINEL && color.trim().toLowerCase() !== SENTINEL) return null;
+
+    colorCtx.clearRect(0, 0, 1, 1);
     colorCtx.fillRect(0, 0, 1, 1);
     const [r, g, b, a] = colorCtx.getImageData(0, 0, 1, 1).data;
     return [r, g, b, a / 255];
@@ -191,6 +198,8 @@ function toRGBA(color: string): [number, number, number, number] {
 
 const luminance = (r: number, g: number, b: number) =>
     (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+
+const COLOR_RE = /(?:rgba?|hsla?|oklch|oklab|lab|lch|color)\([^)]*\)|#[0-9a-fA-F]{3,8}/g;
 
 function detectTone(header: HTMLElement): Tone {
     const x = window.innerWidth / 2;
@@ -205,17 +214,24 @@ function detectTone(header: HTMLElement): Tone {
 
         const cs = getComputedStyle(el);
 
-        // gradasi (misal banner biru): ambil warna pertamanya
+        // gradasi (misal banner biru): ambil warna pertama yang BENAR-BENAR terlihat
+        // (abaikan "transparent" / warna yang tidak bisa dibaca, supaya tidak dianggap hitam)
         if (cs.backgroundImage !== 'none' && !cs.backgroundImage.startsWith('url')) {
-            const m = cs.backgroundImage.match(/(rgba?\([^)]+\)|oklch\([^)]+\)|#[0-9a-fA-F]{3,8})/);
-            if (m) {
-                const [r, g, b] = toRGBA(m[1]);
-                return luminance(r, g, b) < 0.5 ? 'dark' : 'light';
+            const matches = cs.backgroundImage.match(COLOR_RE) ?? [];
+            for (const m of matches) {
+                const rgba = toRGBA(m);
+                if (!rgba) continue;
+                const [r, g, b, a] = rgba;
+                if (a > 0.5) return luminance(r, g, b) < 0.5 ? 'dark' : 'light';
             }
+            // tidak ada warna solid di gradasi ini -> lanjut cek background-color / elemen di bawahnya
         }
 
-        const [r, g, b, a] = toRGBA(cs.backgroundColor);
-        if (a > 0.5) return luminance(r, g, b) < 0.5 ? 'dark' : 'light';
+        const rgba = toRGBA(cs.backgroundColor);
+        if (rgba) {
+            const [r, g, b, a] = rgba;
+            if (a > 0.5) return luminance(r, g, b) < 0.5 ? 'dark' : 'light';
+        }
     }
     return 'light';
 }
@@ -236,7 +252,9 @@ export default function Navbar({ variant }: NavbarProps) {
     const headerRef = useRef<HTMLElement>(null);
     const rafRef = useRef<number | null>(null);
 
-    // Header jadi "kaca" setelah di-scroll + deteksi warna di bawahnya
+    // Header jadi "kaca" setelah di-scroll + deteksi warna di bawahnya.
+    // Deteksi dijalankan ulang otomatis (bukan cuma saat scroll), supaya elemen sementara
+    // seperti loading screen / animasi fade-in tidak membuat nada nyangkut salah di awal.
     useEffect(() => {
         const update = () => {
             rafRef.current = null;
@@ -251,13 +269,39 @@ export default function Navbar({ variant }: NavbarProps) {
         };
 
         schedule();
+
         window.addEventListener('scroll', schedule, { passive: true });
         window.addEventListener('resize', schedule);
         window.addEventListener('load', schedule);
+        window.addEventListener('pageshow', schedule);
+        // animasi / transisi di halaman selesai -> cek ulang
+        document.addEventListener('transitionend', schedule, true);
+        document.addEventListener('animationend', schedule, true);
+
+        // elemen ditambah / dihapus / class & style berubah (loading screen hilang, hero muncul, dll)
+        const mo = new MutationObserver(schedule);
+        mo.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class', 'style', 'hidden'],
+        });
+
+        // font selesai dimuat
+        document.fonts?.ready.then(schedule).catch(() => { });
+
+        // jaring pengaman: cek ulang rutin (murah, hanya 1x elementsFromPoint)
+        const interval = window.setInterval(schedule, 400);
+
         return () => {
             window.removeEventListener('scroll', schedule);
             window.removeEventListener('resize', schedule);
             window.removeEventListener('load', schedule);
+            window.removeEventListener('pageshow', schedule);
+            document.removeEventListener('transitionend', schedule, true);
+            document.removeEventListener('animationend', schedule, true);
+            mo.disconnect();
+            window.clearInterval(interval);
             if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
         };
     }, []);
