@@ -6,40 +6,21 @@ import React from 'react';
 /*  Palette                                                            */
 /* ------------------------------------------------------------------ */
 export const PALETTE = {
+  pageWhite: '#FFFFFF',
   charcoalNoir: '#2B2B2B',
   ironcladGrey: '#565656',
   urbanFog: '#848484',
   moonlitSilver: '#B3B3B3',
   cloudVeil: '#E0E0E0',
+  progressFill: '#D8D8D8',
 } as const;
 
 /* Ornamen garis progress (taruh kedua file ini di folder public/) */
 const BATIK_LEFT = '/batikgariskiri.png';
 const BATIK_RIGHT = '/batikgariskanan.png';
 
-/* ------------------------------------------------------------------ */
-/*  Background pattern (ornamen bunga, di-tile sebagai SVG data-URI)   */
-/* ------------------------------------------------------------------ */
-const flower = (x: number, y: number, s: number) => `
-<g transform="translate(${x} ${y}) scale(${s})">
-  <circle r="10"/><circle r="22"/><circle r="30" stroke-dasharray="2 5"/>
-  ${[0, 45, 90, 135, 180, 225, 270, 315]
-    .map(
-      (a) =>
-        `<path transform="rotate(${a})" d="M0 -30 C 14 -42 14 -64 0 -78 C -14 -64 -14 -42 0 -30Z"/>`
-    )
-    .join('')}
-</g>`;
-
-const PATTERN_SVG = `
-<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"
-     fill="none" stroke="${PALETTE.moonlitSilver}" stroke-opacity="0.1" stroke-width="1.4">
-  ${flower(150, 150, 1)}
-  ${flower(0, 0, 1)}${flower(300, 0, 1)}${flower(0, 300, 1)}${flower(300, 300, 1)}
-  ${flower(150, 0, 0.55)}${flower(150, 300, 0.55)}${flower(0, 150, 0.55)}${flower(300, 150, 0.55)}
-</svg>`;
-
-const PATTERN_URL = `url("data:image/svg+xml,${encodeURIComponent(PATTERN_SVG)}")`;
+/* Background batik (taruh file ini di folder public/) */
+const BATIK_BG = '/BatikLoad.png';
 
 /* ------------------------------------------------------------------ */
 /*  Fallback logo (ganti dengan logo asli lewat prop `logoSrc`)        */
@@ -106,11 +87,12 @@ export default function LoadingPage({
 
   // Ornamen "terisi" dari ujung luar menuju logo.
   // Bar kiri: ujung luar = kiri. Bar kanan: ujung luar = kanan.
+  // Bar kanan di-flip horizontal (scaleX(-1)) lewat CSS, jadi koordinat clip-nya ikut terbalik.
   const fillLeft: React.CSSProperties = {
     clipPath: `inset(-24px ${hidden}% -24px -24px)`,
   };
   const fillRight: React.CSSProperties = {
-    clipPath: `inset(-24px -24px -24px ${hidden}%)`,
+    clipPath: `inset(-24px ${hidden}% -24px -24px)`,
   };
 
   let charIndex = 0;
@@ -208,9 +190,8 @@ export default function LoadingPage({
 /* ------------------------------------------------------------------ */
 const css = `
 .pl-root{
-  --pl-tile:320px;
   position:fixed;inset:0;z-index:9999;overflow:hidden;
-  color:${PALETTE.cloudVeil};
+  color:#000000;
   font-family:var(--font-montserrat),'Montserrat',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
 .pl-root[data-exiting='true']{pointer-events:none}
@@ -218,7 +199,7 @@ const css = `
 /* ---------- tirai ---------- */
 .pl-half{
   position:absolute;top:0;bottom:0;width:calc(50% + 1px);overflow:hidden;
-  background:${PALETTE.charcoalNoir};
+  background:${PALETTE.pageWhite};
   will-change:transform;
   transition:transform 900ms cubic-bezier(.77,0,.18,1) 380ms;
 }
@@ -229,14 +210,12 @@ const css = `
 
 .pl-bg{
   position:absolute;top:0;bottom:0;width:100vw;
-  background-color:${PALETTE.charcoalNoir};
-  background-image:
-    radial-gradient(ellipse at center, rgba(43,43,43,0) 35%, rgba(43,43,43,.5) 100%),
-    ${PATTERN_URL};
-  background-size:100% 100%, var(--pl-tile) var(--pl-tile);
-  background-repeat:no-repeat, repeat;
-  background-position:0 0, 0 0;
-  animation:pl-fade 800ms ease both, pl-drift 70s linear infinite;
+  background-color:${PALETTE.pageWhite};
+  background-image:url('${BATIK_BG}');
+  background-size:cover;
+  background-repeat:no-repeat;
+  background-position:center;
+  animation:pl-fade 800ms ease both;
 }
 .pl-half--l .pl-bg{left:0}
 .pl-half--r .pl-bg{right:0}
@@ -255,7 +234,7 @@ const css = `
   margin:0;padding-left:.22em;text-align:center;
   font-size:clamp(13px,1.7vw,26px);font-weight:700;
   letter-spacing:.22em;line-height:1.6;
-  color:${PALETTE.cloudVeil};
+  color:#000000;
 }
 .pl-word{display:inline-block;white-space:nowrap}
 .pl-char{display:inline-block;animation:pl-rise 700ms cubic-bezier(.22,1,.36,1) both}
@@ -267,7 +246,7 @@ const css = `
 .pl-pct{
   flex:none;width:3.4ch;
   font-size:clamp(13px,1.4vw,22px);font-weight:700;
-  font-variant-numeric:tabular-nums;color:${PALETTE.cloudVeil};
+  font-variant-numeric:tabular-nums;color:${PALETTE.ironcladGrey};
   animation:pl-fade 600ms ease 1000ms both;
 }
 .pl-pct--l{text-align:left}
@@ -284,7 +263,7 @@ const css = `
   animation:pl-unfold-r 1100ms cubic-bezier(.22,1,.36,1) 650ms both;
 }
 .pl-orn-box{position:absolute;inset:0}
-.pl-bar--r .pl-orn-box{transform:translateY(-1.4%)} /* samakan tinggi garis tengah dengan sisi kiri */
+.pl-bar--r .pl-orn-box{transform:translateY(-1.4%) scaleX(-1)} /* balik batik kanan: ornamen besar menghadap ke dalam (dekat logo) */ /* samakan tinggi garis tengah dengan sisi kiri */
 
 .pl-orn{
   position:absolute;inset:0;
@@ -297,24 +276,28 @@ const css = `
 .pl-bar--r .pl-orn{
   -webkit-mask-image:url('${BATIK_RIGHT}');mask-image:url('${BATIK_RIGHT}');
 }
-.pl-orn--track{background:${PALETTE.urbanFog};opacity:.55}
+/* track (kondisi awal) = gambar batik asli dengan warna aslinya, tanpa mask/tint */
+.pl-bar--l .pl-orn--track{
+  background:url('${BATIK_LEFT}') center / 100% 100% no-repeat;
+  -webkit-mask-image:none;mask-image:none;
+}
+.pl-bar--r .pl-orn--track{
+  background:url('${BATIK_RIGHT}') center / 100% 100% no-repeat;
+  -webkit-mask-image:none;mask-image:none;
+}
 .pl-glow{
   position:absolute;inset:0;
-  filter:drop-shadow(0 0 6px rgba(224,224,224,.35));
+  filter:drop-shadow(0 0 6px rgba(216,216,216,.35));
 }
-.pl-orn--fill{background:${PALETTE.cloudVeil}}
+.pl-orn--fill{background:${PALETTE.progressFill}}
 
 /* ---------- logo (transparan, tanpa piringan) ---------- */
 .pl-logo{
   position:relative;flex:none;
-  width:clamp(84px,10vw,148px);aspect-ratio:1;
+  width:clamp(190px,24vw,360px);aspect-ratio:1;
+  top:-2.4vw; /* naikkan logo agar sejajar dengan garis batik */
+  background:transparent;
   display:grid;place-items:center;
-  animation:pl-breathe 3.2s ease-in-out 2s infinite;
-}
-.pl-logo::before{
-  content:'';position:absolute;inset:-45%;pointer-events:none;
-  background:radial-gradient(circle, rgba(224,224,224,.12), transparent 62%);
-  animation:pl-fade 1200ms ease 600ms both;
 }
 .pl-mark{position:relative;width:100%;height:100%;overflow:visible;object-fit:contain}
 .pl-petal{
@@ -323,7 +306,7 @@ const css = `
 }
 .pl-img{
   position:relative;display:block;width:100%;height:100%;object-fit:contain;
-  filter:drop-shadow(0 0 14px rgba(224,224,224,.22));
+  background:transparent;box-shadow:none;
   user-select:none;
   animation:pl-pop 750ms cubic-bezier(.22,1,.36,1) 550ms both;
 }
@@ -332,7 +315,7 @@ const css = `
 .pl-status{
   margin:0;padding-left:.14em;
   font-size:clamp(16px,1.6vw,24px);font-weight:700;letter-spacing:.14em;
-  color:${PALETTE.cloudVeil};
+  color:#000000;
   animation:pl-fade 700ms ease 1100ms both;
 }
 .pl-dot{display:inline-block;animation:pl-blink 1.2s ease-in-out infinite both}
@@ -343,7 +326,6 @@ const css = `
 @keyframes pl-pop{from{opacity:0;transform:scale(.35) rotate(-24deg)}}
 @keyframes pl-breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 @keyframes pl-blink{0%,80%,100%{opacity:.15}40%{opacity:1}}
-@keyframes pl-drift{to{background-position:0 0, var(--pl-tile) var(--pl-tile)}}
 /* ornamen membuka dari logo ke arah luar */
 @keyframes pl-unfold-l{
   from{clip-path:inset(-24px -24px -24px 100%)}
@@ -356,7 +338,6 @@ const css = `
 
 /* ---------- mobile: persen mengapit logo, ornamen menyatu di bawahnya ---------- */
 @media (max-width:700px){
-  .pl-root{--pl-tile:220px}
   .pl-title{letter-spacing:.16em}
   .pl-row{
     display:grid;grid-template-columns:repeat(6,1fr);
@@ -364,7 +345,7 @@ const css = `
   }
   .pl-pct{width:auto}
   .pl-pct--l{grid-column:1 / 3;grid-row:1}
-  .pl-logo{grid-column:3 / 5;grid-row:1;justify-self:center}
+  .pl-logo{grid-column:3 / 5;grid-row:1;justify-self:center;width:100%;max-width:200px;top:0}
   .pl-pct--r{grid-column:5 / 7;grid-row:1}
   .pl-bar{width:100%}
   .pl-bar--l{grid-column:1 / 4;grid-row:2}
