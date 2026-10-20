@@ -847,6 +847,7 @@ export default function WebTabLayout() {
             <Reveal mode="load" y={22} delay={0.6}>
             <Link
               href={LOGIN_HREF}
+              prefetch={true}
               className="mt-7 flex h-14 w-56.5 items-center justify-center rounded-[15px] bg-white text-[20px] font-semibold text-[#333333] transition-opacity hover:opacity-90 lg:mt-9.25"
             >
               Masuk
@@ -918,6 +919,7 @@ export default function WebTabLayout() {
                 >
                   <Link
                     href={`${activeGedung.base}/lantai${item.lantai}`}
+                    prefetch={true}
                     className="group block rounded-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C2AC72]"
                   >
                     <figure className="flex flex-col">
@@ -973,6 +975,7 @@ export default function WebTabLayout() {
                       >
                         <Link
                           href={`${activeGedung.base}/lantai${item.lantai}`}
+                          prefetch={true}
                           onClick={(e) => {
                             if (isDragging) e.preventDefault();
                           }}

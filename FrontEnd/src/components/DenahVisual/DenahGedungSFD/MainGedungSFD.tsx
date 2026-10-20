@@ -11,6 +11,7 @@ export default function MainGedungSFD() {
       <div className="w-full max-w-5xl mb-6 flex items-center justify-start">
         <Link
           href="/"
+          prefetch={true}
           className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:text-[#183449] hover:border-[#588CBC]/40 hover:shadow-xs transition-all"
         >
           <ArrowLeft size={16} />
@@ -33,6 +34,7 @@ export default function MainGedungSFD() {
         {/* Kotak Lantai 3 */}
         <Link
           href="/denah-sfd/lantai3"
+          prefetch={true}
           className="cursor-pointer bg-white border-2 border-slate-100 hover:border-[#588CBC] rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group min-h-100"
         >
           {/* Container Gambar - Proporsi pas h-64 */}
@@ -55,6 +57,7 @@ export default function MainGedungSFD() {
         {/* Kotak Lantai 8 */}
         <Link
           href="/denah-sfd/lantai8"
+          prefetch={true}
           className="cursor-pointer bg-white border-2 border-teal-100 hover:border-teal-500 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group min-h-100"
         >
           {/* Container Gambar - Proporsi pas h-64 */}

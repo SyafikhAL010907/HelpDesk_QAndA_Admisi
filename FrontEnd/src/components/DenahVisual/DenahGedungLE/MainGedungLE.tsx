@@ -39,6 +39,7 @@ export default function MainGedungLE() {
       <div className={`${container} pt-8 lg:pt-10`}>
         <Link
           href="/"
+          prefetch={true}
           className="group inline-flex items-center gap-2 rounded-full border border-[#E3E3E0] bg-white py-2 pl-3 pr-5 text-[14px] font-semibold text-[#333333] transition-colors hover:border-[#333333] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C2AC72]"
         >
           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#F1F1EE] transition-colors group-hover:bg-[#333333] group-hover:text-white">
@@ -122,6 +123,7 @@ export default function MainGedungLE() {
             >
               <Link
                 href={`${GEDUNG.base}/lantai${f.lantai}`}
+                prefetch={true}
                 aria-label={`Buka denah Lantai ${f.lantai} ${GEDUNG.nama}`}
                 className="group relative flex h-full flex-col rounded-[24px] border border-[#E8E8E5] bg-white p-4 transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-1.5 hover:border-[#333333] hover:shadow-[0_20px_44px_rgba(0,0,0,0.10)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C2AC72] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F6F6F4]"
               >

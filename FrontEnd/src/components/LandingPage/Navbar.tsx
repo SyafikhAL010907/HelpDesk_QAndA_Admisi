@@ -179,6 +179,51 @@ let colorCtx: CanvasRenderingContext2D | null = null;
 // Ubah warna CSS apa pun (hex, rgb, oklch, dll) jadi [r, g, b, a].
 // Return null kalau warnanya tidak bisa dibaca browser (supaya tidak salah dianggap hitam).
 function toRGBA(color: string): [number, number, number, number] | null {
+    if (!color) return null;
+    const trimmed = color.trim().toLowerCase();
+
+    // Fast-path: Hex color (tanpa akses canvas/GPU)
+    if (trimmed.startsWith('#')) {
+        const hex = trimmed.slice(1);
+        if (hex.length === 3) {
+            return [
+                parseInt(hex[0] + hex[0], 16),
+                parseInt(hex[1] + hex[1], 16),
+                parseInt(hex[2] + hex[2], 16),
+                1,
+            ];
+        }
+        if (hex.length === 6) {
+            return [
+                parseInt(hex.slice(0, 2), 16),
+                parseInt(hex.slice(2, 4), 16),
+                parseInt(hex.slice(4, 6), 16),
+                1,
+            ];
+        }
+        if (hex.length === 8) {
+            return [
+                parseInt(hex.slice(0, 2), 16),
+                parseInt(hex.slice(2, 4), 16),
+                parseInt(hex.slice(4, 6), 16),
+                parseInt(hex.slice(6, 8), 16) / 255,
+            ];
+        }
+    }
+
+    // Fast-path: rgb / rgba (tanpa akses canvas/GPU)
+    if (trimmed.startsWith('rgb')) {
+        const parts = trimmed.match(/[\d.]+/g);
+        if (parts && parts.length >= 3) {
+            return [
+                parseFloat(parts[0]),
+                parseFloat(parts[1]),
+                parseFloat(parts[2]),
+                parts.length >= 4 ? parseFloat(parts[3]) : 1,
+            ];
+        }
+    }
+
     if (!colorCtx) {
         colorCtx = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
     }
@@ -188,7 +233,7 @@ function toRGBA(color: string): [number, number, number, number] | null {
     const SENTINEL = '#010203';
     colorCtx.fillStyle = SENTINEL;
     colorCtx.fillStyle = color;
-    if (colorCtx.fillStyle === SENTINEL && color.trim().toLowerCase() !== SENTINEL) return null;
+    if (colorCtx.fillStyle === SENTINEL && trimmed !== SENTINEL) return null;
 
     colorCtx.clearRect(0, 0, 1, 1);
     colorCtx.fillRect(0, 0, 1, 1);
@@ -274,30 +319,32 @@ export default function Navbar({ variant }: NavbarProps) {
         window.addEventListener('resize', schedule);
         window.addEventListener('load', schedule);
         window.addEventListener('pageshow', schedule);
+        window.addEventListener('app:loaded', schedule);
         // animasi / transisi di halaman selesai -> cek ulang
         document.addEventListener('transitionend', schedule, true);
         document.addEventListener('animationend', schedule, true);
 
-        // elemen ditambah / dihapus / class & style berubah (loading screen hilang, hero muncul, dll)
+        // Jangan observe 'style' karena Framer Motion terus mengupdate inline style pada seluruh subtree!
         const mo = new MutationObserver(schedule);
         mo.observe(document.body, {
             childList: true,
             subtree: true,
             attributes: true,
-            attributeFilter: ['class', 'style', 'hidden'],
+            attributeFilter: ['class', 'hidden'],
         });
 
         // font selesai dimuat
         document.fonts?.ready.then(schedule).catch(() => { });
 
-        // jaring pengaman: cek ulang rutin (murah, hanya 1x elementsFromPoint)
-        const interval = window.setInterval(schedule, 400);
+        // jaring pengaman: cek ulang rutin
+        const interval = window.setInterval(schedule, 600);
 
         return () => {
             window.removeEventListener('scroll', schedule);
             window.removeEventListener('resize', schedule);
             window.removeEventListener('load', schedule);
             window.removeEventListener('pageshow', schedule);
+            window.removeEventListener('app:loaded', schedule);
             document.removeEventListener('transitionend', schedule, true);
             document.removeEventListener('animationend', schedule, true);
             mo.disconnect();
@@ -372,6 +419,7 @@ export default function Navbar({ variant }: NavbarProps) {
                     {/* kanan: Masuk (di layar sempit cukup lewat menu) */}
                     <Link
                         href={LOGIN_HREF}
+                        prefetch={true}
                         className={`hidden h-11.5 w-35 items-center justify-center rounded-[15px] text-[16px] font-semibold transition-[background-color,color,opacity] duration-300 hover:opacity-85 sm:flex lg:h-13 lg:w-42.5 lg:text-[18px] ${dark ? 'bg-white text-[#333333]' : 'bg-[#333333] text-white'
                             }`}
                     >
@@ -439,6 +487,7 @@ export default function Navbar({ variant }: NavbarProps) {
 
                     <Link
                         href={LOGIN_HREF}
+                        prefetch={true}
                         tabIndex={open ? 0 : -1}
                         className="mt-auto flex h-13 w-full items-center justify-center rounded-[15px] bg-white text-[18px] font-semibold text-[#333333] transition-opacity hover:opacity-90"
                     >

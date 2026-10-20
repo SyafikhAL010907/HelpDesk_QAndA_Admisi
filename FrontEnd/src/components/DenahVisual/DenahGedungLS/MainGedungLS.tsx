@@ -11,6 +11,7 @@ export default function MainGedungLS() {
       <div className="w-full max-w-4xl mb-6 flex items-center justify-start">
         <Link
           href="/"
+          prefetch={true}
           className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:text-[#183449] hover:border-[#588CBC]/40 hover:shadow-xs transition-all"
         >
           <ArrowLeft size={16} />
@@ -33,6 +34,7 @@ export default function MainGedungLS() {
         {/* Kotak Lantai 1 */}
         <Link
           href="/denah-ls/lantai1"
+          prefetch={true}
           className="cursor-pointer bg-white border-2 border-slate-100 hover:border-[#588CBC] rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group h-64"
         >
           <div className="w-full h-36 mb-4 bg-[#588CBC]/5 rounded-xl flex items-center justify-center relative overflow-hidden">
@@ -52,6 +54,7 @@ export default function MainGedungLS() {
         {/* Kotak Lantai 2 */}
         <Link
           href="/denah-ls/lantai2"
+          prefetch={true}
           className="cursor-pointer bg-white border-2 border-teal-100 hover:border-teal-500 rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group h-64"
         >
           <div className="w-full h-36 mb-4 bg-teal-50/50 rounded-xl flex items-center justify-center relative overflow-hidden">
@@ -71,6 +74,7 @@ export default function MainGedungLS() {
         {/* Kotak Lantai 3 */}
         <Link
           href="/denah-ls/lantai3"
+          prefetch={true}
           className="cursor-pointer bg-white border-2 border-cyan-100 hover:border-cyan-500 rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group h-64"
         >
           <div className="w-full h-36 mb-4 bg-cyan-50/50 rounded-xl flex items-center justify-center relative overflow-hidden">
@@ -90,6 +94,7 @@ export default function MainGedungLS() {
         {/* Kotak Lantai 4 */}
         <Link
           href="/denah-ls/lantai4"
+          prefetch={true}
           className="cursor-pointer bg-white border-2 border-blue-100 hover:border-blue-500 rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group h-64"
         >
           <div className="w-full h-36 mb-4 bg-blue-50/50 rounded-xl flex items-center justify-center relative overflow-hidden">

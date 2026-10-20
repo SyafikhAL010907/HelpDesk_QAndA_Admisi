@@ -7,7 +7,19 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import Ruang805SFD from './3DRuang805SFD';
+import dynamic from 'next/dynamic';
+
+const Ruang805SFD = dynamic(() => import('./3DRuang805SFD'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full w-full items-center justify-center bg-[#cfd3d8]" style={{ minHeight: 300 }}>
+      <div className="flex flex-col items-center gap-2">
+        <div className="h-7 w-7 animate-spin rounded-full border-2 border-gray-400 border-t-gray-800" />
+        <span className="text-xs font-semibold text-gray-700">Memuat visual 3D...</span>
+      </div>
+    </div>
+  ),
+});
 
 export { Ruang805SFD };
 

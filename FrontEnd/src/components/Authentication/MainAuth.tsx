@@ -103,7 +103,13 @@ const MainAuth = ({ initialMode, onLoginSuccess }: MainAuthProps) => {
         }
     };
 
-    if (!mounted) return null;
+    if (!mounted) {
+        return (
+            <div className="min-h-screen w-full flex items-center justify-center bg-slate-50">
+                <div className="h-8 w-8 animate-spin rounded-full border-3 border-slate-200 border-t-[#588CBC]" />
+            </div>
+        );
+    }
 
     // HP: tetap ganti halaman seperti sebelumnya
     if (isMobile) {
